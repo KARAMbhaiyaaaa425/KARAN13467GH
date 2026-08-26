@@ -37,9 +37,16 @@ def init_db():
             gmail TEXT,
             app_pass TEXT,
             api_key TEXT UNIQUE,
-            created_at DATETIME
+            created_at DATETIME,
+            display_name TEXT DEFAULT 'Merchant',
+            theme TEXT DEFAULT 'default'
         )
     ''')
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN display_name TEXT DEFAULT 'Merchant'")
+        c.execute("ALTER TABLE users ADD COLUMN theme TEXT DEFAULT 'default'")
+    except:
+        pass
     
     c.execute('''
         CREATE TABLE IF NOT EXISTS transactions (
@@ -60,11 +67,11 @@ def init_db():
 def get_admin_user():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("SELECT upi_id, gmail, app_pass, api_key FROM users WHERE user_id = ?", (ADMIN_USER_ID,))
+    c.execute("SELECT upi_id, gmail, app_pass, api_key, display_name, theme FROM users WHERE user_id = ?", (ADMIN_USER_ID,))
     row = c.fetchone()
     conn.close()
     if row:
-        return {"upi_id": row[0], "gmail": row[1], "app_pass": row[2], "api_key": row[3]}
+        return {"upi_id": row[0], "gmail": row[1], "app_pass": row[2], "api_key": row[3], "display_name": row[4] or 'Merchant', "theme": row[5] or 'default'}
     return None
 
 def save_admin_user(upi_id, gmail, app_pass):
@@ -141,6 +148,18 @@ def save_account():
         
     return redirect(url_for('dashboard'))
 
+
+@app.route('/save_customize', methods=['POST'])
+def save_customize():
+    display_name = request.form.get('display_name', 'Merchant')
+    theme = request.form.get('theme', 'default')
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("UPDATE users SET display_name=?, theme=? WHERE user_id=?", (display_name, theme, ADMIN_USER_ID))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('dashboard', success='Customization Saved!'))
+
 @app.route('/generate_link', methods=['POST'])
 def generate_link():
     amount = request.form.get('amount')
@@ -163,13 +182,13 @@ def checkout_page():
 
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("SELECT user_id, upi_id FROM users WHERE api_key = ?", (api_key,))
+    c.execute("SELECT user_id, upi_id, display_name, theme FROM users WHERE api_key = ?", (api_key,))
     user = c.fetchone()
     
     if not user:
         return "<h1>Error: Invalid API Key</h1>", 401
     
-    user_id, upi_id = user
+    user_id, upi_id, display_name, theme = user
 
     try:
         amount = float(amount_raw)
@@ -204,7 +223,9 @@ def checkout_page():
                            api_key=api_key,
                            payment_url=payment_url,
                            qr_url=f"/qr/{txn_id}",
-                           upi_id=upi_id)
+                           upi_id=upi_id,
+                           display_name=display_name or 'Merchant',
+                           theme=theme or 'default')
 
 @app.route('/qr/<txn_id>')
 def serve_qr(txn_id):

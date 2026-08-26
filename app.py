@@ -90,6 +90,8 @@ def save_admin_user(upi_id, gmail, app_pass):
 
 @app.route('/')
 def dashboard():
+    error = request.args.get('error')
+    success = request.args.get('success')
     user_info = get_admin_user()
     
     # Get stats
@@ -107,15 +109,35 @@ def dashboard():
                            user_info=user_info, 
                            total_count=total_count or 0, 
                            total_amount=f"{total_amount or 0:.2f}",
-                           txns=txns)
+                           txns=txns,
+                           error=error,
+                           success=success)
 
 @app.route('/save_account', methods=['POST'])
 def save_account():
     upi_id = request.form.get('upi_id')
     gmail = request.form.get('gmail')
     app_pass = request.form.get('app_pass')
+    
     if upi_id and gmail and app_pass:
+        if '@' not in upi_id:
+            return redirect(url_for('dashboard', error='Invalid UPI ID format! Must contain @'))
+            
+        if '@' not in gmail or '.com' not in gmail:
+            return redirect(url_for('dashboard', error='Invalid Gmail Address!'))
+            
+        # Verify the IMAP connection instantly
+        try:
+            import imaplib
+            mail = imaplib.IMAP4_SSL('imap.gmail.com', timeout=5)
+            mail.login(gmail, app_pass)
+            mail.logout()
+        except Exception as e:
+            return redirect(url_for('dashboard', error='Connection Failed! Please check your Gmail App Password.'))
+            
         save_admin_user(upi_id, gmail, app_pass)
+        return redirect(url_for('dashboard', success='Account Connected & Verified Perfectly!'))
+        
     return redirect(url_for('dashboard'))
 
 @app.route('/generate_link', methods=['POST'])

@@ -130,9 +130,14 @@
         <p class="text-xs text-gray-400 mb-6">Scan QR or click the button below to pay via FamPay or any UPI App.</p>
 
         <!-- Direct Pay Button for Mobile -->
-        <a href="{{ payment_url }}" class="btn-pay block w-full py-4 uppercase tracking-widest text-sm mb-6 flex items-center justify-center gap-2">
-            Pay Now <i class="fas fa-bolt"></i>
-        </a>
+        <div class="flex gap-2 mb-6">
+            <a href="{{ payment_url }}" class="btn-pay block w-full py-4 uppercase tracking-widest text-sm flex items-center justify-center gap-2" style="flex: 1;">
+                Pay <i class="fas fa-bolt"></i>
+            </a>
+            <button id="verifyBtn" class="btn-pay block w-full py-4 uppercase tracking-widest text-sm flex items-center justify-center gap-2" style="flex: 1; background: linear-gradient(45deg, #10b981, #059669); color: white;">
+                Verify <i class="fas fa-check-circle"></i>
+            </button>
+        </div>
 
         <!-- Timer -->
         <div class="flex items-center justify-center gap-2 text-sm border-t border-white/10 pt-4">
@@ -180,6 +185,33 @@
         // Auto-Verify Polling (Checks every 3 seconds)
         const txnId = document.getElementById('txn_id').value;
         const apiKey = document.getElementById('api_key').value;
+
+        // Manual Verify Button Logic
+        document.getElementById('verifyBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('verifyBtn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = 'Wait <i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+            
+            try {
+                const res = await fetch(`/api/verify?api_key=${apiKey}&txn_id=${txnId}`);
+                const data = await res.json();
+                
+                if (data.status === 'completed') {
+                    clearInterval(checkInterval);
+                    clearInterval(timerInterval);
+                    document.getElementById('success_utr').textContent = data.data.utr || 'Auto-Verified';
+                    document.getElementById('successScreen').classList.add('active');
+                } else {
+                    alert('Payment not received yet. Check if money was deducted and try again.');
+                }
+            } catch (e) {
+                alert('Error verifying payment. Try again.');
+            }
+            
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+        });
 
         const checkInterval = setInterval(async () => {
             if(timeLeft <= 0) {

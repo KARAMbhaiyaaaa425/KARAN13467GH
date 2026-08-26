@@ -277,6 +277,17 @@ body{
                 <p class="text-muted">Enter your details to generate your API Key and auto-verify payments.</p>
                 
                 <form action="/save_account" method="POST">
+                    {% if error %}
+                    <div class="alert alert-danger fw-bold" role="alert">
+                        ❌ {{ error }}
+                    </div>
+                    {% endif %}
+                    {% if success %}
+                    <div class="alert alert-success fw-bold" role="alert">
+                        ✅ {{ success }}
+                    </div>
+                    {% endif %}
+
                     <div class="mb-3">
                         <label class="form-label fw-bold">FamPay UPI ID</label>
                         <input type="text" name="upi_id" class="form-control" value="{{ user_info.upi_id if user_info else '' }}" placeholder="yourname@fam" required>

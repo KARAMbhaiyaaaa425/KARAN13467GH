@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merchant Dashboard — FamPay PRO</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+/* =========================================================
+   GuruPay Passbook — Merchant Dashboard Theme
+   ========================================================= */
+:root{
+  --paper:#FBF6EA;
+  --paper-line:#E6DCC0;
+  --ink:#16302A;
+  --ink-soft:#3B5348;
+  --ink-grad:linear-gradient(135deg,#16302A 0%,#274F41 100%);
+  --brass:#B8862E;
+  --brass-light:#E8C874;
+  --brass-dark:#8C651C;
+  --stamp-red:#A23B2E;
+  --mint:#2F7A5E;
+  --blue:#1a6fa8;
+  --muted:#8A8267;
+  --card:#FFFEF9;
+  --border:#E7DFC9;
+
+  --pg-bg: #FFFFFF;
+  --pg-bg-soft: #FCFAF4;
+  --pg-ink: #1B1F3B;
+  --pg-muted: rgba(27, 31, 59, 0.55);
+  --pg-border: rgba(27, 31, 59, 0.08);
+  --pg-gold: #C9A227;
+  --pg-gold-dark: #A8841F;
+  --pg-gold-soft: rgba(201, 162, 39, 0.12);
+}
+
+body{
+  background:
+    repeating-linear-gradient(180deg, transparent, transparent 37px, var(--paper-line) 38px),
+    var(--paper);
+  font-family:'IBM Plex Sans',sans-serif;
+  color:var(--ink);
+  margin: 0;
+}
+.gp-serif{font-family:'Fraunces',serif;}
+.gp-mono{font-family:'IBM Plex Mono',monospace;}
+
+.dashboard-sidebar {
+    background: var(--pg-bg);
+    border-right: 1px solid var(--pg-border);
+    box-shadow: 4px 0 24px rgba(27, 31, 59, 0.04);
+    width: 264px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 1041;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--pg-border);
+}
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+.logo-text {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--pg-ink);
+}
+.logo-text .text-accent { color: var(--pg-gold); }
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 12px 0;
+}
+.nav-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(27, 31, 59, 0.35);
+    letter-spacing: 1.5px;
+    padding: 14px 12px 6px;
+    text-transform: uppercase;
+}
+
+.sidebar-menu { list-style: none; padding: 0; margin: 0; }
+.sidebar-menu-item { margin-bottom: 2px; }
+.sidebar-menu-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: rgba(27, 31, 59, 0.65);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+}
+.sidebar-menu-item.active .sidebar-menu-link {
+    color: #FFFFFF;
+    background: linear-gradient(135deg, var(--pg-gold), #A8841F);
+    font-weight: 600;
+}
+
+.dashboard-main {
+    margin-left: 264px;
+    min-height: 100vh;
+}
+.dashboard-topbar {
+    background: #FFFFFF;
+    border-bottom: 1px solid rgba(27, 31, 59, 0.08);
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.page-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1B1F3B;
+    margin: 0;
+}
+
+/* Sections */
+.content-section { display: none; }
+.content-section.active { display: block; }
+
+/* Passbook Summary Strip */
+.passbook-strip{
+  background:var(--card);border:1px solid var(--border);border-radius:6px;
+  display:flex;flex-wrap:wrap;margin-bottom:22px;
+}
+.pb-entry{
+  flex:1 1 25%;min-width:220px;padding:18px 20px;
+  display:flex;align-items:center;gap:12px;
+}
+.pb-entry + .pb-entry{border-left:1px dashed var(--border);}
+.pb-icon{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  border:1.5px solid currentColor;
+}
+.pb-label{font-size:10.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
+.pb-value{font-family:'IBM Plex Mono',monospace;font-size:21px;font-weight:600;color:var(--ink);}
+
+.ledger-card{
+  background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:22px 24px;box-shadow:0 2px 0 var(--border); margin-bottom: 20px;
+}
+.lc-head h4 { font-family:'Fraunces',serif;font-size:17px;font-weight:600;color:var(--ink); margin-bottom: 15px;}
+
+.form-control { background: #FBF6EA; border: 1px solid var(--border); }
+.form-control:focus { background: #fff; border-color: var(--brass); box-shadow: none; }
+.btn-gold { background: var(--pg-gold); color: #fff; font-weight: 600; }
+.btn-gold:hover { background: var(--pg-gold-dark); color: #fff; }
+
+.api-box { background: #16302A; color: #E8C874; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 16px; margin-top: 10px;}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="dashboard-sidebar">
+    <div class="sidebar-logo">
+        <a href="#" class="logo-link">
+            <span class="logo-text">Fam<span class="text-accent">Pay</span> PRO</span>
+        </a>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">MAIN MENU</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item active" onclick="switchTab('dashboard', this)">
+                <a class="sidebar-menu-link">
+                    <span class="menu-label">Dashboard</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item" onclick="switchTab('connect', this)">
+                <a class="sidebar-menu-link">
+                    <span class="menu-label">Connect Accounts</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item" onclick="switchTab('links', this)">
+                <a class="sidebar-menu-link">
+                    <span class="menu-label">Payment Links</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item" onclick="switchTab('docs', this)">
+                <a class="sidebar-menu-link">
+                    <span class="menu-label">API Docs</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</aside>
+
+<!-- Content Area -->
+<main class="dashboard-main">
+    <!-- Topbar -->
+    <header class="dashboard-topbar">
+        <div class="topbar-title">
+            <h1 class="page-title" id="topTitle">Dashboard Overview</h1>
+        </div>
+        <div class="env-badge" style="background: rgba(40,167,69,0.12); color: #1e7e34; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 12px;">
+            Live Mode
+        </div>
+    </header>
+
+    <div class="p-3 p-md-4">
+        
+        <!-- DASHBOARD SECTION -->
+        <div id="section-dashboard" class="content-section active">
+            <h2 class="gp-serif mb-4">Welcome Back, Merchant!</h2>
+            
+            <div class="passbook-strip">
+                <div class="pb-entry revenue">
+                    <div class="pb-icon" style="color:var(--brass-dark);">₹</div>
+                    <div>
+                        <div class="pb-label">Total Revenue</div>
+                        <div class="pb-value">₹{{ total_amount }}</div>
+                    </div>
+                </div>
+                <div class="pb-entry orders">
+                    <div class="pb-icon" style="color:var(--ink-soft);">#</div>
+                    <div>
+                        <div class="pb-label">Total Success</div>
+                        <div class="pb-value">{{ total_count }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ledger-card">
+                <div class="lc-head">
+                    <h4>Recent Transactions</h4>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Amount</th>
+                            <th>UTR Reference</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in txns %}
+                        <tr>
+                            <td class="gp-mono">{{ t[0] }}</td>
+                            <td class="gp-mono" style="color:var(--mint); font-weight:bold;">₹{{ t[1] }}</td>
+                            <td class="gp-mono text-muted">{{ t[2] }}</td>
+                            <td><span class="badge bg-success">Success</span></td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center text-muted">No transactions yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CONNECT ACCOUNTS SECTION -->
+        <div id="section-connect" class="content-section">
+            <div class="ledger-card" style="max-width: 600px;">
+                <div class="lc-head">
+                    <h4>API Key & UPI Setup</h4>
+                </div>
+                <p class="text-muted">Enter your details to generate your API Key and auto-verify payments.</p>
+                
+                <form action="/save_account" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">FamPay UPI ID</label>
+                        <input type="text" name="upi_id" class="form-control" value="{{ user_info.upi_id if user_info else '' }}" placeholder="yourname@fam" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Gmail Address (For Auto-Verify)</label>
+                        <input type="email" name="gmail" class="form-control" value="{{ user_info.gmail if user_info else '' }}" placeholder="email@gmail.com" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Gmail App Password</label>
+                        <input type="password" name="app_pass" class="form-control" value="{{ user_info.app_pass if user_info else '' }}" placeholder="16-digit app password" required>
+                    </div>
+                    <button type="submit" class="btn btn-gold w-100 py-2">Save & Generate API Key</button>
+                </form>
+
+                {% if user_info and user_info.api_key %}
+                <div class="mt-4 pt-4 border-top border-warning">
+                    <h5 class="fw-bold text-success">✅ Your API Key is Ready!</h5>
+                    <div class="api-box">{{ user_info.api_key }}</div>
+                    <p class="text-muted mt-2 text-sm">Use this API Key to create payment links via API.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- PAYMENT LINKS SECTION -->
+        <div id="section-links" class="content-section">
+            <div class="ledger-card" style="max-width: 500px;">
+                <div class="lc-head">
+                    <h4>Test Payment Link</h4>
+                </div>
+                {% if user_info and user_info.api_key %}
+                <p class="text-muted">Generate a live checkout link to test your gateway.</p>
+                <form action="/generate_link" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Amount (₹)</label>
+                        <input type="number" name="amount" class="form-control" placeholder="100" required>
+                    </div>
+                    <button type="submit" class="btn btn-gold w-100 py-2">Generate Link</button>
+                </form>
+                {% else %}
+                <div class="alert alert-warning">Please Setup your Connect Account first to get an API key!</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- DOCS SECTION -->
+        <div id="section-docs" class="content-section">
+            <div class="ledger-card">
+                <div class="lc-head">
+                    <h4>API Documentation</h4>
+                </div>
+                <pre class="bg-light p-3 border rounded">
+POST /api/create_order
+Params: api_key, amount
+Returns: checkout_url, txn_id
+
+GET /api/verify
+Params: api_key, txn_id
+Returns: status (pending/completed)
+                </pre>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    function switchTab(tabId, el) {
+        // Update sidebar UI
+        document.querySelectorAll('.sidebar-menu-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+
+        // Update content sections
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.getElementById('section-' + tabId).classList.add('active');
+
+        // Update Title
+        const titles = {
+            'dashboard': 'Dashboard Overview',
+            'connect': 'Connect Accounts',
+            'links': 'Payment Links',
+            'docs': 'API Documentation'
+        };
+        document.getElementById('topTitle').innerText = titles[tabId];
+    }
+</script>
+
+</body>
+</html>

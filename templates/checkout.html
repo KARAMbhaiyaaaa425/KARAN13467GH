@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | FamPay Gateway</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        
+        body {
+            background-color: #0c0e14;
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .checkout-container {
+            background: #12141c;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .qr-box {
+            background: white;
+            padding: 10px;
+            border-radius: 16px;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 0 30px rgba(250, 174, 64, 0.2);
+        }
+
+        .qr-box img {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        .btn-pay {
+            background: linear-gradient(45deg, #faae40, #ff8c00);
+            color: #000;
+            font-weight: 800;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(250, 174, 64, 0.4);
+        }
+
+        .timer {
+            font-family: 'Orbitron', monospace;
+            color: #faae40;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Success Animation */
+        .success-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #0c0e14;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .success-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .check-icon {
+            font-size: 5rem;
+            color: #10b981;
+            margin-bottom: 1rem;
+            animation: bounce 1s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="checkout-container text-center">
+        <!-- Logo Header -->
+        <div class="mb-6 flex justify-center items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-yellow-400 to-orange-500 flex items-center justify-center text-black font-bold text-xl">
+                F
+            </div>
+            <h1 class="text-2xl font-black tracking-wider">Fam<span class="text-yellow-500">Pay</span></h1>
+        </div>
+
+        <div class="text-gray-400 text-sm mb-1">Paying to</div>
+        <div class="font-bold text-lg mb-6">{{ upi_id }}</div>
+
+        <!-- Amount Box -->
+        <div class="bg-black/50 border border-white/10 rounded-2xl py-4 mb-6">
+            <div class="text-gray-500 text-xs font-bold tracking-widest uppercase mb-1">Amount to Pay</div>
+            <div class="text-4xl font-black text-white">₹{{ amount }}</div>
+        </div>
+
+        <!-- QR Code -->
+        <div class="qr-box mb-6">
+            <img src="{{ qr_url }}" alt="UPI QR Code">
+        </div>
+
+        <p class="text-xs text-gray-400 mb-6">Scan QR or click the button below to pay via FamPay or any UPI App.</p>
+
+        <!-- Direct Pay Button for Mobile -->
+        <a href="{{ payment_url }}" class="btn-pay block w-full py-4 uppercase tracking-widest text-sm mb-6 flex items-center justify-center gap-2">
+            Pay Now <i class="fas fa-bolt"></i>
+        </a>
+
+        <!-- Timer -->
+        <div class="flex items-center justify-center gap-2 text-sm border-t border-white/10 pt-4">
+            <span class="text-gray-400">Expires in:</span>
+            <span class="timer" id="countdown">05:00</span>
+        </div>
+
+        <!-- Hidden inputs for JS polling -->
+        <input type="hidden" id="txn_id" value="{{ txn_id }}">
+        <input type="hidden" id="api_key" value="{{ api_key }}">
+
+        <!-- Success Screen -->
+        <div class="success-overlay" id="successScreen">
+            <i class="fas fa-check-circle check-icon"></i>
+            <h2 class="text-3xl font-black text-white mb-2">Payment <span class="text-green-500">Successful!</span></h2>
+            <p class="text-gray-400 mb-6 text-sm">Your payment of ₹{{ amount }} was received.</p>
+            <div class="bg-white/5 border border-white/10 rounded-xl p-4 w-3/4 text-left">
+                <div class="text-xs text-gray-500 mb-1">Transaction ID</div>
+                <div class="font-mono text-sm text-white mb-3" id="success_txn">{{ txn_id }}</div>
+                <div class="text-xs text-gray-500 mb-1">UTR / Ref No</div>
+                <div class="font-mono text-sm text-green-400" id="success_utr">Fetching...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 5 Minute Countdown Timer
+        let timeLeft = 300;
+        const timerEl = document.getElementById('countdown');
+        
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const s = (timeLeft % 60).toString().padStart(2, '0');
+            timerEl.textContent = `${m}:${s}`;
+
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timerEl.textContent = "EXPIRED";
+                timerEl.classList.replace('text-[#faae40]', 'text-red-500');
+            }
+        }, 1000);
+
+        // Auto-Verify Polling (Checks every 3 seconds)
+        const txnId = document.getElementById('txn_id').value;
+        const apiKey = document.getElementById('api_key').value;
+
+        const checkInterval = setInterval(async () => {
+            if(timeLeft <= 0) {
+                clearInterval(checkInterval);
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/verify?api_key=${apiKey}&txn_id=${txnId}`);
+                const data = await res.json();
+                
+                if (data.status === 'completed') {
+                    // Payment is confirmed!
+                    clearInterval(checkInterval);
+                    clearInterval(timerInterval);
+                    
+                    document.getElementById('success_utr').textContent = data.data.utr || 'Auto-Verified';
+                    document.getElementById('successScreen').classList.add('active');
+                }
+            } catch (e) {
+                console.error("Polling error", e);
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

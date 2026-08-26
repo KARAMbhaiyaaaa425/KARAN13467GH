@@ -2,6 +2,7 @@ import os
 import re
 import time
 import uuid
+import random
 import email
 import sqlite3
 import imaplib
@@ -173,6 +174,10 @@ def checkout_page():
     try:
         amount = float(amount_raw)
         if amount <= 0: raise ValueError
+        # Dynamic Amount Logic
+        if amount == int(amount):
+            amount += round(random.uniform(0.01, 0.99), 2)
+        amount = round(amount, 2)
     except ValueError:
         return "<h1>Error: Invalid amount</h1>", 400
 
@@ -207,6 +212,22 @@ def serve_qr(txn_id):
     if os.path.exists(qr_path):
         return send_file(qr_path, mimetype='image/png')
     return jsonify({"error": "QR code not found"}), 404
+
+
+@app.route('/api/submit_utr', methods=['POST'])
+def submit_utr():
+    txn_id = request.json.get('txn_id')
+    utr = request.json.get('utr')
+    if not txn_id or not utr:
+        return jsonify({'status': 'error', 'message': 'Missing data'}), 400
+        
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    # Only update if pending
+    c.execute("UPDATE transactions SET utr=? WHERE txn_id=? AND status='pending'", (utr, txn_id))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
 
 @app.route('/api/verify', methods=['GET'])
 def verify_api():
@@ -288,10 +309,21 @@ def monitor_gmails():
                                 c_db = conn_db.cursor()
                                 now_str = datetime.now().isoformat()
                                 
-                                c_db.execute('''UPDATE transactions SET status='completed', utr=?, paid_at=?
-                                                WHERE user_id=? AND status='pending' AND amount=?''', 
-                                             (utr, now_str, user_id, amount))
-                                conn_db.commit()
+                                # Check if user manually submitted this UTR
+                                c_db.execute("SELECT txn_id, status FROM transactions WHERE utr=?", (utr,))
+                                row = c_db.fetchone()
+                                if row:
+                                    if row[1] == 'pending':
+                                        c_db.execute("UPDATE transactions SET status='completed', paid_at=? WHERE txn_id=?", (now_str, row[0]))
+                                        conn_db.commit()
+                                else:
+                                    # Amount-based fallback (if UTR not submitted by user yet)
+                                    c_db.execute("SELECT txn_id FROM transactions WHERE user_id=? AND status='pending' AND amount=? AND (utr IS NULL OR utr='') ORDER BY created_at ASC LIMIT 1", (user_id, amount))
+                                    pending_txn = c_db.fetchone()
+                                    if pending_txn:
+                                        c_db.execute("UPDATE transactions SET status='completed', utr=?, paid_at=? WHERE txn_id=?", (utr, now_str, pending_txn[0]))
+                                        conn_db.commit()
+                                        
                                 conn_db.close()
                     mail.close()
                     mail.logout()

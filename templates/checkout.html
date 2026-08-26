@@ -140,9 +140,19 @@
         </div>
 
         <!-- Timer -->
-        <div class="flex items-center justify-center gap-2 text-sm border-t border-white/10 pt-4">
+        <div class="flex items-center justify-center gap-2 text-sm border-t border-white/10 pt-4 mb-4">
             <span class="text-gray-400">Expires in:</span>
             <span class="timer" id="countdown">05:00</span>
+        </div>
+
+        <!-- Manual UTR Submission -->
+        <div class="bg-black/50 border border-white/10 rounded-xl p-3 text-left">
+            <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-2">Paid successfully? Submit UTR</p>
+            <div class="flex gap-2">
+                <input type="text" id="manualUtr" placeholder="Enter 12-digit UTR No." class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-yellow-500">
+                <button id="submitUtrBtn" class="bg-gradient-to-tr from-yellow-400 to-orange-500 text-black font-bold px-4 rounded-lg text-xs uppercase tracking-widest hover:scale-105 transition-transform">Submit</button>
+            </div>
+            <p class="text-[9px] text-gray-500 mt-1" id="utrMsg"></p>
         </div>
 
         <!-- Hidden inputs for JS polling -->
@@ -211,6 +221,36 @@
             
             btn.innerHTML = originalHTML;
             btn.disabled = false;
+        });
+
+        // Submit UTR Logic
+        document.getElementById('submitUtrBtn').addEventListener('click', async () => {
+            const utr = document.getElementById('manualUtr').value.trim();
+            const msgEl = document.getElementById('utrMsg');
+            if (utr.length < 8) {
+                msgEl.textContent = 'Please enter a valid UTR number.';
+                msgEl.className = 'text-[9px] text-red-400 mt-1';
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/submit_utr', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({txn_id: txnId, utr: utr})
+                });
+                const data = await res.json();
+                if(data.status === 'success') {
+                    msgEl.textContent = 'UTR Submitted! Waiting for verification...';
+                    msgEl.className = 'text-[9px] text-green-400 mt-1';
+                } else {
+                    msgEl.textContent = 'Error submitting UTR.';
+                    msgEl.className = 'text-[9px] text-red-400 mt-1';
+                }
+            } catch (e) {
+                msgEl.textContent = 'Network error.';
+                msgEl.className = 'text-[9px] text-red-400 mt-1';
+            }
         });
 
         const checkInterval = setInterval(async () => {

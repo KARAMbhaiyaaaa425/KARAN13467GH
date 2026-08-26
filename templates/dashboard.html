@@ -195,6 +195,11 @@ body{
                     <span class="menu-label">Payment Links</span>
                 </a>
             </li>
+            <li class="sidebar-menu-item" onclick="switchTab('customize', this)">
+                <a class="sidebar-menu-link">
+                    <span class="menu-label">Customize</span>
+                </a>
+            </li>
             <li class="sidebar-menu-item" onclick="switchTab('docs', this)">
                 <a class="sidebar-menu-link">
                     <span class="menu-label">API Docs</span>
@@ -334,6 +339,51 @@ body{
             </div>
         </div>
         
+        
+        <!-- CUSTOMIZE SECTION -->
+        <div id="section-customize" class="content-section">
+            <div class="ledger-card" style="max-width: 800px;">
+                <div class="lc-head">
+                    <h4>Customize Payment Page</h4>
+                </div>
+                <p class="text-muted">Choose how your checkout page looks to customers.</p>
+                
+                <form action="/save_customize" method="POST">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Checkout Display Name</label>
+                        <input type="text" name="display_name" class="form-control" value="{{ user_info.display_name if user_info else 'Merchant' }}" placeholder="Business Name" required>
+                        <small class="text-muted">The business name shown to customers. e.g., Karan Bhaiya</small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold mb-3">Payment Page Theme</label>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded text-center" style="background: #12141c; color: white;">
+                                    <input type="radio" name="theme" value="default" id="t1" {% if not user_info or user_info.theme == 'default' %}checked{% endif %}>
+                                    <label for="t1" class="fw-bold d-block mt-2">Premium Dark</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded text-center" style="background: #fde047; color: black; border: 3px solid black !important; box-shadow: 4px 4px 0px black;">
+                                    <input type="radio" name="theme" value="retro" id="t2" {% if user_info and user_info.theme == 'retro' %}checked{% endif %}>
+                                    <label for="t2" class="fw-bold d-block mt-2">Neo-Brutalist</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded text-center" style="background: #000; color: #0f0; box-shadow: 0 0 10px #0f0;">
+                                    <input type="radio" name="theme" value="cyberpunk" id="t3" {% if user_info and user_info.theme == 'cyberpunk' %}checked{% endif %}>
+                                    <label for="t3" class="fw-bold d-block mt-2">Cyberpunk Neon</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-gold w-100 py-2">Save Customizations</button>
+                </form>
+            </div>
+        </div>
+
         <!-- DOCS SECTION -->
         <div id="section-docs" class="content-section">
             <div class="ledger-card">
@@ -370,6 +420,7 @@ Returns: status (pending/completed)
             'dashboard': 'Dashboard Overview',
             'connect': 'Connect Accounts',
             'links': 'Payment Links',
+            'customize': 'Customize',
             'docs': 'API Documentation'
         };
         document.getElementById('topTitle').innerText = titles[tabId];

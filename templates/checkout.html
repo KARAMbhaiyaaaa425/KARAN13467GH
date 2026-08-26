@@ -10,37 +10,70 @@
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         
         body {
-            background-color: #0c0e14;
-            color: white;
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            
+            {% if theme == 'cyberpunk' %}
+            background-color: #000;
+            color: #0f0;
+            {% elif theme == 'retro' %}
+            background-color: #fde047;
+            color: #000;
+            {% else %}
+            background-color: #0c0e14;
+            color: white;
+            {% endif %}
         }
 
         .checkout-container {
-            background: #12141c;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
             width: 100%;
             max-width: 400px;
             padding: 2rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
             position: relative;
             overflow: hidden;
+            
+            {% if theme == 'cyberpunk' %}
+            background: #111;
+            border: 2px solid #0f0;
+            border-radius: 0px;
+            box-shadow: 0 0 20px rgba(0,255,0,0.5);
+            {% elif theme == 'retro' %}
+            background: #fff;
+            border: 4px solid #000;
+            border-radius: 16px;
+            box-shadow: 8px 8px 0px #000;
+            {% else %}
+            background: #12141c;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            {% endif %}
         }
 
         .qr-box {
             background: white;
             padding: 10px;
-            border-radius: 16px;
             width: 220px;
             height: 220px;
             margin: 0 auto;
             position: relative;
+            
+            {% if theme == 'cyberpunk' %}
+            border: 2px solid #0f0;
+            border-radius: 0px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+            {% elif theme == 'retro' %}
+            border: 4px solid #000;
+            border-radius: 12px;
+            box-shadow: 4px 4px 0px #000;
+            {% else %}
+            border-radius: 16px;
             box-shadow: 0 0 30px rgba(250, 174, 64, 0.2);
+            {% endif %}
         }
 
         .qr-box img {
@@ -50,16 +83,36 @@
         }
 
         .btn-pay {
+            font-weight: 800;
+            transition: all 0.3s ease;
+            
+            {% if theme == 'cyberpunk' %}
+            background: transparent;
+            color: #0f0;
+            border: 1px solid #0f0;
+            border-radius: 0px;
+            text-shadow: 0 0 5px #0f0;
+            {% elif theme == 'retro' %}
+            background: #000;
+            color: #fff;
+            border-radius: 8px;
+            border: 2px solid #000;
+            {% else %}
             background: linear-gradient(45deg, #faae40, #ff8c00);
             color: #000;
-            font-weight: 800;
             border-radius: 12px;
-            transition: all 0.3s ease;
+            {% endif %}
         }
 
         .btn-pay:hover {
             transform: translateY(-2px);
+            {% if theme == 'cyberpunk' %}
+            box-shadow: 0 0 15px #0f0, inset 0 0 10px #0f0;
+            {% elif theme == 'retro' %}
+            box-shadow: 4px 4px 0px #000; background: #fff; color:#000;
+            {% else %}
             box-shadow: 0 10px 20px rgba(250, 174, 64, 0.4);
+            {% endif %}
         }
 
         .timer {
@@ -106,20 +159,17 @@
 
     <div class="checkout-container text-center">
         <!-- Logo Header -->
-        <div class="mb-6 flex justify-center items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-yellow-400 to-orange-500 flex items-center justify-center text-black font-bold text-xl">
-                F
-            </div>
-            <h1 class="text-2xl font-black tracking-wider">Fam<span class="text-yellow-500">Pay</span></h1>
+        <div class="mb-6 flex flex-col justify-center items-center gap-2">
+            <h1 class="text-3xl font-black tracking-wider" style="{% if theme=='cyberpunk' %}color:#0f0; text-shadow:0 0 10px #0f0;{% elif theme=='retro' %}color:#000;{% endif %}">{{ display_name }}</h1>
         </div>
 
-        <div class="text-gray-400 text-sm mb-1">Paying to</div>
-        <div class="font-bold text-lg mb-6">{{ upi_id }}</div>
+        <div class="{% if theme=='retro' %}text-gray-700{% else %}text-gray-400{% endif %} text-sm mb-1">Paying to UPI</div>
+        <div class="font-bold text-sm mb-6 opacity-70">{{ upi_id }}</div>
 
         <!-- Amount Box -->
-        <div class="bg-black/50 border border-white/10 rounded-2xl py-4 mb-6">
-            <div class="text-gray-500 text-xs font-bold tracking-widest uppercase mb-1">Amount to Pay</div>
-            <div class="text-4xl font-black text-white">₹{{ amount }}</div>
+        <div class="{% if theme=='retro' %}bg-white border-4 border-black shadow-[4px_4px_0px_black] rounded-xl{% elif theme=='cyberpunk' %}border border-[#0f0] bg-black/50 rounded-none shadow-[0_0_10px_#0f0]{% else %}bg-black/50 border border-white/10 rounded-2xl{% endif %} py-4 mb-6">
+            <div class="{% if theme=='retro' %}text-gray-600{% elif theme=='cyberpunk' %}text-[#0f0]{% else %}text-gray-500{% endif %} text-xs font-bold tracking-widest uppercase mb-1">Amount to Pay</div>
+            <div class="text-4xl font-black {% if theme=='retro' %}text-black{% elif theme=='cyberpunk' %}text-[#0f0] drop-shadow-[0_0_5px_#0f0]{% else %}text-white{% endif %}">₹{{ amount }}</div>
         </div>
 
         <!-- QR Code -->

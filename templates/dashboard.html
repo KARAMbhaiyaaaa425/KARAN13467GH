@@ -206,6 +206,11 @@ body{
                     <span class="menu-label">API Docs</span>
                 </a>
             </li>
+            <li class="sidebar-menu-item" onclick="switchTab('webhooks', this)">
+                <a class="sidebar-menu-link">
+                    <span class="menu-label">Webhook Logs</span>
+                </a>
+            </li>
             <li class="sidebar-menu-item mt-4">
                 <a class="sidebar-menu-link text-danger" href="/logout" style="color: #dc3545 !important; font-weight: 600;">
                     <span class="menu-label"><i class="fas fa-sign-out-alt me-2"></i>Logout</span>
@@ -601,6 +606,22 @@ body{
 </main>
 
 <script>
+    async function retryWebhook(logId, btn) {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+        try {
+            const res = await fetch('/api/retry-webhook/' + logId, {method: 'POST'});
+            const data = await res.json();
+            if(data.status === 'success') {
+                btn.innerHTML = '<i class="fas fa-check text-success"></i> Sent';
+            } else {
+                btn.innerHTML = '<i class="fas fa-times text-danger"></i> Failed';
+            }
+        } catch (e) {
+            btn.innerHTML = 'Error';
+        }
+    }
+
     function switchTab(tabId, el) {
         // Update sidebar UI
         document.querySelectorAll('.sidebar-menu-item').forEach(i => i.classList.remove('active'));
@@ -623,6 +644,22 @@ body{
 </script>
 
 <script>
+    async function retryWebhook(logId, btn) {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+        try {
+            const res = await fetch('/api/retry-webhook/' + logId, {method: 'POST'});
+            const data = await res.json();
+            if(data.status === 'success') {
+                btn.innerHTML = '<i class="fas fa-check text-success"></i> Sent';
+            } else {
+                btn.innerHTML = '<i class="fas fa-times text-danger"></i> Failed';
+            }
+        } catch (e) {
+            btn.innerHTML = 'Error';
+        }
+    }
+
     function switchApiTab(tabId, el) {
         document.querySelectorAll('.api-content').forEach(d => { d.style.display = 'none'; });
         document.querySelectorAll('.api-tab').forEach(t => {

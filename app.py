@@ -655,7 +655,7 @@ def super_admin():
     total_volume = stats[1] or 0
     
     # Get Users List
-    c.execute("SELECT id, username, email, display_name, upi_id FROM users ORDER BY id DESC")
+    c.execute("SELECT user_id, username, gmail, display_name, upi_id FROM users ORDER BY user_id DESC")
     users = c.fetchall()
     
     conn.close()
@@ -669,7 +669,7 @@ def admin_ban(user_id):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     # To ban, we just wipe their API key and credentials so they can't login or use the gateway
-    c.execute("UPDATE users SET password_hash = 'BANNED', api_key = NULL, gmail = NULL, app_pass = NULL WHERE id = ?", (user_id,))
+    c.execute("UPDATE users SET password_hash = 'BANNED', api_key = NULL, gmail = NULL, app_pass = NULL WHERE user_id = ?", (user_id,))
     conn.commit()
     conn.close()
     return redirect(url_for('super_admin'))

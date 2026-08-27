@@ -591,6 +591,89 @@ def regenerate_key():
     flash('API Key successfully regenerated! Update your webhook integrations.')
     return redirect(url_for('dashboard'))
 
+
+# ============================================
+# WEBHOOK LOGS & RETRY
+# ============================================
+
+@app.route('/api/retry-webhook/<int:log_id>', methods=['POST'])
+def retry_webhook(log_id):
+    if 'user_id' not in session: return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT url, payload FROM webhook_logs WHERE id = ? AND user_id = ?", (log_id, session['user_id']))
+    log = c.fetchone()
+    
+    if not log:
+        conn.close()
+        return jsonify({'status': 'error', 'message': 'Log not found'}), 404
+        
+    url, payload = log
+    import json
+    status = "failed"
+    try:
+        res = requests.post(url, json=json.loads(payload), timeout=5)
+        if res.status_code in [200, 201]:
+            status = "success"
+    except:
+        pass
+        
+    c.execute("UPDATE webhook_logs SET status = ?, created_at = CURRENT_TIMESTAMP WHERE id = ?", (status, log_id))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'status': status})
+
+# ============================================
+# SUPER ADMIN PANEL
+# ============================================
+
+@app.route('/admin-karan', methods=['GET', 'POST'])
+def super_admin():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if password == 'karan123':  # HARDCODED ADMIN PASSWORD
+            session['is_admin'] = True
+            return redirect(url_for('super_admin'))
+        else:
+            return render_template('admin.html', error="Invalid password")
+            
+    if not session.get('is_admin'):
+        return render_template('admin.html', login_required=True)
+        
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    
+    # Get Stats
+    c.execute("SELECT COUNT(*) FROM users")
+    total_users = c.fetchone()[0]
+    
+    c.execute("SELECT COUNT(*), SUM(amount) FROM transactions WHERE status='completed'")
+    stats = c.fetchone()
+    total_txns = stats[0] or 0
+    total_volume = stats[1] or 0
+    
+    # Get Users List
+    c.execute("SELECT id, username, email, display_name, upi_id FROM users ORDER BY id DESC")
+    users = c.fetchall()
+    
+    conn.close()
+    
+    return render_template('admin.html', total_users=total_users, total_txns=total_txns, total_volume=total_volume, users=users)
+
+@app.route('/admin-karan/ban/<int:user_id>', methods=['POST'])
+def admin_ban(user_id):
+    if not session.get('is_admin'): return redirect(url_for('super_admin'))
+    
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    # To ban, we just wipe their API key and credentials so they can't login or use the gateway
+    c.execute("UPDATE users SET password_hash = 'BANNED', api_key = NULL, gmail = NULL, app_pass = NULL WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('super_admin'))
+
 def main():
     init_db()
     # Start background gmail reader

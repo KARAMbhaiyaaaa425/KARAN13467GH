@@ -503,56 +503,95 @@ body{
 
                 <!-- Right Column: API Guide -->
                 <div class="col-lg-7">
-                    <div class="p-4 rounded" style="border: 1px solid var(--border); background: var(--card);">
+                    <div class="p-0 rounded" style="background: transparent;">
                         <h5 class="gp-serif mb-4" style="font-weight: 600;"><i class="fas fa-book-open text-muted me-2" style="font-size:14px;"></i>API Integration Guide</h5>
                         
                         <!-- Tabs -->
-                        
                         <ul class="nav nav-tabs mb-4" style="border-bottom-color: var(--border);">
                             <li class="nav-item">
-                                <a class="nav-link active fw-bold" style="color: var(--ink); border-color: var(--border) var(--border) var(--paper); background: var(--paper);" href="#">Create Order</a>
+                                <a class="nav-link active fw-bold api-tab" id="tab-create" style="color: var(--ink); border-color: var(--border) var(--border) var(--paper); background: var(--paper); cursor: pointer;" onclick="switchApiTab('create', this)">Create Order</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-muted fw-bold" style="border-color: transparent;" href="#">Check Status</a>
+                                <a class="nav-link text-muted fw-bold api-tab" id="tab-status" style="border-color: transparent; cursor: pointer;" onclick="switchApiTab('status', this)">Check Status</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-muted fw-bold" style="border-color: transparent;" href="#">Webhook Payload</a>
+                                <a class="nav-link text-muted fw-bold api-tab" id="tab-webhook" style="border-color: transparent; cursor: pointer;" onclick="switchApiTab('webhook', this)">Webhook Payload</a>
                             </li>
                         </ul>
 
-                        <div class="d-flex align-items-center gap-3 mb-4 p-2 rounded" style="background: var(--card); border: 1px solid var(--border);">
-                            <span class="badge" style="background: var(--paper); border: 1px solid var(--mint); color: var(--mint); letter-spacing: 1px;">POST</span>
-                            <code style="color: var(--ink); font-size: 13px;">{{ request.host_url.rstrip('/') }}/api/create-order</code>
-                        </div>
-                        <p class="text-muted mb-4" style="font-size: 13px;">Initiates a payment order and returns a secure payment URL to redirect your customer.</p>
+                        <!-- Content: Create Order -->
+                        <div id="content-create" class="api-content">
+                            <div class="d-flex align-items-center gap-3 mb-4 p-2 rounded" style="background: var(--card); border: 1px solid var(--border);">
+                                <span class="badge" style="background: var(--paper); border: 1px solid var(--mint); color: var(--mint); letter-spacing: 1px;">POST</span>
+                                <code style="color: var(--ink); font-size: 13px;">{{ request.host_url.rstrip('/') }}/api/create-order</code>
+                            </div>
+                            <p class="text-muted mb-4" style="font-size: 13px;">Initiates a payment order and returns a secure payment URL to redirect your customer.</p>
 
-                        <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">REQUEST HEADERS</div>
-                        <div class="p-3 rounded mb-4" style="background: var(--ink); color: var(--brass-light); font-family: monospace; font-size: 12px; overflow-x: auto;">
-                            X-Fam-Key: {{ user_info.api_key if user_info else 'YOUR_API_KEY' }}<br>
-                            Content-Type: application/json
-                        </div>
+                            <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">REQUEST HEADERS</div>
+                            <div class="p-3 rounded mb-4" style="background: var(--ink); color: var(--brass-light); font-family: monospace; font-size: 12px; overflow-x: auto;">
+                                X-Fam-Key: {{ user_info.api_key if user_info else 'YOUR_API_KEY' }}<br>
+                                Content-Type: application/json
+                            </div>
 
-                        <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">JSON REQUEST BODY</div>
-                        <div class="p-3 rounded mb-4" style="background: var(--ink); color: #a4b3ac; font-family: monospace; font-size: 12px; overflow-x: auto;">
+                            <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">JSON REQUEST BODY</div>
+                            <div class="p-3 rounded mb-4" style="background: var(--ink); color: #a4b3ac; font-family: monospace; font-size: 12px; overflow-x: auto;">
 {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"amount"</span>: <span style="color: var(--paper);">"100.00"</span>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"order_id"</span>: <span style="color: var(--paper);">"ORD12345"</span>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"customer_name"</span>: <span style="color: var(--paper);">"Raushan Kumar"</span>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"callback_url"</span>: <span style="color: var(--paper);">"{{ request.host_url.rstrip('/') }}/callback"</span><br>
 }
-                        </div>
+                            </div>
 
-                        <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">RESPONSE BODY</div>
-                        <div class="p-3 rounded" style="background: var(--ink); color: #a4b3ac; font-family: monospace; font-size: 12px; overflow-x: auto;">
+                            <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">RESPONSE BODY</div>
+                            <div class="p-3 rounded" style="background: var(--ink); color: #a4b3ac; font-family: monospace; font-size: 12px; overflow-x: auto;">
 {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"status"</span>: <span style="color: var(--paper);">"success"</span>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"payment_url"</span>: <span style="color: var(--paper);">"{{ request.host_url.rstrip('/') }}/pay/LRd7jTF0V2sFyhMyOBzbJLL1S"</span><br>
 }
+                            </div>
                         </div>
 
+                        <!-- Content: Check Status -->
+                        <div id="content-status" class="api-content" style="display: none;">
+                            <div class="d-flex align-items-center gap-3 mb-4 p-2 rounded" style="background: var(--card); border: 1px solid var(--border);">
+                                <span class="badge" style="background: var(--paper); border: 1px solid #0dcaf0; color: #0dcaf0; letter-spacing: 1px;">GET</span>
+                                <code style="color: var(--ink); font-size: 13px;">{{ request.host_url.rstrip('/') }}/api/verify?api_key={{ user_info.api_key if user_info else 'YOUR_API_KEY' }}&txn_id=FAM172...</code>
+                            </div>
+                            <p class="text-muted mb-4" style="font-size: 13px;">Check the status of a specific transaction ID programmatically.</p>
+
+                            <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">RESPONSE BODY</div>
+                            <div class="p-3 rounded" style="background: var(--ink); color: #a4b3ac; font-family: monospace; font-size: 12px; overflow-x: auto;">
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"status"</span>: <span style="color: var(--paper);">"completed"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"data"</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"amount"</span>: <span style="color: var(--paper);">100.0</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"paid_at"</span>: <span style="color: var(--paper);">"2026-08-27T10:15:30"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"txn_id"</span>: <span style="color: var(--paper);">"FAM1723..."</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"utr"</span>: <span style="color: var(--paper);">"412345678901"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+}
+                            </div>
+                        </div>
+
+                        <!-- Content: Webhook Payload -->
+                        <div id="content-webhook" class="api-content" style="display: none;">
+                            <p class="text-muted mb-4" style="font-size: 13px;">When a payment is successfully verified, we will instantly send a <code>POST</code> request containing the transaction details to the <code>callback_url</code> you provided during Order Creation.</p>
+                            
+                            <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">WEBHOOK POST BODY</div>
+                            <div class="p-3 rounded" style="background: var(--ink); color: #a4b3ac; font-family: monospace; font-size: 12px; overflow-x: auto;">
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"amount"</span>: <span style="color: var(--paper);">100.0</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"merchant_order_id"</span>: <span style="color: var(--paper);">"ORD12345"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"status"</span>: <span style="color: var(--paper);">"success"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"txn_id"</span>: <span style="color: var(--paper);">"FAM1723..."</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"utr"</span>: <span style="color: var(--paper);">"412345678901"</span><br>
+}
+                            </div>
+                            <p class="text-muted mt-3" style="font-size: 12px;"><i class="fas fa-lightbulb text-warning me-1"></i> <strong>Tip:</strong> Always verify the payment amount and order ID on your end before fulfilling the order.</p>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </div>            </div>
         </div>>
 
     </div>

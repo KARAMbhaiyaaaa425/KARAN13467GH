@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | FamPay Gateway</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            
+            {% if theme == 'cyberpunk' %}
+            background-color: #000;
+            color: #0f0;
+            {% elif theme == 'retro' %}
+            background-color: #fde047;
+            color: #000;
+            {% else %}
+            background-color: #0c0e14;
+            color: white;
+            {% endif %}
+        }
+
+        .checkout-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            
+            {% if theme == 'cyberpunk' %}
+            background: #111;
+            border: 2px solid #0f0;
+            border-radius: 0px;
+            box-shadow: 0 0 20px rgba(0,255,0,0.5);
+            {% elif theme == 'retro' %}
+            background: #fff;
+            border: 4px solid #000;
+            border-radius: 16px;
+            box-shadow: 8px 8px 0px #000;
+            {% else %}
+            background: #12141c;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            {% endif %}
+        }
+
+        .qr-box {
+            background: white;
+            padding: 10px;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto;
+            position: relative;
+            
+            {% if theme == 'cyberpunk' %}
+            border: 2px solid #0f0;
+            border-radius: 0px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+            {% elif theme == 'retro' %}
+            border: 4px solid #000;
+            border-radius: 12px;
+            box-shadow: 4px 4px 0px #000;
+            {% else %}
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(250, 174, 64, 0.2);
+            {% endif %}
+        }
+
+        .qr-box img {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        .btn-pay {
+            font-weight: 800;
+            transition: all 0.3s ease;
+            
+            {% if theme == 'cyberpunk' %}
+            background: transparent;
+            color: #0f0;
+            border: 1px solid #0f0;
+            border-radius: 0px;
+            text-shadow: 0 0 5px #0f0;
+            {% elif theme == 'retro' %}
+            background: #000;
+            color: #fff;
+            border-radius: 8px;
+            border: 2px solid #000;
+            {% else %}
+            background: linear-gradient(45deg, #faae40, #ff8c00);
+            color: #000;
+            border-radius: 12px;
+            {% endif %}
+        }
+
+        .btn-pay:hover {
+            transform: translateY(-2px);
+            {% if theme == 'cyberpunk' %}
+            box-shadow: 0 0 15px #0f0, inset 0 0 10px #0f0;
+            {% elif theme == 'retro' %}
+            box-shadow: 4px 4px 0px #000; background: #fff; color:#000;
+            {% else %}
+            box-shadow: 0 10px 20px rgba(250, 174, 64, 0.4);
+            {% endif %}
+        }
+
+        .timer {
+            font-family: 'Orbitron', monospace;
+            color: #faae40;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Success Animation */
+        .success-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #0c0e14;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .success-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .check-icon {
+            font-size: 5rem;
+            color: #10b981;
+            margin-bottom: 1rem;
+            animation: bounce 1s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="checkout-container text-center">
+        <!-- Logo Header -->
+        <div class="mb-6 flex flex-col justify-center items-center gap-2">
+            <h1 class="text-3xl font-black tracking-wider" style="{% if theme=='cyberpunk' %}color:#0f0; text-shadow:0 0 10px #0f0;{% elif theme=='retro' %}color:#000;{% endif %}">{{ display_name }}</h1>
+        </div>
+
+        <div class="{% if theme=='retro' %}text-gray-700{% else %}text-gray-400{% endif %} text-sm mb-1">Paying to UPI</div>
+        <div class="font-bold text-sm mb-6 opacity-70">{{ upi_id }}</div>
+
+        <!-- Amount Box -->
+        <div class="{% if theme=='retro' %}bg-white border-4 border-black shadow-[4px_4px_0px_black] rounded-xl{% elif theme=='cyberpunk' %}border border-[#0f0] bg-black/50 rounded-none shadow-[0_0_10px_#0f0]{% else %}bg-black/50 border border-white/10 rounded-2xl{% endif %} py-4 mb-6">
+            <div class="{% if theme=='retro' %}text-gray-600{% elif theme=='cyberpunk' %}text-[#0f0]{% else %}text-gray-500{% endif %} text-xs font-bold tracking-widest uppercase mb-1">Amount to Pay</div>
+            <div class="text-4xl font-black {% if theme=='retro' %}text-black{% elif theme=='cyberpunk' %}text-[#0f0] drop-shadow-[0_0_5px_#0f0]{% else %}text-white{% endif %}">₹{{ amount }}</div>
+        </div>
+
+        <!-- QR Code -->
+        <div class="qr-box mb-6">
+            <img src="{{ qr_url }}" alt="UPI QR Code">
+        </div>
+
+        <p class="text-xs text-gray-400 mb-6">Scan QR or click the button below to pay via FamPay or any UPI App.</p>
+
+        <!-- Direct Pay Button for Mobile -->
+        <div class="flex gap-2 mb-6">
+            <a href="{{ payment_url }}" class="btn-pay block w-full py-4 uppercase tracking-widest text-sm flex items-center justify-center gap-2" style="flex: 1;">
+                Pay <i class="fas fa-bolt"></i>
+            </a>
+            <button id="verifyBtn" class="btn-pay block w-full py-4 uppercase tracking-widest text-sm flex items-center justify-center gap-2" style="flex: 1; background: linear-gradient(45deg, #10b981, #059669); color: white;">
+                Verify <i class="fas fa-check-circle"></i>
+            </button>
+        </div>
+
+        <!-- Timer -->
+        <div class="flex items-center justify-center gap-2 text-sm border-t border-white/10 pt-4 mb-4">
+            <span class="text-gray-400">Expires in:</span>
+            <span class="timer" id="countdown">05:00</span>
+        </div>
+
+        <!-- Manual UTR Submission -->
+        <div class="bg-black/50 border border-white/10 rounded-xl p-3 text-left">
+            <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-2">Paid successfully? Submit UTR</p>
+            <div class="flex gap-2">
+                <input type="text" id="manualUtr" placeholder="Enter 12-digit UTR No." class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-yellow-500">
+                <button id="submitUtrBtn" class="bg-gradient-to-tr from-yellow-400 to-orange-500 text-black font-bold px-4 rounded-lg text-xs uppercase tracking-widest hover:scale-105 transition-transform">Submit</button>
+            </div>
+            <p class="text-[9px] text-gray-500 mt-1" id="utrMsg"></p>
+        </div>
+
+        <!-- Hidden inputs for JS polling -->
+        <input type="hidden" id="txn_id" value="{{ txn_id }}">
+        <input type="hidden" id="api_key" value="{{ api_key }}">
+        <input type="hidden" id="callback_url" value="{{ callback_url }}">
+
+        <!-- Success Screen -->
+        <div class="success-overlay" id="successScreen">
+            <i class="fas fa-check-circle check-icon"></i>
+            <h2 class="text-3xl font-black text-white mb-2">Payment <span class="text-green-500">Successful!</span></h2>
+            <p class="text-gray-400 mb-6 text-sm">Your payment of ₹{{ amount }} was received.</p>
+            <div class="bg-white/5 border border-white/10 rounded-xl p-4 w-3/4 text-left">
+                <div class="text-xs text-gray-500 mb-1">Transaction ID</div>
+                <div class="font-mono text-sm text-white mb-3" id="success_txn">{{ txn_id }}</div>
+                <div class="text-xs text-gray-500 mb-1">UTR / Ref No</div>
+                <div class="font-mono text-sm text-green-400" id="success_utr">Fetching...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 5 Minute Countdown Timer
+        let timeLeft = 300;
+        const timerEl = document.getElementById('countdown');
+        
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const s = (timeLeft % 60).toString().padStart(2, '0');
+            timerEl.textContent = `${m}:${s}`;
+
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timerEl.textContent = "EXPIRED";
+                timerEl.classList.replace('text-[#faae40]', 'text-red-500');
+            }
+        }, 1000);
+
+        // Auto-Verify Polling (Checks every 3 seconds)
+        const txnId = document.getElementById('txn_id').value;
+        const apiKey = document.getElementById('api_key').value;
+
+        // Manual Verify Button Logic
+        document.getElementById('verifyBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('verifyBtn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = 'Wait <i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+            
+            try {
+                const res = await fetch(`/api/verify?api_key=${apiKey}&txn_id=${txnId}`);
+                const data = await res.json();
+                
+                if (data.status === 'completed') {
+                    clearInterval(checkInterval);
+                    clearInterval(timerInterval);
+                    document.getElementById('success_utr').textContent = data.data.utr || 'Auto-Verified';
+                    document.getElementById('successScreen').classList.add('active');
+                    
+                    const callbackUrl = document.getElementById('callback_url').value;
+                    if (callbackUrl && callbackUrl !== 'None' && callbackUrl !== '') {
+                        setTimeout(() => {
+                            window.location.href = callbackUrl;
+                        }, 2500);
+                    }
+                } else {
+                    alert('Payment not received yet. Check if money was deducted and try again.');
+                }
+            } catch (e) {
+                alert('Error verifying payment. Try again.');
+            }
+            
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+        });
+
+        // Submit UTR Logic
+        document.getElementById('submitUtrBtn').addEventListener('click', async () => {
+            const utr = document.getElementById('manualUtr').value.trim();
+            const msgEl = document.getElementById('utrMsg');
+            if (utr.length < 8) {
+                msgEl.textContent = 'Please enter a valid UTR number.';
+                msgEl.className = 'text-[9px] text-red-400 mt-1';
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/submit_utr', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({txn_id: txnId, utr: utr})
+                });
+                const data = await res.json();
+                if(data.status === 'success') {
+                    msgEl.textContent = 'UTR Submitted! Waiting for verification...';
+                    msgEl.className = 'text-[9px] text-green-400 mt-1';
+                } else {
+                    msgEl.textContent = 'Error submitting UTR.';
+                    msgEl.className = 'text-[9px] text-red-400 mt-1';
+                }
+            } catch (e) {
+                msgEl.textContent = 'Network error.';
+                msgEl.className = 'text-[9px] text-red-400 mt-1';
+            }
+        });
+
+        const checkInterval = setInterval(async () => {
+            if(timeLeft <= 0) {
+                clearInterval(checkInterval);
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/verify?api_key=${apiKey}&txn_id=${txnId}`);
+                const data = await res.json();
+                
+                if (data.status === 'completed') {
+                    // Payment is confirmed!
+                    clearInterval(checkInterval);
+                    clearInterval(timerInterval);
+                    
+                    document.getElementById('success_utr').textContent = data.data.utr || 'Auto-Verified';
+                    document.getElementById('successScreen').classList.add('active');
+                    
+                    const callbackUrl = document.getElementById('callback_url').value;
+                    if (callbackUrl && callbackUrl !== 'None' && callbackUrl !== '') {
+                        setTimeout(() => {
+                            window.location.href = callbackUrl;
+                        }, 2500);
+                    }
+                }
+            } catch (e) {
+                console.error("Polling error", e);
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

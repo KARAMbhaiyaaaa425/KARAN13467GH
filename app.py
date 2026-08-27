@@ -548,6 +548,9 @@ def send_webhook(callback_url, txn_id, merchant_order_id, amount, utr):
     except Exception as e:
         print(f"Webhook failed for {txn_id}: {e}")
 
+# Global dict to hold persistent IMAP connections
+imap_connections = {}
+
 def monitor_gmails():
     while True:
         try:
@@ -557,12 +560,34 @@ def monitor_gmails():
             users = c.fetchall()
             conn.close()
 
+            # Optional: Cleanup removed users from connections
+            valid_user_ids = [u[0] for u in users]
+            for uid in list(imap_connections.keys()):
+                if uid not in valid_user_ids:
+                    try:
+                        imap_connections[uid].logout()
+                    except: pass
+                    del imap_connections[uid]
+
             for user_id, gmail_user, app_pass in users:
                 if not gmail_user or not app_pass: continue
+                
+                mail = imap_connections.get(user_id)
                 try:
-                    mail = imaplib.IMAP4_SSL("imap.gmail.com", timeout=10)
-                    mail.login(gmail_user, decrypt_pass(app_pass))
-                    mail.select("INBOX")
+                    if not mail:
+                        # Connect and login if no active connection
+                        mail = imaplib.IMAP4_SSL("imap.gmail.com", timeout=10)
+                        mail.login(gmail_user, decrypt_pass(app_pass))
+                        imap_connections[user_id] = mail
+                    
+                    try:
+                        mail.select("INBOX")
+                    except:
+                        # Connection might have died, reconnect
+                        mail = imaplib.IMAP4_SSL("imap.gmail.com", timeout=10)
+                        mail.login(gmail_user, decrypt_pass(app_pass))
+                        mail.select("INBOX")
+                        imap_connections[user_id] = mail
 
                     since_date = (datetime.now() - timedelta(days=1)).strftime("%d-%b-%Y")
                     status, messages = mail.search(None, f'(SINCE {since_date})')
@@ -622,13 +647,13 @@ def monitor_gmails():
                                 if txn_completed_now and completed_txn[2]:
                                     threading.Thread(target=send_webhook, args=(completed_txn[2], completed_txn[0], completed_txn[3], amount, utr)).start()
                                     
-                    mail.close()
-                    mail.logout()
-                except Exception:
-                    pass
-        except Exception:
+                except Exception as e:
+                    # If any error (e.g. connection drop), remove from persistent dict to force reconnect next loop
+                    if user_id in imap_connections:
+                        del imap_connections[user_id]
+        except Exception as e:
             pass
-        time.sleep(3)
+        time.sleep(1.5)
 
 @app.route('/regenerate_key', methods=['POST'])
 def regenerate_key():

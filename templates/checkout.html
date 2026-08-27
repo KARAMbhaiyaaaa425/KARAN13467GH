@@ -158,6 +158,12 @@
 <body>
 
     <div class="checkout-container text-center">
+        <!-- Cancel Button -->
+        <div class="text-left mb-4">
+            <button id="cancelBtn" class="text-gray-400 hover:text-white text-sm font-bold flex items-center gap-2 transition-colors">
+                <i class="fas fa-arrow-left"></i> Cancel & Go Back
+            </button>
+        </div>
         <!-- Logo Header -->
         <div class="mb-6 flex flex-col justify-center items-center gap-2">
             <h1 class="text-3xl font-black tracking-wider" style="{% if theme=='cyberpunk' %}color:#0f0; text-shadow:0 0 10px #0f0;{% elif theme=='retro' %}color:#000;{% endif %}">{{ display_name }}</h1>

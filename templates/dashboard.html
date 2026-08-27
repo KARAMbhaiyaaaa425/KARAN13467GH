@@ -283,10 +283,18 @@ body{
                     <tbody>
                         {% for t in txns %}
                         <tr>
-                            <td class="gp-mono">{{ t[0] }}</td>
-                            <td class="gp-mono" style="color:var(--mint); font-weight:bold;">₹{{ t[1] }}</td>
-                            <td class="gp-mono text-muted">{{ t[2] }}</td>
-                            <td><span class="badge bg-success">Success</span></td>
+                            <td class="gp-mono">{{ t[0][:15] }}...</td>
+                            <td class="gp-mono" style="color:var(--mint); font-weight:bold;">₹{{ "%.2f"|format(t[1]) }}</td>
+                            <td class="gp-mono text-muted">{{ t[2] if t[2] else 'None' }}</td>
+                            <td>
+                                {% if t[4] == 'completed' %}
+                                <span class="badge bg-success-subtle text-success border border-success px-2 py-1">Success</span>
+                                {% elif t[4] == 'pending' %}
+                                <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-1">Pending</span>
+                                {% else %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger px-2 py-1">Failed</span>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% else %}
                         <tr><td colspan="4" class="text-center text-muted">No transactions yet.</td></tr>

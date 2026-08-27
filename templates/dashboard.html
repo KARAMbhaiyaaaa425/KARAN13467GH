@@ -517,7 +517,7 @@ body{
 
                         <div class="d-flex align-items-center gap-3 mb-4 p-2 rounded" style="background: var(--card); border: 1px solid var(--border);">
                             <span class="badge" style="background: var(--paper); border: 1px solid var(--mint); color: var(--mint); letter-spacing: 1px;">POST</span>
-                            <code style="color: var(--ink); font-size: 13px;">https://yourwebsite.com/api/create-order</code>
+                            <code style="color: var(--ink); font-size: 13px;">{{ request.host_url.rstrip('/') }}/api/create-order</code>
                         </div>
                         <p class="text-muted mb-4" style="font-size: 13px;">Initiates a payment order and returns a secure payment URL to redirect your customer.</p>
 
@@ -533,7 +533,7 @@ body{
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"amount"</span>: <span style="color: var(--paper);">"100.00"</span>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"order_id"</span>: <span style="color: var(--paper);">"ORD12345"</span>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"customer_name"</span>: <span style="color: var(--paper);">"Raushan Kumar"</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"callback_url"</span>: <span style="color: var(--paper);">"https://yourwebsite.com/callback"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"callback_url"</span>: <span style="color: var(--paper);">"{{ request.host_url.rstrip('/') }}/callback"</span><br>
 }
                         </div>
 
@@ -541,7 +541,7 @@ body{
                         <div class="p-3 rounded" style="background: var(--ink); color: #a4b3ac; font-family: monospace; font-size: 12px; overflow-x: auto;">
 {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"status"</span>: <span style="color: var(--paper);">"success"</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"payment_url"</span>: <span style="color: var(--paper);">"https://yourwebsite.com/pay/LRd7jTF0V2sFyhMyOBzbJLL1S"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"payment_url"</span>: <span style="color: var(--paper);">"{{ request.host_url.rstrip('/') }}/pay/LRd7jTF0V2sFyhMyOBzbJLL1S"</span><br>
 }
                         </div>
 

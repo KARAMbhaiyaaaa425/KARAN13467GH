@@ -413,7 +413,7 @@ def checkout_page_by_id(txn_id):
                            qr_url=f"/qr/{txn_id}",
                            upi_id=upi_id,
                            display_name=display_name or 'Merchant',
-                           theme=theme or 'default',
+                           theme=theme or 'premium',
                            status=status,
                            callback_url=callback_url)
 

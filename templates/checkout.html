@@ -240,6 +240,12 @@
                 clearInterval(timerInterval);
                 timerEl.textContent = "EXPIRED";
                 timerEl.classList.replace('text-[#faae40]', 'text-red-500');
+                // Automatically mark as failed in backend
+                fetch('/api/cancel_txn', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({txn_id: document.getElementById('txn_id').value})
+                });
             }
         }, 1000);
 
@@ -289,6 +295,24 @@
             document.getElementById('mobileIntentContainer').classList.remove('hidden');
             document.getElementById('mobileIntentContainer').classList.add('flex');
         }
+
+        
+        // Cancel Transaction Logic
+        async function cancelTxn() {
+            const btn = document.getElementById('cancelBtn');
+            if(btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelling...';
+            try {
+                await fetch('/api/cancel_txn', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({txn_id: document.getElementById('txn_id').value})
+                });
+            } catch(e) {}
+            window.location.href = document.getElementById('callback_url').value;
+        }
+
+        const cBtn = document.getElementById('cancelBtn');
+        if(cBtn) cBtn.addEventListener('click', cancelTxn);
 
         // Submit UTR Logic
         document.getElementById('submitUtrBtn').addEventListener('click', async () => {

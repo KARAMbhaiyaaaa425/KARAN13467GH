@@ -8,9 +8,12 @@ import sqlite3
 import imaplib
 import threading
 from datetime import datetime, timedelta
+from functools import wraps
 
+import requests
 import qrcode
-from flask import Flask, request, jsonify, send_file, render_template, redirect, url_for
+from flask import Flask, request, jsonify, send_file, render_template, redirect, url_for, session, flash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # ============================================
 # SERVER CONFIGURATION
@@ -19,9 +22,7 @@ DB_FILE = "fampay_gateway.db"
 PORT = int(os.environ.get("PORT", 5000))
 
 app = Flask(__name__)
-
-# Personal Gateway - Only One Admin User
-ADMIN_USER_ID = 1
+app.secret_key = os.environ.get("SECRET_KEY", "fampay-super-secret-key")
 
 # ============================================
 # DATABASE INITIALIZATION
@@ -32,7 +33,9 @@ def init_db():
     
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
-            user_id INTEGER PRIMARY KEY,
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password_hash TEXT,
             upi_id TEXT,
             gmail TEXT,
             app_pass TEXT,
@@ -42,11 +45,14 @@ def init_db():
             theme TEXT DEFAULT 'default'
         )
     ''')
-    try:
-        c.execute("ALTER TABLE users ADD COLUMN display_name TEXT DEFAULT 'Merchant'")
-        c.execute("ALTER TABLE users ADD COLUMN theme TEXT DEFAULT 'default'")
-    except:
-        pass
+    try: c.execute("ALTER TABLE users ADD COLUMN display_name TEXT DEFAULT 'Merchant'")
+    except: pass
+    try: c.execute("ALTER TABLE users ADD COLUMN theme TEXT DEFAULT 'default'")
+    except: pass
+    try: c.execute("ALTER TABLE users ADD COLUMN username TEXT UNIQUE")
+    except: pass
+    try: c.execute("ALTER TABLE users ADD COLUMN password_hash TEXT")
+    except: pass
     
     c.execute('''
         CREATE TABLE IF NOT EXISTS transactions (
@@ -57,59 +63,121 @@ def init_db():
             status TEXT DEFAULT 'pending',
             created_at DATETIME,
             expires_at DATETIME,
-            paid_at DATETIME
+            paid_at DATETIME,
+            merchant_order_id TEXT,
+            customer_name TEXT,
+            callback_url TEXT
         )
     ''')
+    try: c.execute("ALTER TABLE transactions ADD COLUMN merchant_order_id TEXT")
+    except: pass
+    try: c.execute("ALTER TABLE transactions ADD COLUMN customer_name TEXT")
+    except: pass
+    try: c.execute("ALTER TABLE transactions ADD COLUMN callback_url TEXT")
+    except: pass
     
     conn.commit()
     conn.close()
 
-def get_admin_user():
+def get_user(user_id):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("SELECT upi_id, gmail, app_pass, api_key, display_name, theme FROM users WHERE user_id = ?", (ADMIN_USER_ID,))
+    c.execute("SELECT upi_id, gmail, app_pass, api_key, display_name, theme, username FROM users WHERE user_id = ?", (user_id,))
     row = c.fetchone()
     conn.close()
     if row:
-        return {"upi_id": row[0], "gmail": row[1], "app_pass": row[2], "api_key": row[3], "display_name": row[4] or 'Merchant', "theme": row[5] or 'default'}
+        return {"upi_id": row[0], "gmail": row[1], "app_pass": row[2], "api_key": row[3], "display_name": row[4] or 'Merchant', "theme": row[5] or 'default', "username": row[6]}
     return None
 
-def save_admin_user(upi_id, gmail, app_pass):
+def save_user_account(user_id, upi_id, gmail, app_pass):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("SELECT api_key FROM users WHERE user_id = ?", (ADMIN_USER_ID,))
+    c.execute("SELECT api_key FROM users WHERE user_id = ?", (user_id,))
     row = c.fetchone()
-    if row:
-        api_key = row[0]
-        c.execute('''UPDATE users SET upi_id=?, gmail=?, app_pass=? WHERE user_id=?''', 
-                  (upi_id, gmail, app_pass, ADMIN_USER_ID))
-    else:
-        api_key = "FAM_" + uuid.uuid4().hex + uuid.uuid4().hex[:12]
-        c.execute('''INSERT INTO users (user_id, upi_id, gmail, app_pass, api_key, created_at)
-                     VALUES (?, ?, ?, ?, ?, ?)''', 
-                  (ADMIN_USER_ID, upi_id, gmail, app_pass, api_key, datetime.now().isoformat()))
+    api_key = row[0] if row and row[0] else "FAM_" + uuid.uuid4().hex + uuid.uuid4().hex[:12]
+    c.execute('''UPDATE users SET upi_id=?, gmail=?, app_pass=?, api_key=? WHERE user_id=?''', 
+              (upi_id, gmail, app_pass, api_key, user_id))
     conn.commit()
     conn.close()
     return api_key
+
+# ============================================
+# AUTHENTICATION
+# ============================================
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        conn = sqlite3.connect(DB_FILE)
+        c = conn.cursor()
+        c.execute("SELECT user_id, password_hash FROM users WHERE username=?", (username,))
+        row = c.fetchone()
+        conn.close()
+        
+        if row and check_password_hash(row[1], password):
+            session['user_id'] = row[0]
+            return redirect(url_for('dashboard'))
+        else:
+            return render_template('login.html', error='Invalid credentials')
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if not username or not password:
+            return render_template('register.html', error='Username and password required')
+            
+        password_hash = generate_password_hash(password)
+        conn = sqlite3.connect(DB_FILE)
+        c = conn.cursor()
+        try:
+            c.execute("INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, ?)", (username, password_hash, datetime.now().isoformat()))
+            user_id = c.lastrowid
+            conn.commit()
+            session['user_id'] = user_id
+            return redirect(url_for('dashboard'))
+        except sqlite3.IntegrityError:
+            return render_template('register.html', error='Username already exists')
+        finally:
+            conn.close()
+    return render_template('register.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    return redirect(url_for('login'))
 
 # ============================================
 # FLASK WEB INTERFACE (DASHBOARD)
 # ============================================
 
 @app.route('/')
+@login_required
 def dashboard():
+    user_id = session['user_id']
     error = request.args.get('error')
     success = request.args.get('success')
-    user_info = get_admin_user()
+    user_info = get_user(user_id)
     
     # Get stats
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("SELECT COUNT(*), SUM(amount) FROM transactions WHERE user_id=? AND status='completed'", (ADMIN_USER_ID,))
+    c.execute("SELECT COUNT(*), SUM(amount) FROM transactions WHERE user_id=? AND status='completed'", (user_id,))
     total_count, total_amount = c.fetchone()
     
     # Recent 10 transactions
-    c.execute("SELECT txn_id, amount, utr, paid_at FROM transactions WHERE user_id=? AND status='completed' ORDER BY paid_at DESC LIMIT 10", (ADMIN_USER_ID,))
+    c.execute("SELECT txn_id, amount, utr, paid_at FROM transactions WHERE user_id=? AND status='completed' ORDER BY paid_at DESC LIMIT 10", (user_id,))
     txns = c.fetchall()
     conn.close()
     
@@ -122,7 +190,9 @@ def dashboard():
                            success=success)
 
 @app.route('/save_account', methods=['POST'])
+@login_required
 def save_account():
+    user_id = session['user_id']
     upi_id = request.form.get('upi_id')
     gmail = request.form.get('gmail')
     app_pass = request.form.get('app_pass')
@@ -143,46 +213,147 @@ def save_account():
         except Exception as e:
             return redirect(url_for('dashboard', error='Connection Failed! Please check your Gmail App Password.'))
             
-        save_admin_user(upi_id, gmail, app_pass)
+        save_user_account(user_id, upi_id, gmail, app_pass)
         return redirect(url_for('dashboard', success='Account Connected & Verified Perfectly!'))
         
     return redirect(url_for('dashboard'))
 
 
 @app.route('/save_customize', methods=['POST'])
+@login_required
 def save_customize():
+    user_id = session['user_id']
     display_name = request.form.get('display_name', 'Merchant')
     theme = request.form.get('theme', 'default')
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("UPDATE users SET display_name=?, theme=? WHERE user_id=?", (display_name, theme, ADMIN_USER_ID))
+    c.execute("UPDATE users SET display_name=?, theme=? WHERE user_id=?", (display_name, theme, user_id))
     conn.commit()
     conn.close()
     return redirect(url_for('dashboard', success='Customization Saved!'))
 
 @app.route('/delete_account')
+@login_required
 def delete_account():
+    user_id = session['user_id']
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("DELETE FROM users WHERE user_id=?", (ADMIN_USER_ID,))
+    # Just clear the payment details
+    c.execute("UPDATE users SET upi_id=NULL, gmail=NULL, app_pass=NULL WHERE user_id=?", (user_id,))
     conn.commit()
     conn.close()
     return redirect(url_for('dashboard', success='Account Connection Deleted!'))
 
 @app.route('/generate_link', methods=['POST'])
+@login_required
 def generate_link():
+    user_id = session['user_id']
     amount = request.form.get('amount')
-    user_info = get_admin_user()
-    if user_info and amount:
+    user_info = get_user(user_id)
+    if user_info and user_info.get('api_key') and amount:
         return redirect(f"/pay?api_key={user_info['api_key']}&amount={amount}")
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('dashboard', error='Please connect account first'))
 
 # ============================================
 # PAYMENT GATEWAY API & CHECKOUT
 # ============================================
 
+@app.route('/api/create-order', methods=['POST'])
+def api_create_order():
+    api_key = request.headers.get('X-Fam-Key') or request.json.get('api_key')
+    if not api_key:
+        return jsonify({"status": "error", "message": "Missing X-Fam-Key header"}), 401
+        
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT user_id FROM users WHERE api_key = ?", (api_key,))
+    user = c.fetchone()
+    if not user:
+        conn.close()
+        return jsonify({"status": "error", "message": "Invalid API Key"}), 401
+    
+    user_id = user[0]
+    data = request.json or {}
+    
+    amount_raw = data.get('amount')
+    merchant_order_id = data.get('order_id')
+    customer_name = data.get('customer_name')
+    callback_url = data.get('callback_url')
+    
+    if not amount_raw:
+        return jsonify({"status": "error", "message": "Missing amount"}), 400
+        
+    try:
+        amount = float(amount_raw)
+        if amount <= 0: raise ValueError
+        # Dynamic Amount Logic
+        if amount == int(amount):
+            amount += round(random.uniform(0.01, 0.99), 2)
+        amount = round(amount, 2)
+    except ValueError:
+        return jsonify({"status": "error", "message": "Invalid amount"}), 400
+
+    txn_id = f"FAM{int(time.time())}{uuid.uuid4().hex[:4].upper()}"
+    now = datetime.now()
+    expires = now + timedelta(minutes=5)
+
+    c.execute('''INSERT INTO transactions (txn_id, user_id, amount, status, created_at, expires_at, merchant_order_id, customer_name, callback_url)
+                 VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?)''', 
+              (txn_id, user_id, amount, now.isoformat(), expires.isoformat(), merchant_order_id, customer_name, callback_url))
+    conn.commit()
+    conn.close()
+    
+    payment_url = f"{request.host_url.rstrip('/')}/pay/{txn_id}"
+    
+    return jsonify({
+        "status": "success",
+        "payment_url": payment_url,
+        "txn_id": txn_id
+    })
+
+@app.route('/pay/<txn_id>', methods=['GET'])
+def checkout_page_by_id(txn_id):
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT user_id, amount, status, callback_url FROM transactions WHERE txn_id = ?", (txn_id,))
+    txn = c.fetchone()
+    
+    if not txn:
+        conn.close()
+        return "<h1>Error: Transaction not found</h1>", 404
+        
+    user_id, amount, status, callback_url = txn
+    
+    c.execute("SELECT upi_id, display_name, theme, api_key FROM users WHERE user_id = ?", (user_id,))
+    user = c.fetchone()
+    conn.close()
+    
+    if not user or not user[0]:
+        return "<h1>Error: Merchant account not configured properly</h1>", 400
+        
+    upi_id, display_name, theme, api_key = user
+    
+    payment_url = f"upi://pay?pa={upi_id}&pn=Merchant&tr={txn_id}&am={amount}&cu=INR"
+    
+    qr = qrcode.make(payment_url)
+    qr_path = f"static/qr_{txn_id}.png"
+    os.makedirs("static", exist_ok=True)
+    qr.save(qr_path)
+    
+    return render_template('checkout.html', 
+                           amount=f"{amount:.2f}",
+                           txn_id=txn_id,
+                           api_key=api_key,
+                           payment_url=payment_url,
+                           qr_url=f"/qr/{txn_id}",
+                           upi_id=upi_id,
+                           display_name=display_name or 'Merchant',
+                           theme=theme or 'default',
+                           status=status,
+                           callback_url=callback_url)
+
 @app.route('/pay', methods=['GET'])
-def checkout_page():
+def checkout_page_legacy():
     api_key = request.args.get('api_key')
     amount_raw = request.args.get('amount')
 
@@ -194,8 +365,8 @@ def checkout_page():
     c.execute("SELECT user_id, upi_id, display_name, theme FROM users WHERE api_key = ?", (api_key,))
     user = c.fetchone()
     
-    if not user:
-        return "<h1>Error: Invalid API Key</h1>", 401
+    if not user or not user[1]:
+        return "<h1>Error: Invalid API Key or Not Configured</h1>", 401
     
     user_id, upi_id, display_name, theme = user
 
@@ -219,22 +390,8 @@ def checkout_page():
     conn.commit()
     conn.close()
 
-    payment_url = f"upi://pay?pa={upi_id}&pn=Merchant&tr={txn_id}&am={amount}&cu=INR"
-    
-    qr = qrcode.make(payment_url)
-    qr_path = f"static/qr_{txn_id}.png"
-    os.makedirs("static", exist_ok=True)
-    qr.save(qr_path)
+    return redirect(url_for('checkout_page_by_id', txn_id=txn_id))
 
-    return render_template('checkout.html', 
-                           amount=f"{amount:.2f}",
-                           txn_id=txn_id,
-                           api_key=api_key,
-                           payment_url=payment_url,
-                           qr_url=f"/qr/{txn_id}",
-                           upi_id=upi_id,
-                           display_name=display_name or 'Merchant',
-                           theme=theme or 'default')
 
 @app.route('/qr/<txn_id>')
 def serve_qr(txn_id):
@@ -266,13 +423,18 @@ def verify_api():
 
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("SELECT user_id FROM users WHERE api_key = ?", (api_key,))
-    user = c.fetchone()
     
-    if not user:
-        return jsonify({"status": "error", "message": "Invalid API Key"}), 401
-
-    c.execute("SELECT status, amount, utr, paid_at FROM transactions WHERE txn_id = ? AND user_id = ?", (txn_id, user[0]))
+    if api_key:
+        c.execute("SELECT user_id FROM users WHERE api_key = ?", (api_key,))
+        user = c.fetchone()
+        if not user:
+            conn.close()
+            return jsonify({"status": "error", "message": "Invalid API Key"}), 401
+        c.execute("SELECT status, amount, utr, paid_at FROM transactions WHERE txn_id = ? AND user_id = ?", (txn_id, user[0]))
+    else:
+        # Allow checking by txn_id alone for the checkout page polling
+        c.execute("SELECT status, amount, utr, paid_at FROM transactions WHERE txn_id = ?", (txn_id,))
+        
     row = c.fetchone()
     conn.close()
 
@@ -291,14 +453,28 @@ def verify_api():
     })
 
 # ============================================
-# GMAIL BACKGROUND READER
+# GMAIL BACKGROUND READER & WEBHOOK DISPATCHER
 # ============================================
+
+def send_webhook(callback_url, txn_id, merchant_order_id, amount, utr):
+    try:
+        payload = {
+            "status": "success",
+            "txn_id": txn_id,
+            "merchant_order_id": merchant_order_id,
+            "amount": amount,
+            "utr": utr
+        }
+        requests.post(callback_url, json=payload, timeout=5)
+    except Exception as e:
+        print(f"Webhook failed for {txn_id}: {e}")
+
 def monitor_gmails():
     while True:
         try:
             conn = sqlite3.connect(DB_FILE)
             c = conn.cursor()
-            c.execute("SELECT user_id, gmail, app_pass FROM users")
+            c.execute("SELECT user_id, gmail, app_pass FROM users WHERE gmail IS NOT NULL AND app_pass IS NOT NULL")
             users = c.fetchall()
             conn.close()
 
@@ -340,21 +516,32 @@ def monitor_gmails():
                                 now_str = datetime.now().isoformat()
                                 
                                 # Check if user manually submitted this UTR
-                                c_db.execute("SELECT txn_id, status FROM transactions WHERE utr=?", (utr,))
+                                c_db.execute("SELECT txn_id, status, callback_url, merchant_order_id FROM transactions WHERE utr=?", (utr,))
                                 row = c_db.fetchone()
+                                txn_completed_now = False
+                                
                                 if row:
                                     if row[1] == 'pending':
                                         c_db.execute("UPDATE transactions SET status='completed', paid_at=? WHERE txn_id=?", (now_str, row[0]))
                                         conn_db.commit()
+                                        txn_completed_now = True
+                                        completed_txn = row
                                 else:
                                     # Amount-based fallback (if UTR not submitted by user yet)
-                                    c_db.execute("SELECT txn_id FROM transactions WHERE user_id=? AND status='pending' AND amount=? AND (utr IS NULL OR utr='') ORDER BY created_at ASC LIMIT 1", (user_id, amount))
+                                    c_db.execute("SELECT txn_id, callback_url, merchant_order_id FROM transactions WHERE user_id=? AND status='pending' AND amount=? AND (utr IS NULL OR utr='') ORDER BY created_at ASC LIMIT 1", (user_id, amount))
                                     pending_txn = c_db.fetchone()
                                     if pending_txn:
                                         c_db.execute("UPDATE transactions SET status='completed', utr=?, paid_at=? WHERE txn_id=?", (utr, now_str, pending_txn[0]))
                                         conn_db.commit()
+                                        txn_completed_now = True
+                                        completed_txn = (pending_txn[0], 'pending', pending_txn[1], pending_txn[2])
                                         
                                 conn_db.close()
+                                
+                                # Fire webhook if completed now
+                                if txn_completed_now and completed_txn[2]:
+                                    threading.Thread(target=send_webhook, args=(completed_txn[2], completed_txn[0], completed_txn[3], amount, utr)).start()
+                                    
                     mail.close()
                     mail.logout()
                 except Exception:

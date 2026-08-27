@@ -314,7 +314,12 @@
                     body: JSON.stringify({txn_id: document.getElementById('txn_id').value})
                 });
             } catch(e) {}
-            window.location.href = document.getElementById('callback_url').value;
+            const cb = document.getElementById('callback_url').value;
+            if (cb && cb !== 'None' && cb.trim() !== '') {
+                window.location.href = cb;
+            } else {
+                document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;flex-direction:column;color:white;font-family:sans-serif;"><h1 style="color:red;font-size:2rem;margin-bottom:1rem;">Payment Cancelled</h1><p>You can close this window.</p></div>';
+            }
         }
 
         const cBtn = document.getElementById('cancelBtn');

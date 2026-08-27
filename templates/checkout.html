@@ -206,6 +206,20 @@
         <input type="hidden" id="api_key" value="{{ api_key }}">
         <input type="hidden" id="callback_url" value="{{ callback_url }}">
 
+                <!-- Custom Error Modal -->
+        <div class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden" id="errorModal">
+            <div class="bg-gray-900 border-2 border-red-500/50 rounded-2xl p-6 w-11/12 max-w-sm text-center shadow-2xl shadow-red-500/20 transform transition-all duration-200 scale-95 opacity-0" id="errorModalContent">
+                <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/30">
+                    <i class="fas fa-exclamation-triangle text-3xl text-red-500"></i>
+                </div>
+                <h3 class="text-xl font-black text-white mb-2">Payment Not Found</h3>
+                <p class="text-sm text-gray-400 mb-6">We couldn't verify your payment yet. It might take a few moments for the bank to process. If money was deducted, please wait and try again.</p>
+                <button onclick="closeErrorModal()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-colors">
+                    Try Again
+                </button>
+            </div>
+        </div>
+        
         <!-- Success Screen -->
         <div class="success-overlay" id="successScreen">
             <i class="fas fa-check-circle check-icon"></i>
@@ -249,41 +263,70 @@
         const txnId = document.getElementById('txn_id').value;
         const apiKey = document.getElementById('api_key').value;
 
-        // Manual Verify Button Logic
+        function showErrorModal() {
+            const modal = document.getElementById('errorModal');
+            const content = document.getElementById('errorModalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeErrorModal() {
+            const modal = document.getElementById('errorModal');
+            const content = document.getElementById('errorModalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        // Manual Verify Button Logic (15 sec dynamic polling)
         document.getElementById('verifyBtn').addEventListener('click', async () => {
             const btn = document.getElementById('verifyBtn');
             const originalHTML = btn.innerHTML;
             btn.innerHTML = 'Wait <i class="fas fa-spinner fa-spin"></i>';
             btn.disabled = true;
             
-            // Add a fake delay for better UX
-            await new Promise(r => setTimeout(r, 2000));
+            let attempts = 0;
+            const maxAttempts = 10; // 10 attempts * 1.5s = 15 seconds
             
-            try {
-                const res = await fetch(`/api/verify?api_key=${apiKey}&txn_id=${txnId}`);
-                const data = await res.json();
-                
-                if (data.status === 'completed') {
-                    clearInterval(checkInterval);
-                    clearInterval(timerInterval);
-                    document.getElementById('success_utr').textContent = data.data.utr || 'Auto-Verified';
-                    document.getElementById('successScreen').classList.add('active');
+            const verifyLoop = setInterval(async () => {
+                attempts++;
+                try {
+                    const res = await fetch(`/api/verify?api_key=${apiKey}&txn_id=${txnId}`);
+                    const data = await res.json();
                     
-                    const callbackUrl = document.getElementById('callback_url').value;
-                    if (callbackUrl && callbackUrl !== 'None' && callbackUrl !== '') {
-                        setTimeout(() => {
-                            window.location.href = callbackUrl;
-                        }, 2500);
+                    if (data.status === 'completed') {
+                        clearInterval(verifyLoop);
+                        clearInterval(checkInterval);
+                        clearInterval(timerInterval);
+                        document.getElementById('success_utr').textContent = data.data.utr || 'Auto-Verified';
+                        document.getElementById('successScreen').classList.add('active');
+                        
+                        const callbackUrl = document.getElementById('callback_url').value;
+                        if (callbackUrl && callbackUrl !== 'None' && callbackUrl !== '') {
+                            setTimeout(() => {
+                                window.location.href = callbackUrl;
+                            }, 2500);
+                        }
+                    } else if (attempts >= maxAttempts) {
+                        clearInterval(verifyLoop);
+                        btn.innerHTML = originalHTML;
+                        btn.disabled = false;
+                        showErrorModal();
                     }
-                } else {
-                    alert('Payment not received yet. Check if money was deducted and try again.');
+                } catch (e) {
+                    if (attempts >= maxAttempts) {
+                        clearInterval(verifyLoop);
+                        btn.innerHTML = originalHTML;
+                        btn.disabled = false;
+                        showErrorModal();
+                    }
                 }
-            } catch (e) {
-                alert('Error verifying payment. Try again.');
-            }
-            
-            btn.innerHTML = originalHTML;
-            btn.disabled = false;
+            }, 1500);
         });
 
         

@@ -23,6 +23,9 @@
             {% elif theme == 'retro' %}
             background-color: #fde047;
             color: #000;
+            {% elif theme == 'premium' %}
+            background: linear-gradient(135deg, #0f172a, #1e1b4b, #312e81);
+            color: white;
             {% else %}
             background-color: #0c0e14;
             color: white;
@@ -32,7 +35,7 @@
         .checkout-container {
             width: 100%;
             max-width: 400px;
-            padding: 2rem;
+            padding: 1.25rem; width: 95%; max-width: 420px; box-sizing: border-box;
             position: relative;
             overflow: hidden;
             
@@ -46,6 +49,13 @@
             border: 4px solid #000;
             border-radius: 16px;
             box-shadow: 8px 8px 0px #000;
+            {% elif theme == 'premium' %}
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 28px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
             {% else %}
             background: #12141c;
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -57,8 +67,10 @@
         .qr-box {
             background: white;
             padding: 10px;
-            width: 220px;
-            height: 220px;
+            width: 100%;
+            max-width: 220px;
+            aspect-ratio: 1/1;
+            height: auto;
             margin: 0 auto;
             position: relative;
             
@@ -70,6 +82,12 @@
             border: 4px solid #000;
             border-radius: 12px;
             box-shadow: 4px 4px 0px #000;
+            {% elif theme == 'premium' %}
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
             {% else %}
             border-radius: 16px;
             box-shadow: 0 0 30px rgba(250, 174, 64, 0.2);
@@ -97,6 +115,11 @@
             color: #fff;
             border-radius: 8px;
             border: 2px solid #000;
+            {% elif theme == 'premium' %}
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+            color: white;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             {% else %}
             background: linear-gradient(45deg, #faae40, #ff8c00);
             color: #000;
@@ -110,6 +133,8 @@
             box-shadow: 0 0 15px #0f0, inset 0 0 10px #0f0;
             {% elif theme == 'retro' %}
             box-shadow: 4px 4px 0px #000; background: #fff; color:#000;
+            {% elif theme == 'premium' %}
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.5);
             {% else %}
             box-shadow: 0 10px 20px rgba(250, 174, 64, 0.4);
             {% endif %}
@@ -161,7 +186,7 @@
         <!-- Cancel Button -->
         <div class="text-left mb-4">
             <button id="cancelBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors w-full justify-center border-2 border-red-500 shadow-lg shadow-red-500/50">
-                <i class="fas fa-arrow-left"></i> CANCEL PAYMENT & GO BACK
+                <i class="fas fa-arrow-left"></i> CANCEL & GO BACK
             </button>
         </div>
         <!-- Logo Header -->
@@ -173,7 +198,7 @@
         <div class="font-bold text-sm mb-6 opacity-70">{{ upi_id }}</div>
 
         <!-- Amount Box -->
-        <div class="{% if theme=='retro' %}bg-white border-4 border-black shadow-[4px_4px_0px_black] rounded-xl{% elif theme=='cyberpunk' %}border border-[#0f0] bg-black/50 rounded-none shadow-[0_0_10px_#0f0]{% else %}bg-black/50 border border-white/10 rounded-2xl{% endif %} py-4 mb-6">
+        <div class="{% if theme=='retro' %}bg-white border-4 border-black shadow-[4px_4px_0px_black] rounded-xl{% elif theme=='cyberpunk' %}border border-[#0f0] bg-black/50 rounded-none shadow-[0_0_10px_#0f0]{% elif theme=='premium' %}bg-white/10 border border-white/20 rounded-3xl backdrop-blur-md shadow-inner{% else %}bg-black/50 border border-white/10 rounded-2xl{% endif %} py-4 mb-6">
             <div class="{% if theme=='retro' %}text-gray-600{% elif theme=='cyberpunk' %}text-[#0f0]{% else %}text-gray-500{% endif %} text-xs font-bold tracking-widest uppercase mb-1">Amount to Pay</div>
             <div class="text-4xl font-black {% if theme=='retro' %}text-black{% elif theme=='cyberpunk' %}text-[#0f0] drop-shadow-[0_0_5px_#0f0]{% else %}text-white{% endif %}">₹{{ amount }}</div>
         </div>
@@ -186,7 +211,7 @@
         <p class="text-xs text-gray-400 mb-6">Scan QR or click the button below to pay via FamPay or any UPI App.</p>
 
         <!-- Direct Pay Button for Mobile -->
-        <div class="flex gap-2 mb-6">
+        <div class="flex flex-col sm:flex-row gap-3 mb-6">
             <a href="{{ payment_url }}" class="btn-pay block w-full py-4 uppercase tracking-widest text-sm flex items-center justify-center gap-2" style="flex: 1;">
                 Pay <i class="fas fa-bolt"></i>
             </a>

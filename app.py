@@ -568,7 +568,8 @@ def monitor_gmails():
                     status, messages = mail.search(None, f'(SINCE {since_date})')
 
                     if status == 'OK':
-                        for num in messages[0].split():
+                        # ONLY fetch the last 10 emails to prevent extremely slow looping
+                        for num in messages[0].split()[-10:]:
                             status, data = mail.fetch(num, '(RFC822)')
                             if status != 'OK': continue
 

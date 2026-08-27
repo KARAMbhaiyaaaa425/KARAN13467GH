@@ -283,6 +283,31 @@ def generate_link():
 # PAYMENT GATEWAY API & CHECKOUT
 # ============================================
 
+
+@app.route('/export/transactions')
+def export_transactions():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+        
+    user_id = session['user_id']
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT txn_id, amount, utr, status, created_at, paid_at FROM transactions WHERE user_id=? ORDER BY created_at DESC", (user_id,))
+    rows = c.fetchall()
+    conn.close()
+    
+    import csv
+    from io import StringIO
+    from flask import Response
+    
+    si = StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['Transaction ID', 'Amount (INR)', 'UTR', 'Status', 'Created At', 'Paid At'])
+    cw.writerows(rows)
+    
+    output = si.getvalue()
+    return Response(output, mimetype="text/csv", headers={"Content-disposition": "attachment; filename=transactions.csv"})
+
 @app.route('/api/create-order', methods=['POST'])
 def api_create_order():
     api_key = request.headers.get('X-Fam-Key') or request.json.get('api_key')

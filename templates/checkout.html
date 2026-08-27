@@ -208,6 +208,7 @@
         <!-- Hidden inputs for JS polling -->
         <input type="hidden" id="txn_id" value="{{ txn_id }}">
         <input type="hidden" id="api_key" value="{{ api_key }}">
+        <input type="hidden" id="callback_url" value="{{ callback_url }}">
 
         <!-- Success Screen -->
         <div class="success-overlay" id="successScreen">
@@ -262,6 +263,13 @@
                     clearInterval(timerInterval);
                     document.getElementById('success_utr').textContent = data.data.utr || 'Auto-Verified';
                     document.getElementById('successScreen').classList.add('active');
+                    
+                    const callbackUrl = document.getElementById('callback_url').value;
+                    if (callbackUrl && callbackUrl !== 'None' && callbackUrl !== '') {
+                        setTimeout(() => {
+                            window.location.href = callbackUrl;
+                        }, 2500);
+                    }
                 } else {
                     alert('Payment not received yet. Check if money was deducted and try again.');
                 }
@@ -320,6 +328,13 @@
                     
                     document.getElementById('success_utr').textContent = data.data.utr || 'Auto-Verified';
                     document.getElementById('successScreen').classList.add('active');
+                    
+                    const callbackUrl = document.getElementById('callback_url').value;
+                    if (callbackUrl && callbackUrl !== 'None' && callbackUrl !== '') {
+                        setTimeout(() => {
+                            window.location.href = callbackUrl;
+                        }, 2500);
+                    }
                 }
             } catch (e) {
                 console.error("Polling error", e);

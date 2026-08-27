@@ -19,18 +19,54 @@
         {% if error %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endif %}
-        <form method="POST" action="/register">
+        <form method="POST" action="/register" id="regForm">
             <div class="mb-3">
                 <label class="form-label fw-bold">Username</label>
                 <input type="text" name="username" class="form-control" required>
             </div>
-            <div class="mb-4">
+            <div class="mb-3">
                 <label class="form-label fw-bold">Password</label>
-                <input type="password" name="password" class="form-control" required>
+                <!-- Pattern forces 1 upper, 1 lower, minimum 8 chars -->
+                <input type="password" name="password" class="form-control" 
+                       pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" 
+                       title="Must contain at least one number, one uppercase and lowercase letter, and at least 8 or more characters" required>
+                <small class="text-muted" style="font-size: 11px;">Min 8 chars, 1 uppercase, 1 lowercase.</small>
             </div>
+            
+            <div class="mb-4">
+                <label class="form-label fw-bold">Security Check</label>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <div class="p-2 bg-light border rounded text-center fw-bold" style="letter-spacing: 2px; width: 100px; font-size: 18px; user-select: none; background: repeating-linear-gradient(45deg, #f0f0f0, #f0f0f0 10px, #e8e8e8 10px, #e8e8e8 20px);" id="captchaProblem"></div>
+                    <input type="text" class="form-control" id="captchaInput" placeholder="Answer?" required>
+                </div>
+            </div>
+            
             <button type="submit" class="btn btn-gold">Register</button>
         </form>
         <p class="text-center mt-3 text-muted">Already have an account? <a href="/login" style="color: #C9A227;">Login here</a></p>
     </div>
+
+    <script>
+        // Simple Math Captcha Generator
+        let num1 = Math.floor(Math.random() * 10) + 1;
+        let num2 = Math.floor(Math.random() * 10) + 1;
+        let correctAns = num1 + num2;
+        
+        document.getElementById('captchaProblem').innerText = `${num1} + ${num2}`;
+        
+        document.getElementById('regForm').addEventListener('submit', function(e) {
+            let userAns = parseInt(document.getElementById('captchaInput').value);
+            if(userAns !== correctAns) {
+                e.preventDefault();
+                alert('Captcha is incorrect! Please try again.');
+                // Refresh Captcha
+                num1 = Math.floor(Math.random() * 10) + 1;
+                num2 = Math.floor(Math.random() * 10) + 1;
+                correctAns = num1 + num2;
+                document.getElementById('captchaProblem').innerText = `${num1} + ${num2}`;
+                document.getElementById('captchaInput').value = '';
+            }
+        });
+    </script>
 </body>
 </html>

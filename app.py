@@ -451,6 +451,20 @@ def serve_qr(txn_id):
     return jsonify({"error": "QR code not found"}), 404
 
 
+
+@app.route('/api/cancel_txn', methods=['POST'])
+def cancel_txn():
+    txn_id = request.json.get('txn_id')
+    if not txn_id:
+        return jsonify({'status': 'error'}), 400
+        
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("UPDATE transactions SET status='failed' WHERE txn_id=? AND status='pending'", (txn_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
 @app.route('/api/submit_utr', methods=['POST'])
 def submit_utr():
     txn_id = request.json.get('txn_id')

@@ -627,7 +627,7 @@ def monitor_gmails():
                     pass
         except Exception:
             pass
-        time.sleep(10)
+        time.sleep(3)
 
 @app.route('/regenerate_key', methods=['POST'])
 def regenerate_key():

@@ -15,6 +15,31 @@ import qrcode
 from flask import Flask, request, jsonify, send_file, render_template, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from cryptography.fernet import Fernet
+
+# --- ENCRYPTION SETUP ---
+KEY_FILE = 'secret.key'
+if not os.path.exists(KEY_FILE):
+    with open(KEY_FILE, 'wb') as key_file:
+        key_file.write(Fernet.generate_key())
+
+with open(KEY_FILE, 'rb') as key_file:
+    ENCRYPTION_KEY = key_file.read()
+
+cipher_suite = Fernet(ENCRYPTION_KEY)
+
+def encrypt_pass(plain_text):
+    if not plain_text: return None
+    return cipher_suite.encrypt(plain_text.encode('utf-8')).decode('utf-8')
+
+def decrypt_pass(cipher_text):
+    if not cipher_text: return None
+    try:
+        return cipher_suite.decrypt(cipher_text.encode('utf-8')).decode('utf-8')
+    except Exception:
+        # Fallback for plain-text passwords saved before this update
+        return cipher_text
+
 # ============================================
 # SERVER CONFIGURATION
 # ============================================
@@ -96,7 +121,7 @@ def save_user_account(user_id, upi_id, gmail, app_pass):
     row = c.fetchone()
     api_key = row[0] if row and row[0] else "FAM_" + uuid.uuid4().hex + uuid.uuid4().hex[:12]
     c.execute('''UPDATE users SET upi_id=?, gmail=?, app_pass=?, api_key=? WHERE user_id=?''', 
-              (upi_id, gmail, app_pass, api_key, user_id))
+              (upi_id, gmail, encrypt_pass(app_pass), api_key, user_id))
     conn.commit()
     conn.close()
     return api_key
@@ -482,7 +507,7 @@ def monitor_gmails():
                 if not gmail_user or not app_pass: continue
                 try:
                     mail = imaplib.IMAP4_SSL("imap.gmail.com", timeout=10)
-                    mail.login(gmail_user, app_pass)
+                    mail.login(gmail_user, decrypt_pass(app_pass))
                     mail.select("INBOX")
 
                     since_date = (datetime.now() - timedelta(days=1)).strftime("%d-%b-%Y")
@@ -549,6 +574,22 @@ def monitor_gmails():
         except Exception:
             pass
         time.sleep(10)
+
+@app.route('/regenerate_key', methods=['POST'])
+def regenerate_key():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+        
+    import secrets
+    new_api_key = 'FAM' + secrets.token_hex(16).upper()
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('UPDATE users SET api_key = ? WHERE user_id = ?', (new_api_key, session['user_id']))
+    conn.commit()
+    conn.close()
+    
+    flash('API Key successfully regenerated! Update your webhook integrations.')
+    return redirect(url_for('dashboard'))
 
 def main():
     init_db()

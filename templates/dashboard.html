@@ -168,6 +168,7 @@ body{
 
 .api-box { background: #16302A; color: #E8C874; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 16px; margin-top: 10px;}
 </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -717,6 +718,37 @@ body{
         el.style.color = 'var(--ink)';
         el.style.borderColor = 'var(--border) var(--border) var(--paper)';
         el.style.background = 'var(--paper)';
+    }
+
+    // Initialize Chart
+    const ctx = document.getElementById('revenueChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels | safe | default('[]') }},
+                datasets: [{
+                    label: 'Revenue (₹)',
+                    data: {{ chart_data | safe | default('[]') }},
+                    borderColor: '#C9A227',
+                    backgroundColor: 'rgba(201, 162, 39, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
     }
 </script>
 </body>

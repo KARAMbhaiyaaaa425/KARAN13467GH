@@ -281,6 +281,15 @@
             btn.disabled = false;
         });
 
+        
+        // Mobile Intent Check
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if(isMobile) {
+            document.getElementById('qrImage').parentElement.style.display = 'none'; // Hide QR Card
+            document.getElementById('mobileIntentContainer').classList.remove('hidden');
+            document.getElementById('mobileIntentContainer').classList.add('flex');
+        }
+
         // Submit UTR Logic
         document.getElementById('submitUtrBtn').addEventListener('click', async () => {
             const utr = document.getElementById('manualUtr').value.trim();

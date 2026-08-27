@@ -582,7 +582,7 @@ def regenerate_key():
         
     import secrets
     new_api_key = 'FAM' + secrets.token_hex(16).upper()
-    conn = get_db_connection()
+    conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute('UPDATE users SET api_key = ? WHERE user_id = ?', (new_api_key, session['user_id']))
     conn.commit()

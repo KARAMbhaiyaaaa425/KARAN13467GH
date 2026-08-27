@@ -160,6 +160,15 @@ def save_customize():
     conn.close()
     return redirect(url_for('dashboard', success='Customization Saved!'))
 
+@app.route('/delete_account')
+def delete_account():
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("DELETE FROM users WHERE user_id=?", (ADMIN_USER_ID,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('dashboard', success='Account Connection Deleted!'))
+
 @app.route('/generate_link', methods=['POST'])
 def generate_link():
     amount = request.form.get('amount')

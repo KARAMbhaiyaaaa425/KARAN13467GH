@@ -619,5 +619,24 @@ body{
     }
 </script>
 
+<script>
+    function switchApiTab(tabId, el) {
+        document.querySelectorAll('.api-content').forEach(d => { d.style.display = 'none'; });
+        document.querySelectorAll('.api-tab').forEach(t => {
+            t.classList.remove('active', 'text-ink');
+            t.classList.add('text-muted');
+            t.style.borderColor = 'transparent';
+            t.style.background = 'transparent';
+            t.style.color = ''; 
+        });
+        
+        document.getElementById('content-' + tabId).style.display = 'block';
+        el.classList.add('active');
+        el.classList.remove('text-muted');
+        el.style.color = 'var(--ink)';
+        el.style.borderColor = 'var(--border) var(--border) var(--paper)';
+        el.style.background = 'var(--paper)';
+    }
+</script>
 </body>
 </html>

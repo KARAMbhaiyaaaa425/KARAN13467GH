@@ -461,21 +461,94 @@ body{
 
         <!-- DOCS SECTION -->
         <div id="section-docs" class="content-section">
-            <div class="ledger-card">
-                <div class="lc-head">
-                    <h4>API Documentation</h4>
-                </div>
-                <pre class="bg-light p-3 border rounded">
-POST /api/create_order
-Params: api_key, amount
-Returns: checkout_url, txn_id
-
-GET /api/verify
-Params: api_key, txn_id
-Returns: status (pending/completed)
-                </pre>
+            <div class="mb-4">
+                <span class="gp-mono text-muted text-uppercase" style="font-size: 10px; font-weight: 600; letter-spacing: 2px;">DEVELOPER · LEDGER · CREDENTIALS</span>
+                <h2 class="gp-serif mt-1 mb-2" style="color: var(--ink); font-weight: 700;"><span class="pb-icon d-inline-flex me-2" style="width: 32px; height: 32px; font-size: 14px; background: var(--ink); color: var(--brass-light); border: none;"><i class="fas fa-key"></i></span>Developer Console</h2>
+                <p class="text-muted" style="font-size: 13.5px;">Integrate FamPay Payment Gateway into your app using our REST API.</p>
+                <hr style="border-color: var(--brass); border-width: 2px; opacity: 1;">
             </div>
-        </div>
+
+            <div class="row g-4">
+                <!-- Left Column: API Keys -->
+                <div class="col-lg-5">
+                    <div class="p-4 rounded mb-4" style="border: 1px solid var(--border); background: var(--card);">
+                        <h5 class="gp-serif" style="font-weight: 600;"><i class="fas fa-link text-muted me-2" style="font-size:14px;"></i>API Keys</h5>
+                        <p class="text-muted mb-4" style="font-size: 13px;">Manage your API credentials & settings</p>
+                        
+                        <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;"><i class="fas fa-bolt me-1"></i> FAMKEY</div>
+                        
+                        {% if user_info and user_info.api_key %}
+                        <div class="d-flex justify-content-between align-items-center p-3 rounded mb-3" style="background: var(--ink); color: var(--brass-light); font-family: monospace; font-size: 13px;">
+                            <span id="apiKeyText">{{ user_info.api_key }}</span>
+                            <i class="far fa-copy" style="cursor: pointer;" onclick="navigator.clipboard.writeText('{{ user_info.api_key }}'); alert('Copied!');"></i>
+                        </div>
+                        <p class="text-muted mb-4" style="font-size: 12px;"><i class="fas fa-info-circle text-warning me-1"></i> Your unique API key for authentication. Send this as `api_key` param in every request.</p>
+                        {% else %}
+                        <div class="p-3 rounded mb-3 text-center text-muted" style="background: #f1eada; border: 1px dashed var(--border);">
+                            Please Connect Account first to generate API Key.
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="p-4 rounded" style="background: var(--ink); color: var(--paper); border-top: 4px dashed var(--brass-dark);">
+                        <h6 class="gp-serif mb-2" style="color: var(--brass-light); font-style: italic;"><i class="fas fa-code me-2"></i>Integration Note</h6>
+                        <p style="font-size: 12.5px; margin: 0; opacity: 0.9;">FamPay PRO uses a single API key for all requests. No separate secret key required. Keep your key secure and do not share it.</p>
+                    </div>
+                </div>
+
+                <!-- Right Column: API Guide -->
+                <div class="col-lg-7">
+                    <div class="p-4 rounded" style="border: 1px solid var(--border); background: var(--card);">
+                        <h5 class="gp-serif mb-4" style="font-weight: 600;"><i class="fas fa-book-open text-muted me-2" style="font-size:14px;"></i>API Integration Guide</h5>
+                        
+                        <!-- Tabs -->
+                        
+                        <ul class="nav nav-tabs mb-4" style="border-bottom-color: var(--border);">
+                            <li class="nav-item">
+                                <a class="nav-link active fw-bold" style="color: var(--ink); border-color: var(--border) var(--border) var(--paper); background: var(--paper);" href="#">Create Order</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-muted fw-bold" style="border-color: transparent;" href="#">Check Status</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-muted fw-bold" style="border-color: transparent;" href="#">Webhook Payload</a>
+                            </li>
+                        </ul>
+
+                        <div class="d-flex align-items-center gap-3 mb-4 p-2 rounded" style="background: var(--card); border: 1px solid var(--border);">
+                            <span class="badge" style="background: var(--paper); border: 1px solid var(--mint); color: var(--mint); letter-spacing: 1px;">POST</span>
+                            <code style="color: var(--ink); font-size: 13px;">https://yourwebsite.com/api/create-order</code>
+                        </div>
+                        <p class="text-muted mb-4" style="font-size: 13px;">Initiates a payment order and returns a secure payment URL to redirect your customer.</p>
+
+                        <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">REQUEST HEADERS</div>
+                        <div class="p-3 rounded mb-4" style="background: var(--ink); color: var(--brass-light); font-family: monospace; font-size: 12px; overflow-x: auto;">
+                            X-Fam-Key: {{ user_info.api_key if user_info else 'YOUR_API_KEY' }}<br>
+                            Content-Type: application/json
+                        </div>
+
+                        <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">JSON REQUEST BODY</div>
+                        <div class="p-3 rounded mb-4" style="background: var(--ink); color: #a4b3ac; font-family: monospace; font-size: 12px; overflow-x: auto;">
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"amount"</span>: <span style="color: var(--paper);">"100.00"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"order_id"</span>: <span style="color: var(--paper);">"ORD12345"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"customer_name"</span>: <span style="color: var(--paper);">"Raushan Kumar"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"callback_url"</span>: <span style="color: var(--paper);">"https://yourwebsite.com/callback"</span><br>
+}
+                        </div>
+
+                        <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">RESPONSE BODY</div>
+                        <div class="p-3 rounded" style="background: var(--ink); color: #a4b3ac; font-family: monospace; font-size: 12px; overflow-x: auto;">
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"status"</span>: <span style="color: var(--paper);">"success"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"payment_url"</span>: <span style="color: var(--paper);">"https://yourwebsite.com/pay/LRd7jTF0V2sFyhMyOBzbJLL1S"</span><br>
+}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>>
 
     </div>
 </main>

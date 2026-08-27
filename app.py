@@ -201,9 +201,22 @@ def dashboard():
     c.execute("SELECT COUNT(*), SUM(amount) FROM transactions WHERE user_id=? AND status='completed'", (user_id,))
     total_count, total_amount = c.fetchone()
     
-    # Recent 10 transactions
-    c.execute("SELECT txn_id, amount, utr, paid_at FROM transactions WHERE user_id=? AND status='completed' ORDER BY paid_at DESC LIMIT 10", (user_id,))
+    # Recent transactions (all statuses)
+    c.execute("SELECT txn_id, amount, utr, paid_at, status FROM transactions WHERE user_id=? ORDER BY created_at DESC LIMIT 15", (user_id,))
     txns = c.fetchall()
+    
+    # Chart Data: Revenue for last 7 days
+    from datetime import datetime, timedelta
+    chart_labels = []
+    chart_data = []
+    for i in range(6, -1, -1):
+        dt = datetime.now() - timedelta(days=i)
+        d_str = dt.strftime('%Y-%m-%d')
+        c.execute("SELECT SUM(amount) FROM transactions WHERE user_id=? AND status='completed' AND paid_at LIKE ?", (user_id, f"{d_str}%"))
+        daily_sum = c.fetchone()[0] or 0
+        chart_labels.append(dt.strftime('%d %b'))
+        chart_data.append(daily_sum)
+
     conn.close()
     
     return render_template('dashboard.html', 
@@ -211,6 +224,8 @@ def dashboard():
                            total_count=total_count or 0, 
                            total_amount=f"{total_amount or 0:.2f}",
                            txns=txns,
+                           chart_labels=chart_labels,
+                           chart_data=chart_data,
                            error=error,
                            success=success)
 

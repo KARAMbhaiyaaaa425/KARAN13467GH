@@ -256,9 +256,20 @@ body{
                 </div>
             </div>
 
-            <div class="ledger-card">
+            <!-- Chart Section -->
+            <div class="ledger-card" style="margin-bottom: 2rem;">
                 <div class="lc-head">
+                    <h4>Revenue Analytics (Last 7 Days)</h4>
+                </div>
+                <div style="position: relative; height:200px; width:100%; padding: 1rem;">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <div class="ledger-card">
+                <div class="lc-head" style="display: flex; justify-content: space-between; align-items: center;">
                     <h4>Recent Transactions</h4>
+                    <a href="/export/transactions" class="btn btn-sm btn-outline-secondary" style="font-size: 0.8rem; padding: 0.3rem 0.6rem;"><i class="fas fa-download"></i> Download CSV</a>
                 </div>
                 <table class="table">
                     <thead>

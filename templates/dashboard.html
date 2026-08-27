@@ -603,6 +603,46 @@ body{
         </div>>
 
     </div>
+<!-- Webhooks SECTION -->
+        <div id="section-webhooks" class="content-section">
+            <h4 class="gp-serif mb-4" style="font-weight: 600;">Webhook Delivery Logs</h4>
+            <div class="p-0 rounded" style="background: var(--card); border: 1px solid var(--border);">
+                <div class="table-responsive">
+                    <table class="table table-borderless table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>TIME</th>
+                                <th>TXN ID</th>
+                                <th>ENDPOINT URL</th>
+                                <th>STATUS</th>
+                                <th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in webhook_logs %}
+                            <tr>
+                                <td class="text-muted">{{ log.created_at.split('.')[0] }}</td>
+                                <td class="gp-mono">{{ log.txn_id }}</td>
+                                <td class="text-muted" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ log.url }}</td>
+                                <td>
+                                    {% if log.status == 'success' %}
+                                    <span class="badge bg-success-subtle text-success border border-success px-2 py-1">Delivered</span>
+                                    {% else %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger px-2 py-1">Failed</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="retryWebhook({{ log.id }}, this)"><i class="fas fa-redo fa-xs"></i> Retry</button>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" class="text-center text-muted py-4">No webhooks fired yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 </main>
 
 <script>

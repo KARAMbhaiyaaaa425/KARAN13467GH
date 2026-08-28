@@ -308,7 +308,52 @@
             }, 200);
         }
 
-        // Manual Verify Button Logic (15 sec dynamic polling)
+        function showUtrModal() {
+            const modal = document.getElementById('utrModal');
+            const content = document.getElementById('utrModalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeUtrModal() {
+            const modal = document.getElementById('utrModal');
+            const content = document.getElementById('utrModalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        async function submitUtrManual() {
+            const utr = document.getElementById('utrInput').value.trim();
+            if(!utr) return alert("Please enter UTR");
+            
+            const btn = document.getElementById('submitUtrBtn');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+            
+            try {
+                await fetch('/api/submit_utr', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({txn_id: txnId, utr: utr})
+                });
+                closeUtrModal();
+                alert("UTR Submitted! Please wait a few seconds for verification.");
+                // Background checkInterval will continue polling and catch it
+            } catch(e) {
+                alert("Error submitting UTR");
+            }
+            btn.innerHTML = orig;
+            btn.disabled = false;
+        }
+
+        // Manual Verify Button Logic (18 sec dynamic polling)
         document.getElementById('verifyBtn').addEventListener('click', async () => {
             const btn = document.getElementById('verifyBtn');
             const originalHTML = btn.innerHTML;
@@ -316,7 +361,7 @@
             btn.disabled = true;
             
             let attempts = 0;
-            const maxAttempts = 10; // 10 attempts * 1.5s = 15 seconds
+            const maxAttempts = 12; // 12 attempts * 1.5s = 18 seconds
             
             const verifyLoop = setInterval(async () => {
                 attempts++;
@@ -341,14 +386,14 @@
                         clearInterval(verifyLoop);
                         btn.innerHTML = originalHTML;
                         btn.disabled = false;
-                        showErrorModal();
+                        showUtrModal(); // Changed from showErrorModal to showUtrModal
                     }
                 } catch (e) {
                     if (attempts >= maxAttempts) {
                         clearInterval(verifyLoop);
                         btn.innerHTML = originalHTML;
                         btn.disabled = false;
-                        showErrorModal();
+                        showUtrModal();
                     }
                 }
             }, 1500);

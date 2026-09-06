@@ -385,15 +385,15 @@ body{
 
                     <div class="mb-4" style="max-width: 300px;">
                         <label class="form-label text-muted text-uppercase fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">SELECT PAYMENT PROVIDER</label>
-                        <select class="form-select form-control" style="border-color: var(--border); box-shadow: none;">
-                            <option value="fampay">-- Choose Provider --</option>
-                            <option value="fampay" selected>FamPay</option>
+                        <select name="provider" class="form-select form-control" style="border-color: var(--border); box-shadow: none;" onchange="document.getElementById('upiLabel').innerText = this.value === 'paytm' ? 'Paytm UPI ID' : 'FamPay UPI ID';">
+                            <option value="fampay" {% if user_info and user_info.provider == 'fampay' %}selected{% endif %}>FamPay</option>
+                            <option value="paytm" {% if user_info and user_info.provider == 'paytm' %}selected{% endif %}>Paytm for Business</option>
                         </select>
                     </div>
 
                     <div class="row g-3" style="max-width: 800px;">
                         <div class="col-md-4">
-                            <label class="form-label fw-bold" style="font-size: 13px;">FamPay UPI ID</label>
+                            <label id="upiLabel" class="form-label fw-bold" style="font-size: 13px;">{% if user_info and user_info.provider == 'paytm' %}Paytm UPI ID{% else %}FamPay UPI ID{% endif %}</label>
                             <input type="text" name="upi_id" class="form-control" value="{{ user_info.upi_id if user_info else '' }}" placeholder="yourname@fam" required>
                         </div>
                         <div class="col-md-4">
@@ -421,7 +421,7 @@ body{
                     <tbody style="font-size: 12px;">
                         <tr style="border-bottom: 1px dashed var(--border);">
                             <td class="text-muted fw-bold py-3" style="width: 120px;">PROVIDER</td>
-                            <td class="text-end py-3"><span class="badge rounded-pill" style="border: 1px solid #e83e8c; color: #e83e8c; background: transparent; font-weight: 600; letter-spacing: 1px;">FAMPAY</span></td>
+                            <td class="text-end py-3"><span class="badge rounded-pill" style="border: 1px solid #e83e8c; color: #e83e8c; background: transparent; font-weight: 600; letter-spacing: 1px;">{{ user_info.provider | upper if user_info.provider else 'FAMPAY' }}</span></td>
                         </tr>
                         <tr style="border-bottom: 1px dashed var(--border);">
                             <td class="text-muted fw-bold py-3">MID (Gmail)</td>

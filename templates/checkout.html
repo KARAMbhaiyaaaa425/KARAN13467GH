@@ -208,7 +208,7 @@
             <img src="{{ qr_url }}" alt="UPI QR Code">
         </div>
 
-        <p class="text-xs text-gray-400 mb-6">Scan QR or click the button below to pay via FamPay or any UPI App.</p>
+        <p class="text-xs text-gray-400 mb-6">Scan QR or click the button below to pay via {% if provider == 'paytm' %}Paytm{% else %}FamPay{% endif %} or any UPI App.</p>
 
         <!-- Direct Pay Button for Mobile -->
         <div class="flex flex-col gap-3 mb-6">

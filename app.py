@@ -77,6 +77,8 @@ def init_db():
     except: pass
     try: c.execute("ALTER TABLE users ADD COLUMN theme TEXT DEFAULT 'default'")
     except: pass
+    try: c.execute("ALTER TABLE users ADD COLUMN provider TEXT DEFAULT 'fampay'")
+    except: pass
     try: c.execute("ALTER TABLE users ADD COLUMN username TEXT UNIQUE")
     except: pass
     try: c.execute("ALTER TABLE users ADD COLUMN password_hash TEXT")
@@ -131,21 +133,21 @@ def init_db():
 def get_user(user_id):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("SELECT upi_id, gmail, app_pass, api_key, display_name, theme, username FROM users WHERE user_id = ?", (user_id,))
+    c.execute("SELECT upi_id, gmail, app_pass, api_key, display_name, theme, username, provider FROM users WHERE user_id = ?", (user_id,))
     row = c.fetchone()
     conn.close()
     if row:
-        return {"upi_id": row[0], "gmail": row[1], "app_pass": row[2], "api_key": row[3], "display_name": row[4] or 'Merchant', "theme": row[5] or 'default', "username": row[6]}
+        return {"upi_id": row[0], "gmail": row[1], "app_pass": row[2], "api_key": row[3], "display_name": row[4] or 'Merchant', "theme": row[5] or 'default', "username": row[6], "provider": row[7] or 'fampay'}
     return None
 
-def save_user_account(user_id, upi_id, gmail, app_pass):
+def save_user_account(user_id, upi_id, gmail, app_pass, provider='fampay'):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute("SELECT api_key FROM users WHERE user_id = ?", (user_id,))
     row = c.fetchone()
     api_key = row[0] if row and row[0] else "FAM_" + uuid.uuid4().hex + uuid.uuid4().hex[:12]
-    c.execute('''UPDATE users SET upi_id=?, gmail=?, app_pass=?, api_key=? WHERE user_id=?''', 
-              (upi_id, gmail, encrypt_pass(app_pass), api_key, user_id))
+    c.execute('''UPDATE users SET upi_id=?, gmail=?, app_pass=?, api_key=?, provider=? WHERE user_id=?''', 
+              (upi_id, gmail, encrypt_pass(app_pass), api_key, provider, user_id))
     conn.commit()
     conn.close()
     return api_key
@@ -263,6 +265,7 @@ def dashboard():
 @login_required
 def save_account():
     user_id = session['user_id']
+    provider = request.form.get('provider', 'fampay')
     upi_id = request.form.get('upi_id')
     gmail = request.form.get('gmail')
     app_pass = request.form.get('app_pass')
@@ -283,7 +286,7 @@ def save_account():
         except Exception as e:
             return redirect(url_for('dashboard', error='Connection Failed! Please check your Gmail App Password.'))
             
-        save_user_account(user_id, upi_id, gmail, app_pass)
+        save_user_account(user_id, upi_id, gmail, app_pass, provider)
         return redirect(url_for('dashboard', success='Account Connected & Verified Perfectly!'))
         
     return redirect(url_for('dashboard'))
@@ -419,14 +422,14 @@ def checkout_page_by_id(txn_id):
         
     user_id, amount, status, callback_url = txn
     
-    c.execute("SELECT upi_id, display_name, theme, api_key FROM users WHERE user_id = ?", (user_id,))
+    c.execute("SELECT upi_id, display_name, theme, api_key, provider FROM users WHERE user_id = ?", (user_id,))
     user = c.fetchone()
     conn.close()
     
     if not user or not user[0]:
         return "<h1>Error: Merchant account not configured properly</h1>", 400
         
-    upi_id, display_name, theme, api_key = user
+    upi_id, display_name, theme, api_key, provider = user
     
     payment_url = f"upi://pay?pa={upi_id}&pn=Merchant&tr={txn_id}&am={amount}&cu=INR"
     
@@ -445,7 +448,8 @@ def checkout_page_by_id(txn_id):
                            display_name=display_name or 'Merchant',
                            theme=theme or 'premium',
                            status=status,
-                           callback_url=callback_url)
+                           callback_url=callback_url,
+                           provider=provider or 'fampay')
 
 @app.route('/pay', methods=['GET'])
 def checkout_page_legacy():
@@ -457,13 +461,13 @@ def checkout_page_legacy():
 
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("SELECT user_id, upi_id, display_name, theme FROM users WHERE api_key = ?", (api_key,))
+    c.execute("SELECT user_id, upi_id, display_name, theme, provider FROM users WHERE api_key = ?", (api_key,))
     user = c.fetchone()
     
     if not user or not user[1]:
         return "<h1>Error: Invalid API Key or Not Configured</h1>", 401
     
-    user_id, upi_id, display_name, theme = user
+    user_id, upi_id, display_name, theme, provider = user
 
     try:
         amount = float(amount_raw)
@@ -701,7 +705,7 @@ def monitor_gmails():
 
                             text = str(msg.get("Subject", "")) + " " + body
                             amt_match = re.search(r'(?:Rs\.?|INR|₹)\s*([\d,]+\.?\d*)', text, re.IGNORECASE)
-                            utr_match = re.search(r'(?:UPI\s*Ref|UTR|Txn\s*ID|RRN)\s*[:.]?\s*([A-Z0-9]{8,20})', text, re.IGNORECASE)
+                            utr_match = re.search(r'(?:UPI\s*Ref|UTR|Txn\s*ID|RRN|Order\s*ID)\s*[:.]?\s*([A-Z0-9]{8,30})', text, re.IGNORECASE)
 
                             if amt_match and utr_match:
                                 amount = float(amt_match.group(1).replace(',', ''))

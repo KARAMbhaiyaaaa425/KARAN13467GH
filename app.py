@@ -116,6 +116,15 @@ def init_db():
             sent_at DATETIME
         )
     ''')
+    
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS system_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            log_msg TEXT,
+            log_time DATETIME
+        )
+    ''')
     conn.commit()
     conn.close()
 
@@ -203,6 +212,12 @@ def logout():
 # ============================================
 
 @app.route('/')
+def index():
+    if 'user_id' in session:
+        return redirect(url_for('dashboard'))
+    return render_template('index.html')
+
+@app.route('/dashboard')
 @login_required
 def dashboard():
     user_id = session['user_id']
@@ -550,6 +565,19 @@ def verify_api():
 # GMAIL BACKGROUND READER & WEBHOOK DISPATCHER
 # ============================================
 
+def add_sys_log(user_id, msg):
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        c = conn.cursor()
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        c.execute("INSERT INTO system_logs (user_id, log_msg, log_time) VALUES (?, ?, ?)", (user_id, msg, now_str))
+        # Keep only last 100 logs per user to avoid DB bloat
+        c.execute("DELETE FROM system_logs WHERE id NOT IN (SELECT id FROM system_logs WHERE user_id=? ORDER BY id DESC LIMIT 100)", (user_id,))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print("Log error:", e)
+
 def send_webhook(user_id, callback_url, txn_id, merchant_order_id, amount, utr):
     try:
         conn = sqlite3.connect(DB_FILE)
@@ -636,7 +664,9 @@ def monitor_gmails():
                     status, messages = mail.search(None, '(UNSEEN)')
 
                     if status == 'OK' and messages[0]:
-                        for num in messages[0].split():
+                        msg_nums = messages[0].split()
+                        add_sys_log(user_id, f"Found {len(msg_nums)} new UNSEEN emails")
+                        for num in msg_nums:
                             status, data = mail.fetch(num, '(RFC822)')
                             if status != 'OK': continue
 
@@ -656,6 +686,7 @@ def monitor_gmails():
                             # 2. DKIM Anti-Fraud Check (Rejects spoofed fake emails)
                             auth_results = msg.get("Authentication-Results", "").lower()
                             if auth_results and ("dkim=fail" in auth_results or "spf=fail" in auth_results):
+                                add_sys_log(user_id, "REJECTED: Spoofed/Fake Email detected (DKIM/SPF failed).")
                                 continue # Reject forged emails completely
                             # --------------------------------
                             
@@ -675,6 +706,7 @@ def monitor_gmails():
                             if amt_match and utr_match:
                                 amount = float(amt_match.group(1).replace(',', ''))
                                 utr = utr_match.group(1)
+                                add_sys_log(user_id, f"Parsed Payment: ₹{amount} with UTR: {utr}")
 
                                 conn_db = sqlite3.connect(DB_FILE)
                                 c_db = conn_db.cursor()
@@ -705,6 +737,7 @@ def monitor_gmails():
                                 
                                 # Fire webhook if completed now
                                 if txn_completed_now and completed_txn[2]:
+                                    add_sys_log(user_id, f"Match Success! Verified Txn ID: {completed_txn[0]}")
                                     threading.Thread(target=send_webhook, args=(user_id, completed_txn[2], completed_txn[0], completed_txn[3], amount, utr)).start()
                                     
                 except Exception as e:
@@ -826,6 +859,19 @@ def webhook_logs():
     conn.close()
     
     return render_template('webhook_logs.html', logs=logs)
+
+@app.route('/api/system_logs')
+def system_logs_api():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT log_msg, log_time FROM system_logs WHERE user_id=? ORDER BY id DESC LIMIT 50", (session['user_id'],))
+    logs = c.fetchall()
+    conn.close()
+    
+    return jsonify([{"msg": log[0], "time": log[1]} for log in logs])
 
 def main():
     init_db()

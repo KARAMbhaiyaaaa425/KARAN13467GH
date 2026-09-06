@@ -7,6 +7,9 @@ import email
 import sqlite3
 import imaplib
 import threading
+import json
+import hmac
+import hashlib
 from datetime import datetime, timedelta
 from functools import wraps
 
@@ -100,7 +103,19 @@ def init_db():
     except: pass
     try: c.execute("ALTER TABLE transactions ADD COLUMN callback_url TEXT")
     except: pass
-    
+
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS webhook_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            txn_id TEXT,
+            url TEXT,
+            payload TEXT,
+            response_code INTEGER,
+            response_body TEXT,
+            sent_at DATETIME
+        )
+    ''')
     conn.commit()
     conn.close()
 
@@ -535,8 +550,14 @@ def verify_api():
 # GMAIL BACKGROUND READER & WEBHOOK DISPATCHER
 # ============================================
 
-def send_webhook(callback_url, txn_id, merchant_order_id, amount, utr):
+def send_webhook(user_id, callback_url, txn_id, merchant_order_id, amount, utr):
     try:
+        conn = sqlite3.connect(DB_FILE)
+        c = conn.cursor()
+        c.execute("SELECT api_key FROM users WHERE user_id=?", (user_id,))
+        row = c.fetchone()
+        api_key = row[0] if row and row[0] else "default_secret"
+        
         payload = {
             "status": "success",
             "txn_id": txn_id,
@@ -544,14 +565,37 @@ def send_webhook(callback_url, txn_id, merchant_order_id, amount, utr):
             "amount": amount,
             "utr": utr
         }
-        requests.post(callback_url, json=payload, timeout=5)
+        payload_str = json.dumps(payload)
+        
+        # Pro Logic: HMAC-SHA256 Signature for Webhook Security
+        signature = hmac.new(api_key.encode('utf-8'), payload_str.encode('utf-8'), hashlib.sha256).hexdigest()
+        headers = {
+            "Content-Type": "application/json",
+            "X-FamGateway-Signature": signature
+        }
+        
+        response_code = 0
+        response_body = ""
+        try:
+            resp = requests.post(callback_url, data=payload_str, headers=headers, timeout=5)
+            response_code = resp.status_code
+            response_body = resp.text[:500]
+        except Exception as e:
+            response_body = str(e)[:500]
+            
+        now_str = datetime.now().isoformat()
+        c.execute('''INSERT INTO webhook_logs (user_id, txn_id, url, payload, response_code, response_body, sent_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                  (user_id, txn_id, callback_url, payload_str, response_code, response_body, now_str))
+        conn.commit()
+        conn.close()
     except Exception as e:
         print(f"Webhook failed for {txn_id}: {e}")
-
 # Global dict to hold persistent IMAP connections
 imap_connections = {}
 
 def monitor_gmails():
+    processed_msg_ids = set()
     while True:
         try:
             conn = sqlite3.connect(DB_FILE)
@@ -589,16 +633,32 @@ def monitor_gmails():
                         mail.select("INBOX")
                         imap_connections[user_id] = mail
 
-                    since_date = (datetime.now() - timedelta(days=1)).strftime("%d-%b-%Y")
-                    status, messages = mail.search(None, f'(SINCE {since_date})')
+                    status, messages = mail.search(None, '(UNSEEN)')
 
-                    if status == 'OK':
-                        # ONLY fetch the last 10 emails to prevent extremely slow looping
-                        for num in messages[0].split()[-10:]:
+                    if status == 'OK' and messages[0]:
+                        for num in messages[0].split():
                             status, data = mail.fetch(num, '(RFC822)')
                             if status != 'OK': continue
 
                             msg = email.message_from_bytes(data[0][1])
+                            
+                            # --- ADVANCED SECURITY LOGIC ---
+                            # 1. Message-ID Replay Guard (Prevents double verification)
+                            msg_id = msg.get("Message-ID")
+                            if msg_id:
+                                if msg_id in processed_msg_ids:
+                                    continue
+                                processed_msg_ids.add(msg_id)
+                                # Keep set size manageable
+                                if len(processed_msg_ids) > 10000:
+                                    processed_msg_ids.clear()
+                                    
+                            # 2. DKIM Anti-Fraud Check (Rejects spoofed fake emails)
+                            auth_results = msg.get("Authentication-Results", "").lower()
+                            if auth_results and ("dkim=fail" in auth_results or "spf=fail" in auth_results):
+                                continue # Reject forged emails completely
+                            # --------------------------------
+                            
                             body = ""
                             if msg.is_multipart():
                                 for part in msg.walk():
@@ -645,7 +705,7 @@ def monitor_gmails():
                                 
                                 # Fire webhook if completed now
                                 if txn_completed_now and completed_txn[2]:
-                                    threading.Thread(target=send_webhook, args=(completed_txn[2], completed_txn[0], completed_txn[3], amount, utr)).start()
+                                    threading.Thread(target=send_webhook, args=(user_id, completed_txn[2], completed_txn[0], completed_txn[3], amount, utr)).start()
                                     
                 except Exception as e:
                     # If any error (e.g. connection drop), remove from persistent dict to force reconnect next loop
@@ -753,6 +813,19 @@ def admin_ban(user_id):
     conn.commit()
     conn.close()
     return redirect(url_for('super_admin'))
+
+@app.route('/webhook_logs')
+def webhook_logs():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+        
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT id, txn_id, url, payload, response_code, response_body, sent_at FROM webhook_logs WHERE user_id=? ORDER BY sent_at DESC LIMIT 50", (session['user_id'],))
+    logs = c.fetchall()
+    conn.close()
+    
+    return render_template('webhook_logs.html', logs=logs)
 
 def main():
     init_db()

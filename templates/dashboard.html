@@ -242,6 +242,11 @@ body{
                     <span class="menu-label">Webhook Logs</span>
                 </a>
             </li>
+            <li class="sidebar-menu-item" onclick="switchTab('system-logs', this)">
+                <a class="sidebar-menu-link">
+                    <span class="menu-label"><i class="fas fa-terminal me-2"></i>Live System Logs</span>
+                </a>
+            </li>
             <li class="sidebar-menu-item mt-4">
                 <a class="sidebar-menu-link text-danger" href="/logout" style="color: #dc3545 !important; font-weight: 600;">
                     <span class="menu-label"><i class="fas fa-sign-out-alt me-2"></i>Logout</span>
@@ -693,6 +698,25 @@ body{
                 </div>
             </div>
         </div>
+        <!-- SYSTEM LOGS SECTION -->
+        <div id="section-system-logs" class="content-section">
+            <div class="mb-4">
+                <span class="gp-mono text-muted text-uppercase" style="font-size: 10px; font-weight: 600; letter-spacing: 2px;">LIVE MONITORING</span>
+                <h2 class="gp-serif mt-1 mb-2" style="color: var(--ink); font-weight: 700;"><i class="fas fa-terminal me-2"></i>Live System Logs</h2>
+                <p class="text-muted" style="font-size: 13.5px;">View live server output of IMAP email fetching, parsing, and background activity.</p>
+                <hr style="border-color: var(--brass); border-width: 2px; opacity: 1;">
+            </div>
+            
+            <div class="mb-3 d-flex gap-2">
+                <button id="startLogBtn" class="btn btn-dark" onclick="startSystemLogs()"><i class="fas fa-play me-2"></i>Start Log</button>
+                <button id="stopLogBtn" class="btn btn-outline-danger" style="display:none;" onclick="stopSystemLogs()"><i class="fas fa-stop me-2"></i>Stop Log</button>
+            </div>
+            
+            <div id="sysLogTerminal" class="p-3 rounded" style="background: #0f172a; color: #38bdf8; font-family: monospace; font-size: 13px; height: 400px; overflow-y: auto; border: 1px solid #1e293b;">
+                <div class="text-muted mb-2"># System logs will appear here...</div>
+            </div>
+        </div>
+        </div>
 </main>
 
 <script>
@@ -712,6 +736,45 @@ body{
         }
     }
 
+    let logInterval = null;
+    let lastLogMsg = "";
+
+    async function fetchLogs() {
+        try {
+            const res = await fetch('/api/system_logs');
+            const logs = await res.json();
+            const term = document.getElementById('sysLogTerminal');
+            if (logs.length > 0 && logs[0].msg !== lastLogMsg) {
+                term.innerHTML = '';
+                logs.reverse().forEach(log => {
+                    const div = document.createElement('div');
+                    div.style.marginBottom = '4px';
+                    div.innerHTML = `<span style="color: #64748b;">[${log.time}]</span> <span style="color: #4ade80;">${log.msg}</span>`;
+                    term.appendChild(div);
+                });
+                lastLogMsg = logs[logs.length - 1].msg;
+                term.scrollTop = term.scrollHeight;
+            }
+        } catch (e) {
+            console.error("Failed to fetch logs");
+        }
+    }
+
+    function startSystemLogs() {
+        document.getElementById('startLogBtn').style.display = 'none';
+        document.getElementById('stopLogBtn').style.display = 'inline-block';
+        fetchLogs();
+        logInterval = setInterval(fetchLogs, 1500);
+        document.getElementById('sysLogTerminal').innerHTML += `<div style="color: #fde047;"># LIVE LOGGING STARTED...</div>`;
+    }
+
+    function stopSystemLogs() {
+        document.getElementById('startLogBtn').style.display = 'inline-block';
+        document.getElementById('stopLogBtn').style.display = 'none';
+        clearInterval(logInterval);
+        document.getElementById('sysLogTerminal').innerHTML += `<div style="color: #ef4444;"># LIVE LOGGING STOPPED.</div>`;
+    }
+
     function switchTab(tabId, el) {
         // Update sidebar UI
         document.querySelectorAll('.sidebar-menu-item').forEach(i => i.classList.remove('active'));
@@ -728,9 +791,14 @@ body{
             'links': 'Payment Links',
             'customize': 'Customize',
             'docs': 'API Documentation',
-            'webhooks': 'Webhook Logs'
+            'webhooks': 'Webhook Logs',
+            'system-logs': 'Live System Logs'
         };
         document.getElementById('topTitle').innerText = titles[tabId];
+        
+        if(tabId !== 'system-logs' && logInterval) {
+            stopSystemLogs();
+        }
     }
 </script>
 

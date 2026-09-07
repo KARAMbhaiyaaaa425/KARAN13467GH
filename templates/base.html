@@ -94,7 +94,7 @@
                 <span class="bg-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">New</span>
             </a>
             
-            <a href="/settings" class="sidebar-link flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-300">
+            <a href="/api_docs" class="sidebar-link {% if request.path == '/api_docs' %}active{% endif %} flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-300">
                 <i class="fa-solid fa-key w-5 text-center"></i> API Keys
             </a>
             
@@ -194,6 +194,7 @@
     </script>
 </body>
 </html>
+
 
 
 

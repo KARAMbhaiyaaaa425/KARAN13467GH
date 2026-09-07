@@ -316,6 +316,33 @@ def save_account():
     return jsonify({'status': 'error', 'message': 'All fields are required.'}) if is_ajax else redirect(url_for('dashboard'))
 
 
+@app.route('/preview_checkout')
+@login_required
+def preview_checkout():
+    user_id = session['user_id']
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT upi_id, display_name, theme, profile_pic FROM users WHERE user_id=?", (user_id,))
+    row = c.fetchone()
+    conn.close()
+    
+    upi_id = row[0] if row and row[0] else "merchant@upi"
+    display_name = row[1] if row and row[1] else "Merchant"
+    theme = row[2] if row and row[2] else "default"
+    profile_pic = row[3] if row and len(row)>3 and row[3] else None
+    
+    return render_template('checkout.html',
+                           txn_id="FAM12345678",
+                           amount=499.00,
+                           upi_id=upi_id,
+                           display_name=display_name,
+                           theme=theme,
+                           api_key="preview",
+                           callback_url="",
+                           qr_url="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi://pay?pa=merchant@upi&pn=Merchant&am=499",
+                           payment_url="#",
+                           profile_pic=profile_pic)
+
 @app.route('/customize')
 @login_required
 def customize():
@@ -1104,6 +1131,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 

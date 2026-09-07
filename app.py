@@ -138,11 +138,21 @@ def init_db():
 def get_user(user_id):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("SELECT upi_id, gmail, app_pass, api_key, display_name, theme, username, provider FROM users WHERE user_id = ?", (user_id,))
+    c.execute("SELECT upi_id, gmail, app_pass, api_key, display_name, theme, username, provider, profile_pic FROM users WHERE user_id = ?", (user_id,))
     row = c.fetchone()
     conn.close()
     if row:
-        return {"upi_id": row[0], "gmail": row[1], "app_pass": row[2], "api_key": row[3], "display_name": row[4] or 'Merchant', "theme": row[5] or 'default', "username": row[6], "provider": row[7] or 'fampay'}
+        return {
+            "upi_id": row[0],
+            "gmail": row[1],
+            "app_pass": row[2],
+            "api_key": row[3],
+            "display_name": row[4] or "Merchant",
+            "theme": row[5] or "default",
+            "username": row[6],
+            "provider": row[7] or "fampay",
+            "profile_pic": row[8] if len(row) > 8 and row[8] else None
+        }
     return None
 
 def save_user_account(user_id, upi_id, gmail, app_pass, provider='fampay'):
@@ -363,12 +373,22 @@ def save_customize():
     user_id = session['user_id']
     display_name = request.form.get('display_name', 'Merchant')
     theme = request.form.get('theme', 'default')
+    
+    file = request.files.get('profile_pic')
+    profile_pic_b64 = None
+    if file and file.filename != '':
+        import base64
+        profile_pic_b64 = "data:" + file.content_type + ";base64," + base64.b64encode(file.read()).decode('utf-8')
+        
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("UPDATE users SET display_name=?, theme=? WHERE user_id=?", (display_name, theme, user_id))
+    if profile_pic_b64:
+        c.execute("UPDATE users SET display_name=?, theme=?, profile_pic=? WHERE user_id=?", (display_name, theme, profile_pic_b64, user_id))
+    else:
+        c.execute("UPDATE users SET display_name=?, theme=? WHERE user_id=?", (display_name, theme, user_id))
     conn.commit()
     conn.close()
-    return redirect(url_for('dashboard', success='Customization Saved!'))
+    return redirect(url_for('customize', success='Customization Saved!'))
 
 @app.route('/delete_account')
 @login_required
@@ -1131,6 +1151,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
 
 
 

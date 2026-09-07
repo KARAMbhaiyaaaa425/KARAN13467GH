@@ -319,6 +319,13 @@ def customize():
     user_info = get_user(user_id)
     return render_template('customize.html', user_info=user_info)
 
+@app.route('/api_docs')
+@login_required
+def api_docs():
+    user_id = session['user_id']
+    user_info = get_user(user_id)
+    return render_template('api_docs.html', user_info=user_info)
+
 @app.route('/save_customize', methods=['POST'])
 @login_required
 def save_customize():

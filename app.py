@@ -666,12 +666,16 @@ def monitor_gmails():
                         mail.select("INBOX")
                         imap_connections[user_id] = mail
 
-                    status, messages = mail.search(None, '(UNSEEN)')
+                    # Fetch ALL emails to get the latest ones, regardless of SEEN status
+                    status, messages = mail.search(None, 'ALL')
 
                     if status == 'OK' and messages[0]:
                         msg_nums = messages[0].split()
-                        add_sys_log(user_id, f"Found {len(msg_nums)} new UNSEEN emails")
-                        for num in msg_nums:
+                        # Only take the last 10 emails to avoid processing the entire inbox
+                        latest_msg_nums = msg_nums[-10:]
+                        add_sys_log(user_id, f"Checking last {len(latest_msg_nums)} emails in inbox...")
+                        
+                        for num in latest_msg_nums:
                             status, data = mail.fetch(num, '(RFC822)')
                             if status != 'OK': continue
 
@@ -730,7 +734,7 @@ def monitor_gmails():
                                         completed_txn = row
                                 else:
                                     # Amount-based fallback (if UTR not submitted by user yet)
-                                    c_db.execute("SELECT txn_id, callback_url, merchant_order_id FROM transactions WHERE user_id=? AND status='pending' AND amount=? AND (utr IS NULL OR utr='') ORDER BY created_at ASC LIMIT 1", (user_id, amount))
+                                    c_db.execute("SELECT txn_id, callback_url, merchant_order_id FROM transactions WHERE user_id=? AND status='pending' AND ABS(amount - ?) < 0.01 AND (utr IS NULL OR utr='') ORDER BY created_at ASC LIMIT 1", (user_id, amount))
                                     pending_txn = c_db.fetchone()
                                     if pending_txn:
                                         c_db.execute("UPDATE transactions SET status='completed', utr=?, paid_at=? WHERE txn_id=?", (utr, now_str, pending_txn[0]))

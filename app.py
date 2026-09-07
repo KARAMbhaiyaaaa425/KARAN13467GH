@@ -70,7 +70,8 @@ def init_db():
             api_key TEXT UNIQUE,
             created_at DATETIME,
             display_name TEXT DEFAULT 'Merchant',
-            theme TEXT DEFAULT 'default'
+            theme TEXT DEFAULT 'default',
+            provider TEXT DEFAULT 'fampay'
         )
     ''')
     try: c.execute("ALTER TABLE users ADD COLUMN display_name TEXT DEFAULT 'Merchant'")

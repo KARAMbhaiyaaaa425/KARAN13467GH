@@ -349,7 +349,45 @@ def payment_links():
     links = c.fetchall()
     conn.close()
     
-    return render_template('payment_links.html', user_info=user_info, links=links)
+@app.route('/transactions')
+@login_required
+def transactions():
+    user_id = session['user_id']
+    user_info = get_user(user_id)
+    
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    
+    # Stats
+    c.execute("SELECT SUM(amount), COUNT(*) FROM transactions WHERE user_id=? AND status='completed'", (user_id,))
+    row = c.fetchone()
+    collected_amount = row[0] or 0.0
+    collected_count = row[1] or 0
+    
+    c.execute("SELECT COUNT(*) FROM transactions WHERE user_id=? AND status='pending'", (user_id,))
+    pending_count = c.fetchone()[0] or 0
+    
+    c.execute("SELECT COUNT(*) FROM transactions WHERE user_id=? AND status='failed'", (user_id,))
+    failed_count = c.fetchone()[0] or 0
+    
+    # Let's count expired (pending but past expires_at)
+    now_iso = datetime.now().isoformat()
+    c.execute("SELECT COUNT(*) FROM transactions WHERE user_id=? AND status='pending' AND expires_at < ?", (user_id, now_iso))
+    expired_count = c.fetchone()[0] or 0
+    
+    # Fetch all transactions
+    c.execute("SELECT txn_id, amount, status, created_at, utr FROM transactions WHERE user_id=? ORDER BY created_at DESC", (user_id,))
+    txns = c.fetchall()
+    conn.close()
+    
+    return render_template('transactions.html', 
+                           user_info=user_info, 
+                           collected_amount=collected_amount,
+                           collected_count=collected_count,
+                           pending_count=pending_count,
+                           failed_count=failed_count,
+                           expired_count=expired_count,
+                           txns=txns)
 
 @app.route('/generate_link', methods=['POST'])
 @login_required

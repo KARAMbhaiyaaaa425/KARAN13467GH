@@ -108,6 +108,8 @@ def init_db():
     except: pass
     try: c.execute("ALTER TABLE transactions ADD COLUMN customer_email TEXT")
     except: pass
+    try: c.execute("ALTER TABLE users ADD COLUMN profile_pic TEXT")
+    except: pass
 
     c.execute('''
         CREATE TABLE IF NOT EXISTS webhook_logs (
@@ -1102,6 +1104,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
 
 
 

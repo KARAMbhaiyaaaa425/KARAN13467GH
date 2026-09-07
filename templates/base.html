@@ -89,7 +89,7 @@
                 <i class="fa-solid fa-satellite-dish w-5 text-center"></i> Webhooks
             </a>
             
-            <a href="#" class="sidebar-link flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-300">
+            <a href="/customize" class="sidebar-link {% if request.path == '/customize' %}active{% endif %} flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-300">
                 <div class="flex items-center gap-3"><i class="fa-solid fa-palette w-5 text-center"></i> Customize</div>
                 <span class="bg-yellow-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">New</span>
             </a>
@@ -194,6 +194,7 @@
     </script>
 </body>
 </html>
+
 
 
 

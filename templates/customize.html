@@ -1,0 +1,101 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-slate-800">Customize Checkout</h1>
+    <p class="text-sm font-medium text-slate-500 mt-1">Design your payment gateway to match your brand.</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Form -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <h3 class="text-base font-bold text-slate-800 mb-6">Brand Settings</h3>
+        <form action="/save_customize" method="POST">
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Display Name</label>
+                    <input type="text" name="display_name" value="{{ user_info.display_name if user_info and user_info.display_name else 'Merchant' }}" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all shadow-sm" placeholder="e.g. My Awesome Shop">
+                    <p class="text-xs text-slate-500 mt-2">This name will be shown to your customers on the checkout page.</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Checkout Theme</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="border rounded-xl p-4 cursor-pointer flex items-center gap-3 transition-all {% if not user_info or user_info.theme == 'default' %}border-primary bg-indigo-50 ring-2 ring-primary ring-offset-1{% else %}border-slate-200{% endif %}" onclick="selectTheme(this, 'default')">
+                            <input type="radio" name="theme" value="default" class="hidden" {% if not user_info or user_info.theme == 'default' %}checked{% endif %}>
+                            <div class="w-6 h-6 rounded-full bg-slate-100 border border-slate-300"></div>
+                            <span class="text-sm font-bold text-slate-700">Light (Default)</span>
+                        </label>
+                        <label class="border rounded-xl p-4 cursor-pointer flex items-center gap-3 transition-all {% if user_info and user_info.theme == 'premium' %}border-primary bg-indigo-50 ring-2 ring-primary ring-offset-1{% else %}border-slate-200{% endif %}" onclick="selectTheme(this, 'premium')">
+                            <input type="radio" name="theme" value="premium" class="hidden" {% if user_info and user_info.theme == 'premium' %}checked{% endif %}>
+                            <div class="w-6 h-6 rounded-full bg-slate-900 border border-slate-700"></div>
+                            <span class="text-sm font-bold text-slate-700">Dark (Premium)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-colors shadow-sm">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Preview -->
+    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200 flex flex-col items-center justify-center min-h-[400px]">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6">Live Preview</h3>
+        <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 relative" id="previewBox">
+            <div class="bg-primary h-24 absolute top-0 w-full" id="previewHeader"></div>
+            <div class="relative pt-10 px-6 pb-8 text-center z-10">
+                <div class="w-20 h-20 bg-white rounded-2xl shadow-md mx-auto mb-4 flex items-center justify-center border-4 border-white text-primary font-bold text-2xl" id="previewLogo">
+                    {{ user_info.display_name[:1].upper() if user_info and user_info.display_name else 'M' }}
+                </div>
+                <h2 class="text-xl font-black text-slate-800 mb-1" id="previewName">{{ user_info.display_name if user_info and user_info.display_name else 'Merchant' }}</h2>
+                <p class="text-sm font-medium text-slate-500 mb-6">Paying for Order #FAM1234</p>
+                <h1 class="text-4xl font-black text-slate-800 mb-8">₹499.00</h1>
+                <div class="w-48 h-48 bg-slate-100 mx-auto rounded-xl border border-slate-200 mb-6 flex items-center justify-center">
+                    <i class="fa-solid fa-qrcode text-6xl text-slate-300"></i>
+                </div>
+                <div class="w-full h-12 bg-primary rounded-xl opacity-50"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function selectTheme(element, theme) {
+    document.querySelectorAll('input[name="theme"]').forEach(r => {
+        r.parentElement.classList.remove('border-primary', 'bg-indigo-50', 'ring-2', 'ring-primary', 'ring-offset-1');
+        r.parentElement.classList.add('border-slate-200');
+    });
+    element.classList.remove('border-slate-200');
+    element.classList.add('border-primary', 'bg-indigo-50', 'ring-2', 'ring-primary', 'ring-offset-1');
+    element.querySelector('input').checked = true;
+    
+    // Update preview
+    const box = document.getElementById('previewBox');
+    const name = document.getElementById('previewName');
+    const header = document.getElementById('previewHeader');
+    if (theme === 'premium') {
+        box.classList.remove('bg-white');
+        box.classList.add('bg-slate-900');
+        name.classList.remove('text-slate-800');
+        name.classList.add('text-white');
+        header.classList.remove('bg-primary');
+        header.classList.add('bg-slate-800');
+    } else {
+        box.classList.remove('bg-slate-900');
+        box.classList.add('bg-white');
+        name.classList.remove('text-white');
+        name.classList.add('text-slate-800');
+        header.classList.remove('bg-slate-800');
+        header.classList.add('bg-primary');
+    }
+}
+
+document.querySelector('input[name="display_name"]').addEventListener('input', function(e) {
+    document.getElementById('previewName').innerText = e.target.value || 'Merchant';
+    document.getElementById('previewLogo').innerText = (e.target.value || 'M').charAt(0).toUpperCase();
+});
+</script>
+{% endblock %}

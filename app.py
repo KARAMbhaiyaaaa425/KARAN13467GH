@@ -298,7 +298,7 @@ def save_account():
         # Verify the IMAP connection instantly
         try:
             import imaplib
-            mail = imaplib.IMAP4_SSL('imap.gmail.com', timeout=5)
+            mail = imaplib.IMAP4_SSL('imap.gmail.com', timeout=15)
             mail.login(gmail, app_pass)
             mail.logout()
         except Exception as e:
@@ -311,6 +311,13 @@ def save_account():
         
     return jsonify({'status': 'error', 'message': 'All fields are required.'}) if is_ajax else redirect(url_for('dashboard'))
 
+
+@app.route('/customize')
+@login_required
+def customize():
+    user_id = session['user_id']
+    user_info = get_user(user_id)
+    return render_template('customize.html', user_info=user_info)
 
 @app.route('/save_customize', methods=['POST'])
 @login_required

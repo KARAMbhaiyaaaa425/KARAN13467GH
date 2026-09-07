@@ -1,287 +1,137 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout | FamPay Gateway</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Checkout | {{ display_name }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#4f46e5' },
+                    fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            
-            {% if theme == 'cyberpunk' %}
-            background-color: #000;
-            color: #0f0;
-            {% elif theme == 'retro' %}
-            background-color: #fde047;
-            color: #000;
-            {% elif theme == 'premium' %}
-            background: linear-gradient(135deg, #0f172a, #1e1b4b, #312e81);
-            color: white;
-            {% else %}
-            background-color: #0c0e14;
-            color: white;
-            {% endif %}
-        }
-
-        .checkout-container {
-            width: 100%;
-            max-width: 400px;
-            padding: 1.25rem; width: 95%; max-width: 420px; box-sizing: border-box;
-            position: relative;
-            overflow: hidden;
-            
-            {% if theme == 'cyberpunk' %}
-            background: #111;
-            border: 2px solid #0f0;
-            border-radius: 0px;
-            box-shadow: 0 0 20px rgba(0,255,0,0.5);
-            {% elif theme == 'retro' %}
-            background: #fff;
-            border: 4px solid #000;
-            border-radius: 16px;
-            box-shadow: 8px 8px 0px #000;
-            {% elif theme == 'premium' %}
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 28px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            {% else %}
-            background: #12141c;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-            {% endif %}
-        }
-
-        .qr-box {
-            background: white;
-            padding: 10px;
-            width: 100%;
-            max-width: 220px;
-            aspect-ratio: 1/1;
-            height: auto;
-            margin: 0 auto;
-            position: relative;
-            
-            {% if theme == 'cyberpunk' %}
-            border: 2px solid #0f0;
-            border-radius: 0px;
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
-            {% elif theme == 'retro' %}
-            border: 4px solid #000;
-            border-radius: 12px;
-            box-shadow: 4px 4px 0px #000;
-            {% elif theme == 'premium' %}
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px;
-            {% else %}
-            border-radius: 16px;
-            box-shadow: 0 0 30px rgba(250, 174, 64, 0.2);
-            {% endif %}
-        }
-
-        .qr-box img {
-            width: 100%;
-            height: 100%;
-            border-radius: 8px;
-        }
-
-        .btn-pay {
-            font-weight: 800;
-            transition: all 0.3s ease;
-            
-            {% if theme == 'cyberpunk' %}
-            background: transparent;
-            color: #0f0;
-            border: 1px solid #0f0;
-            border-radius: 0px;
-            text-shadow: 0 0 5px #0f0;
-            {% elif theme == 'retro' %}
-            background: #000;
-            color: #fff;
-            border-radius: 8px;
-            border: 2px solid #000;
-            {% elif theme == 'premium' %}
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
-            color: white;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            {% else %}
-            background: linear-gradient(45deg, #faae40, #ff8c00);
-            color: #000;
-            border-radius: 12px;
-            {% endif %}
-        }
-
-        .btn-pay:hover {
-            transform: translateY(-2px);
-            {% if theme == 'cyberpunk' %}
-            box-shadow: 0 0 15px #0f0, inset 0 0 10px #0f0;
-            {% elif theme == 'retro' %}
-            box-shadow: 4px 4px 0px #000; background: #fff; color:#000;
-            {% elif theme == 'premium' %}
-            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.5);
-            {% else %}
-            box-shadow: 0 10px 20px rgba(250, 174, 64, 0.4);
-            {% endif %}
-        }
-
-        .timer {
-            font-family: 'Orbitron', monospace;
-            color: #faae40;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-
-        /* Success Animation */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .success-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: #0c0e14;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 50;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s ease;
+            position: fixed; top: 0; left: 0; w-full h-full; z-index: 50;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
-
-        .success-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .check-icon {
-            font-size: 5rem;
-            color: #10b981;
-            margin-bottom: 1rem;
-            animation: bounce 1s ease infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
+        .success-overlay.active { opacity: 1; pointer-events: auto; }
+        
+        .theme-dark { background-color: #0f172a; color: white; }
+        .theme-dark .card-bg { background-color: #1e293b; border-color: #334155; }
+        .theme-dark .text-dark { color: white; }
+        .theme-dark .text-muted { color: #94a3b8; }
+        .theme-dark .qr-bg { background-color: #f8fafc; padding: 0.5rem; }
+        
+        .theme-light { background-color: #f8fafc; }
+        .theme-light .card-bg { background-color: white; border-color: #f1f5f9; }
+        .theme-light .text-dark { color: #1e293b; }
+        .theme-light .text-muted { color: #64748b; }
+        .theme-light .qr-bg { background-color: white; }
     </style>
 </head>
-<body>
+<body class="flex items-center justify-center min-h-screen p-4 {% if theme == 'premium' %}theme-dark{% else %}theme-light{% endif %}">
+    
+    <input type="hidden" id="txn_id" value="{{ txn_id }}">
+    <input type="hidden" id="api_key" value="{{ api_key }}">
+    <input type="hidden" id="callback_url" value="{{ callback_url }}">
 
-    <div class="checkout-container text-center">
-        <!-- Cancel Button -->
-        <div class="text-left mb-4">
-            <button id="cancelBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors w-full justify-center border-2 border-red-500 shadow-lg shadow-red-500/50">
-                <i class="fas fa-arrow-left"></i> CANCEL & GO BACK
-            </button>
-        </div>
-        <!-- Logo Header -->
-        <div class="mb-6 flex flex-col justify-center items-center gap-2">
-            <h1 class="text-3xl font-black tracking-wider" style="{% if theme=='cyberpunk' %}color:#0f0; text-shadow:0 0 10px #0f0;{% elif theme=='retro' %}color:#000;{% endif %}">{{ display_name }}</h1>
-        </div>
-
-        <div class="{% if theme=='retro' %}text-gray-700{% else %}text-gray-400{% endif %} text-sm mb-1">Paying to UPI</div>
-        <div class="font-bold text-sm mb-6 opacity-70">{{ upi_id }}</div>
-
-        <!-- Amount Box -->
-        <div class="{% if theme=='retro' %}bg-white border-4 border-black shadow-[4px_4px_0px_black] rounded-xl{% elif theme=='cyberpunk' %}border border-[#0f0] bg-black/50 rounded-none shadow-[0_0_10px_#0f0]{% elif theme=='premium' %}bg-white/10 border border-white/20 rounded-3xl backdrop-blur-md shadow-inner{% else %}bg-black/50 border border-white/10 rounded-2xl{% endif %} py-4 mb-6">
-            <div class="{% if theme=='retro' %}text-gray-600{% elif theme=='cyberpunk' %}text-[#0f0]{% else %}text-gray-500{% endif %} text-xs font-bold tracking-widest uppercase mb-1">Amount to Pay</div>
-            <div class="text-4xl font-black {% if theme=='retro' %}text-black{% elif theme=='cyberpunk' %}text-[#0f0] drop-shadow-[0_0_5px_#0f0]{% else %}text-white{% endif %}">â‚¹{{ amount }}</div>
-        </div>
-
-        <!-- QR Code -->
-        <div class="qr-box mb-6">
-            <img src="{{ qr_url }}" alt="UPI QR Code">
-        </div>
-
-        <p class="text-xs text-gray-400 mb-6">Scan QR or click the button below to pay via {% if provider == 'paytm' %}Paytm{% else %}FamPay{% endif %} or any UPI App.</p>
-
-        <!-- Direct Pay Button for Mobile -->
-        <div class="flex flex-col gap-3 mb-6">
-            <a href="{{ payment_url }}" class="btn-pay block w-full py-4 uppercase tracking-widest text-sm flex items-center justify-center gap-2">
-                Pay Now <i class="fas fa-bolt"></i>
-            </a>
-            <div class="text-center text-[#10b981] text-xs font-bold animate-pulse mt-2">
-                <i class="fas fa-circle-notch fa-spin"></i> Automatically verifying payment...
+    <div class="w-full max-w-sm card-bg rounded-3xl shadow-xl overflow-hidden border relative mx-auto">
+        <div class="bg-primary h-28 absolute top-0 w-full {% if theme == 'premium' %}bg-slate-800{% endif %}" id="previewHeader"></div>
+        
+        <div class="relative pt-12 px-6 pb-8 text-center z-10">
+            <div class="w-24 h-24 bg-white rounded-2xl shadow-md mx-auto mb-5 flex items-center justify-center border-4 {% if theme == 'premium' %}border-slate-800{% else %}border-white{% endif %} text-primary font-black text-3xl">
+                {{ display_name[:1].upper() if display_name else 'M' }}
             </div>
-        </div>
-
-        <!-- Timer -->
-        <div class="flex items-center justify-center gap-2 text-sm border-t border-white/10 pt-4 mb-4">
-            <span class="text-gray-400">Expires in:</span>
-            <span class="timer" id="countdown">05:00</span>
-        </div>
-
-        <!-- Hidden inputs for JS polling -->
-        <input type="hidden" id="txn_id" value="{{ txn_id }}">
-        <input type="hidden" id="api_key" value="{{ api_key }}">
-        <input type="hidden" id="callback_url" value="{{ callback_url }}">
-
-                <!-- Custom Error Modal -->
-        <div class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden" id="errorModal">
-            <div class="bg-gray-900 border-2 border-red-500/50 rounded-2xl p-6 w-11/12 max-w-sm text-center shadow-2xl shadow-red-500/20 transform transition-all duration-200 scale-95 opacity-0" id="errorModalContent">
-                <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/30">
-                    <i class="fas fa-exclamation-triangle text-3xl text-red-500"></i>
+            
+            <h2 class="text-2xl font-black text-dark mb-1">{{ display_name if display_name else 'Merchant' }}</h2>
+            <p class="text-sm font-medium text-muted mb-6">Paying for Order #{{ txn_id[-6:] }}</p>
+            
+            <h1 class="text-5xl font-black text-dark mb-8">₹{{ amount }}</h1>
+            
+            <!-- QR Section (Desktop) -->
+            <div id="desktopQrSection">
+                <div class="w-56 h-56 mx-auto rounded-2xl border border-slate-200 mb-6 flex items-center justify-center qr-bg shadow-sm overflow-hidden p-2">
+                    <img src="{{ qr_url }}" alt="QR Code" class="w-full h-full object-contain rounded-xl">
                 </div>
-                <h3 class="text-xl font-black text-white mb-2">Payment Not Found</h3>
-                <p class="text-sm text-gray-400 mb-6">We couldn't verify your payment yet. It might take a few moments for the bank to process. If money was deducted, please wait and try again.</p>
-                <button onclick="closeErrorModal()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-colors">
-                    Try Again
+                <p class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Scan to Pay with</p>
+                <div class="flex justify-center gap-3 mb-6">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg" class="h-5 opacity-70">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" class="h-5 opacity-70">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" class="h-5 opacity-70 hidden">
+                </div>
+            </div>
+            
+            <!-- Mobile Intent Section -->
+            <div id="mobileIntentContainer" class="hidden flex-col gap-3 mb-6">
+                <a href="{{ payment_url }}" class="w-full bg-primary hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-md transition-transform active:scale-95 flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-bolt"></i> Pay ₹{{ amount }} Now
+                </a>
+                <button onclick="showUtrModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-colors text-sm">
+                    I have already paid
                 </button>
             </div>
+            
+            <div class="flex items-center justify-between px-2 mt-4 pt-4 border-t border-slate-200/50">
+                <div class="flex items-center gap-2">
+                    <i class="fa-regular fa-clock text-amber-500"></i>
+                    <span id="countdown" class="text-sm font-bold text-amber-600">05:00</span>
+                </div>
+                <button id="cancelBtn" class="text-xs font-bold text-red-500 hover:text-red-600 transition-colors">Cancel Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual UTR Modal -->
+    <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity opacity-0" id="utrModal">
+        <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl transform scale-95 transition-transform" id="utrModalContent">
+            <div class="p-6">
+                <div class="w-12 h-12 bg-indigo-50 text-primary rounded-full flex items-center justify-center text-xl mb-4">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">Submit Reference No.</h3>
+                <p class="text-sm text-slate-500 mb-6">If you have paid but the screen hasn't updated, please enter the 12-digit UTR/Reference Number below.</p>
+                <input type="text" id="utrInput" placeholder="e.g. 321456789012" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold focus:ring-2 focus:ring-primary outline-none mb-6 text-center tracking-widest">
+                <div class="flex gap-3">
+                    <button onclick="closeUtrModal()" class="flex-1 bg-slate-100 text-slate-700 font-bold py-3 rounded-xl">Close</button>
+                    <button onclick="submitUtrManual()" id="submitUtrBtn" class="flex-1 bg-primary text-white font-bold py-3 rounded-xl">Verify</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Screen -->
+    <div class="success-overlay {% if theme == 'premium' %}theme-dark{% endif %}" id="successScreen">
+        <div class="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center text-5xl mb-6 shadow-lg shadow-emerald-500/20">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        <h2 class="text-3xl font-black text-dark mb-2">Payment <span class="text-emerald-500">Successful!</span></h2>
+        <p class="text-muted font-medium mb-8">₹{{ amount }} has been received.</p>
+        
+        <div class="w-full max-w-xs bg-slate-50 border border-slate-200 rounded-2xl p-5 text-left mb-8 {% if theme == 'premium' %}bg-slate-800 border-slate-700{% endif %}">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Transaction ID</div>
+            <div class="font-mono text-sm font-bold text-dark mb-4">{{ txn_id }}</div>
+            
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">UTR / Ref No.</div>
+            <div class="font-mono text-sm font-bold text-emerald-500" id="success_utr">Fetching...</div>
         </div>
         
-                <!-- UTR Modal -->
-        <div class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden transition-opacity" id="utrModal">
-            <div class="bg-gray-900 border border-blue-500/30 rounded-2xl p-6 w-full max-w-sm mx-4 transform scale-95 opacity-0 transition-all duration-300" id="utrModalContent">
-                <div class="text-blue-500 mb-4 text-center">
-                    <i class="fas fa-file-invoice-dollar text-5xl"></i>
-                </div>
-                <h3 class="text-xl font-bold text-white text-center mb-2">Submit UTR / Ref No</h3>
-                <p class="text-gray-400 text-center mb-4 text-sm">We couldn't verify your payment automatically. Please enter your 12-digit UTR or Reference Number.</p>
-                <input type="text" id="utrInput" placeholder="Enter 12-digit UTR..." class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 mb-4 font-mono text-center">
-                <div class="flex space-x-3">
-                    <button onclick="closeUtrModal()" class="w-1/2 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition-colors">
-                        Cancel
-                    </button>
-                    <button onclick="submitUtrManual()" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors" id="submitUtrBtn">
-                        Submit
-                    </button>
-                </div>
-            </div>
+        <div class="flex items-center gap-2 text-xs font-bold text-slate-400">
+            <i class="fa-solid fa-spinner fa-spin"></i> Redirecting you back...
         </div>
-
-        <!-- Success Screen -->
-        <div class="success-overlay" id="successScreen">
-            <i class="fas fa-check-circle check-icon"></i>
-            <h2 class="text-3xl font-black text-white mb-2">Payment <span class="text-green-500">Successful!</span></h2>
-            <p class="text-gray-400 mb-6 text-sm">Your payment of â‚¹{{ amount }} was received.</p>
-            <div class="bg-white/5 border border-white/10 rounded-xl p-4 w-3/4 text-left">
-                <div class="text-xs text-gray-500 mb-1">Transaction ID</div>
-                <div class="font-mono text-sm text-white mb-3" id="success_txn">{{ txn_id }}</div>
-                <div class="text-xs text-gray-500 mb-1">UTR / Ref No</div>
-                <div class="font-mono text-sm text-green-400" id="success_utr">Fetching...</div>
-            </div>
-        </div>
-
     </div>
 
     <script>
-        // 5 Minute Countdown Timer
         let timeLeft = 300;
         const timerEl = document.getElementById('countdown');
         
@@ -289,13 +139,12 @@
             timeLeft--;
             const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
             const s = (timeLeft % 60).toString().padStart(2, '0');
-            timerEl.textContent = `${m}:${s}`;
+            timerEl.textContent = ${m}:;
 
             if(timeLeft <= 0) {
                 clearInterval(timerInterval);
                 timerEl.textContent = "EXPIRED";
-                timerEl.classList.replace('text-[#faae40]', 'text-red-500');
-                // Automatically mark as failed in backend
+                timerEl.classList.replace('text-amber-600', 'text-red-500');
                 fetch('/api/cancel_txn', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -304,57 +153,36 @@
             }
         }, 1000);
 
-        // Auto-Verify Polling (Checks every 3 seconds)
         const txnId = document.getElementById('txn_id').value;
         const apiKey = document.getElementById('api_key').value;
-
-        function showErrorModal() {
-            const modal = document.getElementById('errorModal');
-            const content = document.getElementById('errorModalContent');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.remove('scale-95', 'opacity-0');
-                content.classList.add('scale-100', 'opacity-100');
-            }, 10);
-        }
-
-        function closeErrorModal() {
-            const modal = document.getElementById('errorModal');
-            const content = document.getElementById('errorModalContent');
-            content.classList.remove('scale-100', 'opacity-100');
-            content.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 200);
-        }
 
         function showUtrModal() {
             const modal = document.getElementById('utrModal');
             const content = document.getElementById('utrModalContent');
             modal.classList.remove('hidden');
             setTimeout(() => {
-                content.classList.remove('scale-95', 'opacity-0');
-                content.classList.add('scale-100', 'opacity-100');
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
             }, 10);
         }
 
         function closeUtrModal() {
             const modal = document.getElementById('utrModal');
             const content = document.getElementById('utrModalContent');
-            content.classList.remove('scale-100', 'opacity-100');
-            content.classList.add('scale-95', 'opacity-0');
+            content.classList.add('scale-95');
+            modal.classList.add('opacity-0');
             setTimeout(() => {
                 modal.classList.add('hidden');
-            }, 200);
+            }, 300);
         }
 
         async function submitUtrManual() {
             const utr = document.getElementById('utrInput').value.trim();
-            if(!utr) return alert("Please enter UTR");
+            if(!utr) return;
             
             const btn = document.getElementById('submitUtrBtn');
             const orig = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
             btn.disabled = true;
             
             try {
@@ -364,35 +192,27 @@
                     body: JSON.stringify({txn_id: txnId, utr: utr})
                 });
                 closeUtrModal();
-                alert("UTR Submitted! Please wait a few seconds for verification.");
-                // Background checkInterval will continue polling and catch it
-            } catch(e) {
-                alert("Error submitting UTR");
-            }
+                // Alert removed, will just poll
+            } catch(e) {}
             btn.innerHTML = orig;
             btn.disabled = false;
         }
-
-        // Manual Verify Button Logic Removed - Fully Automatic Now
         
-        // Mobile Intent Check
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         if(isMobile) {
-            document.getElementById('qrImage').parentElement.style.display = 'none'; // Hide QR Card
+            document.getElementById('desktopQrSection').style.display = 'none';
             document.getElementById('mobileIntentContainer').classList.remove('hidden');
             document.getElementById('mobileIntentContainer').classList.add('flex');
         }
-
         
-        // Cancel Transaction Logic
         async function cancelTxn() {
             const btn = document.getElementById('cancelBtn');
-            if(btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelling...';
+            if(btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
             try {
                 await fetch('/api/cancel_txn', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({txn_id: document.getElementById('txn_id').value})
+                    body: JSON.stringify({txn_id: txnId})
                 });
             } catch(e) {}
             const cb = document.getElementById('callback_url').value;
@@ -406,8 +226,6 @@
         const cBtn = document.getElementById('cancelBtn');
         if(cBtn) cBtn.addEventListener('click', cancelTxn);
 
-
-
         const checkInterval = setInterval(async () => {
             if(timeLeft <= 0) {
                 clearInterval(checkInterval);
@@ -415,11 +233,10 @@
             }
 
             try {
-                const res = await fetch(`/api/verify?api_key=${apiKey}&txn_id=${txnId}`);
+                const res = await fetch(/api/verify?api_key=&txn_id=);
                 const data = await res.json();
                 
                 if (data.status === 'completed') {
-                    // Payment is confirmed!
                     clearInterval(checkInterval);
                     clearInterval(timerInterval);
                     
@@ -434,9 +251,9 @@
                     }
                 }
             } catch (e) {
-                console.error("Polling error", e);
+                console.error(e);
             }
-        }, 1500);
+        }, 2000);
     </script>
 </body>
 </html>

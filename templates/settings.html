@@ -17,12 +17,10 @@
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
             <h3 class="text-base font-bold text-slate-800 mb-4">Current Connection</h3>
             
-            {% if user_info and user_info.api_key %}
+            {% if user_info and user_info.upi_id %}
                 <div class="flex items-center gap-4 mb-6">
                     {% if user_info.provider == 'paytm' %}
-                        <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center border border-blue-100">
-                            <i class="fa-solid fa-p text-blue-500 text-2xl font-bold"></i>
-                        </div>
+                        <div class="w-12 h-12 rounded-xl border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center bg-white"><img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" alt="Paytm" class="w-8 h-8"></div>
                         <div>
                             <h4 class="text-lg font-bold text-slate-800">Paytm Biz</h4>
                             <div class="flex items-center gap-1.5 text-emerald-500 text-xs font-bold mt-1">
@@ -30,9 +28,7 @@
                             </div>
                         </div>
                     {% else %}
-                        <div class="w-12 h-12 rounded-xl bg-yellow-50 flex items-center justify-center border border-yellow-100">
-                            <div class="w-6 h-6 bg-yellow-400 rounded flex items-center justify-center text-white text-sm font-bold">F</div>
-                        </div>
+                        <div class="w-12 h-12 rounded-xl border border-slate-200 overflow-hidden shrink-0"><img src="https://play-lh.googleusercontent.com/uM_lA7b5B-_k5xM_xO0W4s4aYq1u2S8p5X_3Z_t_P5K7o7O_R_1r_n2c_r9d_8Y5=s128-rw" alt="FamPay" class="w-full h-full object-cover"></div>
                         <div>
                             <h4 class="text-lg font-bold text-slate-800">FamPay</h4>
                             <div class="flex items-center gap-1.5 text-emerald-500 text-xs font-bold mt-1">
@@ -68,7 +64,7 @@
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
             <h3 class="text-base font-bold text-slate-800 mb-4">API Credentials</h3>
             
-            {% if user_info and user_info.api_key %}
+            {% if user_info and user_info.upi_id %}
                 <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Secret API Key</p>
                 <div class="flex items-center gap-2">
                     <input type="text" readonly value="{{ user_info.api_key }}" id="apiKeyInput" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-sm font-mono text-slate-700 outline-none">
@@ -89,7 +85,7 @@
     <!-- Connection Form -->
     <div class="lg:col-span-2">
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 h-full">
-            <h3 class="text-base font-bold text-slate-800 mb-6">{% if user_info and user_info.api_key %}Update Connection{% else %}Setup New Connection{% endif %}</h3>
+            <h3 class="text-base font-bold text-slate-800 mb-6">{% if user_info and user_info.upi_id %}Update Connection{% else %}Setup New Connection{% endif %}</h3>
             
             <form id="connectForm" onsubmit="submitConnectForm(event)">
                 <div class="space-y-6">
@@ -98,12 +94,12 @@
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <label class="border rounded-xl p-4 cursor-pointer transition-all flex flex-col items-center gap-3 provider-label">
                                 <input type="radio" name="provider" value="fampay" class="hidden provider-radio" onchange="updateUpiLabel()" {% if not user_info or user_info.provider == 'fampay' %}checked{% endif %}>
-                                <div class="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center text-white text-lg font-bold shadow-sm">F</div>
+                                <div class="w-10 h-10 rounded-lg overflow-hidden border border-slate-100 shadow-sm"><img src="https://play-lh.googleusercontent.com/uM_lA7b5B-_k5xM_xO0W4s4aYq1u2S8p5X_3Z_t_P5K7o7O_R_1r_n2c_r9d_8Y5=s128-rw" alt="FamPay" class="w-full h-full object-cover"></div>
                                 <span class="text-sm font-bold text-slate-700">FamPay</span>
                             </label>
                             <label class="border rounded-xl p-4 cursor-pointer transition-all flex flex-col items-center gap-3 provider-label">
                                 <input type="radio" name="provider" value="paytm" class="hidden provider-radio" onchange="updateUpiLabel()" {% if user_info and user_info.provider == 'paytm' %}checked{% endif %}>
-                                <i class="fa-solid fa-p text-blue-500 text-4xl mt-1 mb-1"></i>
+                                <div class="w-10 h-10 flex items-center justify-center"><img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" alt="Paytm" class="w-full h-full"></div>
                                 <span class="text-sm font-bold text-slate-700">Paytm Biz</span>
                             </label>
                         </div>
@@ -236,3 +232,4 @@
     });
 </script>
 {% endblock %}
+

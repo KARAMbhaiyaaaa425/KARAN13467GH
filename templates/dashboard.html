@@ -1,872 +1,343 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Merchant Dashboard — FamPay PRO</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-/* =========================================================
-   GuruPay Passbook — Merchant Dashboard Theme
-   ========================================================= */
-:root{
-  --paper:#FBF6EA;
-  --paper-line:#E6DCC0;
-  --ink:#16302A;
-  --ink-soft:#3B5348;
-  --ink-grad:linear-gradient(135deg,#16302A 0%,#274F41 100%);
-  --brass:#B8862E;
-  --brass-light:#E8C874;
-  --brass-dark:#8C651C;
-  --stamp-red:#A23B2E;
-  --mint:#2F7A5E;
-  --blue:#1a6fa8;
-  --muted:#8A8267;
-  --card:#FFFEF9;
-  --border:#E7DFC9;
+﻿{% extends 'base.html' %}
 
-  --pg-bg: #FFFFFF;
-  --pg-bg-soft: #FCFAF4;
-  --pg-ink: #1B1F3B;
-  --pg-muted: rgba(27, 31, 59, 0.55);
-  --pg-border: rgba(27, 31, 59, 0.08);
-  --pg-gold: #C9A227;
-  --pg-gold-dark: #A8841F;
-  --pg-gold-soft: rgba(201, 162, 39, 0.12);
-}
-
-body{
-  background:
-    repeating-linear-gradient(180deg, transparent, transparent 37px, var(--paper-line) 38px),
-    var(--paper);
-  font-family:'IBM Plex Sans',sans-serif;
-  color:var(--ink);
-  margin: 0;
-}
-.gp-serif{font-family:'Fraunces',serif;}
-.gp-mono{font-family:'IBM Plex Mono',monospace;}
-
-.dashboard-sidebar {
-    background: var(--pg-bg);
-    border-right: 1px solid var(--pg-border);
-    box-shadow: 4px 0 24px rgba(27, 31, 59, 0.04);
-    width: 264px;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0; left: 0;
-    z-index: 1041;
-}
-
-.sidebar-logo {
-    display: flex;
-    align-items: center;
-    padding: 20px 20px 16px;
-    border-bottom: 1px solid var(--pg-border);
-}
-.logo-link {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-}
-.logo-text {
-    font-size: 20px;
-    font-weight: 900;
-    color: var(--pg-ink);
-}
-.logo-text .text-accent { color: var(--pg-gold); }
-
-.sidebar-nav {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px 12px 0;
-}
-.nav-section-label {
-    font-size: 10px;
-    font-weight: 700;
-    color: rgba(27, 31, 59, 0.35);
-    letter-spacing: 1.5px;
-    padding: 14px 12px 6px;
-    text-transform: uppercase;
-}
-
-.sidebar-menu { list-style: none; padding: 0; margin: 0; }
-.sidebar-menu-item { margin-bottom: 2px; }
-.sidebar-menu-link {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    color: rgba(27, 31, 59, 0.65);
-    text-decoration: none;
-    font-size: 13.5px;
-    font-weight: 500;
-    cursor: pointer;
-}
-.sidebar-menu-item.active .sidebar-menu-link {
-    color: #FFFFFF;
-    background: linear-gradient(135deg, var(--pg-gold), #A8841F);
-    font-weight: 600;
-}
-
-.dashboard-main {
-    margin-left: 264px;
-    min-height: 100vh;
-}
-.dashboard-topbar {
-    background: #FFFFFF;
-    border-bottom: 1px solid rgba(27, 31, 59, 0.08);
-    padding: 16px 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.page-title {
-    font-size: 20px;
-    font-weight: 800;
-    color: #1B1F3B;
-    margin: 0;
-}
-
-/* Sections */
-.content-section { display: none; }
-.content-section.active { display: block; }
-
-/* Passbook Summary Strip */
-.passbook-strip{
-  background:var(--card);border:1px solid var(--border);border-radius:6px;
-  display:flex;flex-wrap:wrap;margin-bottom:22px;
-}
-.pb-entry{
-  flex:1 1 25%;min-width:220px;padding:18px 20px;
-  display:flex;align-items:center;gap:12px;
-}
-.pb-entry + .pb-entry{border-left:1px dashed var(--border);}
-.pb-icon{
-  width:36px;height:36px;border-radius:50%;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  border:1.5px solid currentColor;
-}
-.pb-label{font-size:10.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
-.pb-value{font-family:'IBM Plex Mono',monospace;font-size:21px;font-weight:600;color:var(--ink);}
-
-.ledger-card{
-  background:var(--card);border:1px solid var(--border);border-radius:8px;
-  padding:22px 24px;box-shadow:0 2px 0 var(--border); margin-bottom: 20px;
-}
-.lc-head h4 { font-family:'Fraunces',serif;font-size:17px;font-weight:600;color:var(--ink); margin-bottom: 15px;}
-
-.form-control { background: #FBF6EA; border: 1px solid var(--border); }
-.form-control:focus { background: #fff; border-color: var(--brass); box-shadow: none; }
-.btn-gold { background: var(--pg-gold); color: #fff; font-weight: 600; }
-.btn-gold:hover { background: var(--pg-gold-dark); color: #fff; }
-
-.api-box { background: #16302A; color: #E8C874; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 16px; margin-top: 10px;}
-
-@media (max-width: 768px) {
-    .dashboard-sidebar {
-        position: static;
-        width: 100%;
-        height: auto;
-        border-right: none;
-        border-bottom: 2px solid var(--pg-border);
-    }
-    .dashboard-main {
-        margin-left: 0;
-    }
-    .sidebar-nav {
-        padding-bottom: 12px;
-        overflow-y: visible;
-    }
-    .dashboard-topbar {
-        padding: 12px 16px;
-        flex-direction: column;
-        gap: 10px;
-        align-items: flex-start;
-    }
-    .grid {
-        grid-template-columns: 1fr !important;
-    }
-    .api-sidebar, .api-content-pane {
-        width: 100% !important;
-        float: none !important;
-    }
-}
-</style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-
-<!-- Sidebar -->
-<aside class="dashboard-sidebar">
-    <div class="sidebar-logo">
-        <a href="#" class="logo-link">
-            <span class="logo-text">Fam<span class="text-accent">Pay</span> PRO</span>
-        </a>
+{% block content %}
+<div class="mb-8">
+    <div class="flex justify-between items-end">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Good Morning, {{ user_info.display_name if user_info and user_info.display_name else (user_info.username if user_info else 'Merchant') }} 👋</h1>
+            <p class="text-sm font-medium text-slate-500 mt-1">Here's what's happening with your payments today.</p>
+        </div>
+        <div class="hidden sm:block">
+            <button class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 shadow-sm transition-colors">
+                <i class="fa-regular fa-calendar text-slate-400"></i>
+                07 Sep 2026 - 07 Sep 2026
+                <i class="fa-solid fa-chevron-down text-xs ml-1 text-slate-400"></i>
+            </button>
+        </div>
     </div>
-    <nav class="sidebar-nav">
-        <div class="nav-section-label">MAIN MENU</div>
-        <ul class="sidebar-menu">
-            <li class="sidebar-menu-item active" onclick="switchTab('dashboard', this)">
-                <a class="sidebar-menu-link">
-                    <span class="menu-label">Dashboard</span>
-                </a>
-            </li>
-            <li class="sidebar-menu-item" onclick="switchTab('connect', this)">
-                <a class="sidebar-menu-link">
-                    <span class="menu-label">Connect Accounts</span>
-                </a>
-            </li>
-            <li class="sidebar-menu-item" onclick="switchTab('links', this)">
-                <a class="sidebar-menu-link">
-                    <span class="menu-label">Payment Links</span>
-                </a>
-            </li>
-            <li class="sidebar-menu-item" onclick="switchTab('customize', this)">
-                <a class="sidebar-menu-link">
-                    <span class="menu-label">Customize</span>
-                </a>
-            </li>
-            <li class="sidebar-menu-item" onclick="switchTab('docs', this)">
-                <a class="sidebar-menu-link">
-                    <span class="menu-label">API Docs</span>
-                </a>
-            </li>
-            <li class="sidebar-menu-item">
-                <a class="sidebar-menu-link" href="/webhook_logs">
-                    <span class="menu-label">Webhook Logs</span>
-                </a>
-            </li>
-            <li class="sidebar-menu-item" onclick="switchTab('system-logs', this)">
-                <a class="sidebar-menu-link">
-                    <span class="menu-label"><i class="fas fa-terminal me-2"></i>Live System Logs</span>
-                </a>
-            </li>
-            <li class="sidebar-menu-item mt-4">
-                <a class="sidebar-menu-link text-danger" href="/logout" style="color: #dc3545 !important; font-weight: 600;">
-                    <span class="menu-label"><i class="fas fa-sign-out-alt me-2"></i>Logout</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-</aside>
+</div>
 
-<!-- Content Area -->
-<main class="dashboard-main">
-    <!-- Topbar -->
-    <header class="dashboard-topbar">
-        <div class="topbar-title">
-            <h1 class="page-title" id="topTitle">Dashboard Overview</h1>
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Total Revenue -->
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 flex items-start gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-wallet text-blue-500 text-xl"></i>
         </div>
-        <div class="env-badge" style="background: rgba(40,167,69,0.12); color: #1e7e34; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 12px;">
-            Live Mode
+        <div>
+            <p class="text-sm font-semibold text-slate-500 mb-1">Total Revenue</p>
+            <h3 class="text-2xl font-bold text-slate-800 mb-2">₹ {{ total_amount }}</h3>
+            <p class="text-xs font-semibold text-emerald-500 bg-emerald-50 inline-block px-2 py-0.5 rounded"><i class="fa-solid fa-arrow-trend-up mr-1"></i> +12.5% <span class="text-slate-400 font-medium">from yesterday</span></p>
         </div>
-    </header>
+    </div>
+    
+    <!-- Successful Payments -->
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-emerald-100 flex items-start gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-check text-emerald-500 text-xl"></i>
+        </div>
+        <div>
+            <p class="text-sm font-semibold text-slate-500 mb-1">Successful Payments</p>
+            <h3 class="text-2xl font-bold text-slate-800 mb-2">{{ total_count }}</h3>
+            <p class="text-xs font-semibold text-emerald-500 bg-emerald-50 inline-block px-2 py-0.5 rounded"><i class="fa-solid fa-arrow-trend-up mr-1"></i> +20.0% <span class="text-slate-400 font-medium">from yesterday</span></p>
+        </div>
+    </div>
+    
+    <!-- Pending Payments -->
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-amber-100 flex items-start gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
+            <i class="fa-regular fa-clock text-amber-500 text-xl"></i>
+        </div>
+        <div>
+            <p class="text-sm font-semibold text-slate-500 mb-1">Pending Payments</p>
+            <h3 class="text-2xl font-bold text-slate-800 mb-2">3</h3>
+            <p class="text-xs font-semibold text-red-500 bg-red-50 inline-block px-2 py-0.5 rounded"><i class="fa-solid fa-arrow-trend-down mr-1"></i> -40.0% <span class="text-slate-400 font-medium">from yesterday</span></p>
+        </div>
+    </div>
+    
+    <!-- Failed Payments -->
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-red-100 flex items-start gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-xmark text-red-500 text-xl"></i>
+        </div>
+        <div>
+            <p class="text-sm font-semibold text-slate-500 mb-1">Failed Payments</p>
+            <h3 class="text-2xl font-bold text-slate-800 mb-2">2</h3>
+            <p class="text-xs font-semibold text-emerald-500 bg-emerald-50 inline-block px-2 py-0.5 rounded"><i class="fa-solid fa-arrow-trend-down mr-1"></i> -33.3% <span class="text-slate-400 font-medium">from yesterday</span></p>
+        </div>
+    </div>
+</div>
 
-    <div class="p-3 p-md-4">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+    <!-- Chart Section -->
+    <div class="lg:col-span-2 bg-[#1e293b] rounded-2xl p-6 shadow-lg shadow-slate-200/50">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h3 class="text-lg font-bold text-white mb-1">Revenue Analytics</h3>
+                <p class="text-sm text-slate-400 font-medium">Total revenue over the last 7 days</p>
+            </div>
+            <div class="flex bg-[#334155] rounded-lg p-1">
+                <button class="px-4 py-1.5 text-xs font-bold text-white bg-primary rounded-md shadow">7D</button>
+                <button class="px-4 py-1.5 text-xs font-bold text-slate-300 hover:text-white">30D</button>
+                <button class="px-4 py-1.5 text-xs font-bold text-slate-300 hover:text-white">Custom</button>
+            </div>
+        </div>
         
-        <!-- DASHBOARD SECTION -->
-        <div id="section-dashboard" class="content-section active">
-            <h2 class="gp-serif mb-4">Welcome Back, Merchant!</h2>
-            
-            <div class="passbook-strip">
-                <div class="pb-entry revenue">
-                    <div class="pb-icon" style="color:var(--brass-dark);">₹</div>
-                    <div>
-                        <div class="pb-label">Total Revenue</div>
-                        <div class="pb-value">₹{{ total_amount }}</div>
-                    </div>
-                </div>
-                <div class="pb-entry orders">
-                    <div class="pb-icon" style="color:var(--ink-soft);">#</div>
-                    <div>
-                        <div class="pb-label">Total Success</div>
-                        <div class="pb-value">{{ total_count }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Chart Section -->
-            <div class="ledger-card" style="margin-bottom: 2rem;">
-                <div class="lc-head">
-                    <h4>Revenue Analytics (Last 7 Days)</h4>
-                </div>
-                <div style="position: relative; height:200px; width:100%; padding: 1rem;">
-                    <canvas id="revenueChart"></canvas>
-                </div>
-            </div>
-
-            <div class="ledger-card">
-                <div class="lc-head" style="display: flex; justify-content: space-between; align-items: center;">
-                    <h4>Recent Transactions</h4>
-                    <a href="/export/transactions" class="btn btn-sm btn-outline-secondary" style="font-size: 0.8rem; padding: 0.3rem 0.6rem;"><i class="fas fa-download"></i> Download CSV</a>
-                </div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Amount</th>
-                            <th>UTR Reference</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for t in txns %}
-                        <tr>
-                            <td class="gp-mono">{{ t[0][:15] }}...</td>
-                            <td class="gp-mono" style="color:var(--mint); font-weight:bold;">₹{{ "%.2f"|format(t[1]) }}</td>
-                            <td class="gp-mono text-muted">{{ t[2] if t[2] else 'None' }}</td>
-                            <td>
-                                {% if t[4] == 'completed' %}
-                                <span class="badge bg-success-subtle text-success border border-success px-2 py-1">Success</span>
-                                {% elif t[4] == 'pending' %}
-                                <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-1">Pending</span>
-                                {% else %}
-                                <span class="badge bg-danger-subtle text-danger border border-danger px-2 py-1">Failed</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr><td colspan="4" class="text-center text-muted">No transactions yet.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <div class="relative h-64 w-full">
+            <canvas id="revenueChart"></canvas>
         </div>
-
-        <!-- CONNECT ACCOUNTS SECTION -->
-        <div id="section-connect" class="content-section">
+    </div>
+    
+    <!-- Right Column: Methods & Quick Actions -->
+    <div class="flex flex-col gap-6">
+        <!-- Payment Methods -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 h-full">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-base font-bold text-slate-800">Payment Methods</h3>
+                <a href="#" class="text-xs font-bold text-primary hover:text-indigo-800">View All &rarr;</a>
+            </div>
             
-            <div class="mb-4">
-                <span class="gp-mono text-muted text-uppercase" style="font-size: 10px; font-weight: 600; letter-spacing: 2px;">PASSBOOK · MERCHANT ACCOUNTS</span>
-                <h2 class="gp-serif mt-1 mb-2" style="color: var(--ink); font-weight: 700;"><span class="pb-icon d-inline-flex me-2" style="width: 32px; height: 32px; font-size: 14px; background: var(--ink); color: var(--brass-light); border: none;"><i class="fas fa-university"></i></span>Connect Payment Accounts</h2>
-                <p class="text-muted" style="font-size: 13.5px;">Link FamPay accounts. Enable routing to cycle checkouts between connected accounts.</p>
-                <hr style="border-color: var(--brass); border-width: 2px; opacity: 1;">
-            </div>
-
-            <!-- Routing Banner -->
-            <div class="p-4 rounded-3 mb-5 d-flex justify-content-between align-items-center" style="background: var(--ink-soft); color: var(--paper);">
-                <div>
-                    <div class="gp-mono text-uppercase mb-1" style="font-size: 10px; color: #a4b3ac; letter-spacing: 1px;">ROUTING LEDGER</div>
-                    <div class="gp-serif" style="font-size: 16px; color: var(--brass-light); font-weight: 600;">Round-Robin Routing</div>
-                    <div style="font-size: 12px; color: #a4b3ac; margin-top: 3px;">Cycle payments dynamically across connected accounts</div>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-3 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center">
+                            <div class="w-5 h-5 bg-yellow-400 rounded flex items-center justify-center text-white text-xs font-bold">F</div>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-800 group-hover:text-primary transition-colors">FamPay <span class="ml-2 text-[10px] uppercase tracking-wider font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full {% if not user_info or user_info.provider != 'fampay' %}hidden{% endif %}">Active</span></p>
+                            <p class="text-xs text-slate-500 font-medium">UPI / Wallet / Card</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-sm"></i>
                 </div>
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="routingSwitch" style="width: 40px; height: 20px; cursor: pointer;">
-                </div>
-            </div>
-
-            <div class="d-flex justify-content-between align-items-end mb-3">
-                <h5 class="gp-serif m-0" style="font-weight: 600;">Link New Account</h5>
-                <span class="gp-mono text-muted" style="font-size: 11px; letter-spacing: 1px;">Passbook Entry</span>
-            </div>
-
-            <div class="p-4 rounded mb-5" style="border: 1px dashed var(--brass); background: #fdfaf3;">
-                <div class="gp-mono text-uppercase mb-1" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">NEW CONNECTION</div>
-                <h4 class="gp-serif mb-4" style="font-style: italic; color: var(--ink); font-weight: 600;">Choose a Provider</h4>
                 
-                <form action="/save_account" method="POST">
-                    
-                    {% if error %}
-                    <div class="alert alert-danger fw-bold" role="alert">
-                        ❌ {{ error }}
-                    </div>
-                    {% endif %}
-                    {% if success %}
-                    <div class="alert alert-success fw-bold" role="alert">
-                        ✅ {{ success }}
-                    </div>
-                    {% endif %}
-
-                    <div class="mb-4" style="max-width: 300px;">
-                        <label class="form-label text-muted text-uppercase fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">SELECT PAYMENT PROVIDER</label>
-                        <select name="provider" class="form-select form-control" style="border-color: var(--border); box-shadow: none;" onchange="document.getElementById('upiLabel').innerText = this.value === 'paytm' ? 'Paytm UPI ID' : 'FamPay UPI ID';">
-                            <option value="fampay" {% if user_info and user_info.provider == 'fampay' %}selected{% endif %}>FamPay</option>
-                            <option value="paytm" {% if user_info and user_info.provider == 'paytm' %}selected{% endif %}>Paytm for Business</option>
-                        </select>
-                    </div>
-
-                    <div class="row g-3" style="max-width: 800px;">
-                        <div class="col-md-4">
-                            <label id="upiLabel" class="form-label fw-bold" style="font-size: 13px;">{% if user_info and user_info.provider == 'paytm' %}Paytm UPI ID{% else %}FamPay UPI ID{% endif %}</label>
-                            <input type="text" name="upi_id" class="form-control" value="{{ user_info.upi_id if user_info else '' }}" placeholder="yourname@fam" required>
+                <div class="flex items-center justify-between p-3 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                            <i class="fa-solid fa-p text-blue-500 text-lg font-bold"></i>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold" style="font-size: 13px;">Gmail Address</label>
-                            <input type="email" name="gmail" class="form-control" value="{{ user_info.gmail if user_info else '' }}" placeholder="email@gmail.com" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold" style="font-size: 13px;">Gmail App Password</label>
-                            <input type="password" name="app_pass" class="form-control" value="{{ user_info.app_pass if user_info else '' }}" placeholder="16-digit app password" required>
+                        <div>
+                            <p class="text-sm font-bold text-slate-800 group-hover:text-primary transition-colors">Paytm Business <span class="ml-2 text-[10px] uppercase tracking-wider font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full {% if not user_info or user_info.provider != 'paytm' %}hidden{% endif %}">Active</span></p>
+                            <p class="text-xs text-slate-500 font-medium">UPI / Wallet / Card</p>
                         </div>
                     </div>
-                    
-                    <button type="submit" class="btn btn-gold mt-4 px-4 py-2">Save Account & Generate API Key</button>
-                </form>
-            </div>
-
-            <div class="d-flex justify-content-between align-items-end mb-3">
-                <h5 class="gp-serif m-0" style="font-weight: 600;">Active Connections</h5>
-                <span class="gp-mono text-muted" style="font-size: 11px; letter-spacing: 1px;">{% if user_info and user_info.api_key %}1 Account{% else %}0 Accounts{% endif %}</span>
-            </div>
-
-            {% if user_info and user_info.api_key %}
-            <div class="table-responsive" style="max-width: 400px;">
-                <table class="table table-borderless" style="border-left: 4px solid var(--ink); background: var(--card); border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);">
-                    <tbody style="font-size: 12px;">
-                        <tr style="border-bottom: 1px dashed var(--border);">
-                            <td class="text-muted fw-bold py-3" style="width: 120px;">PROVIDER</td>
-                            <td class="text-end py-3"><span class="badge rounded-pill" style="border: 1px solid #e83e8c; color: #e83e8c; background: transparent; font-weight: 600; letter-spacing: 1px;">{{ user_info.provider | upper if user_info.provider else 'FAMPAY' }}</span></td>
-                        </tr>
-                        <tr style="border-bottom: 1px dashed var(--border);">
-                            <td class="text-muted fw-bold py-3">MID (Gmail)</td>
-                            <td class="text-end fw-bold py-3">{{ user_info.gmail }}</td>
-                        </tr>
-                        <tr style="border-bottom: 1px dashed var(--border);">
-                            <td class="text-muted fw-bold py-3">UPI ID</td>
-                            <td class="text-end fw-bold py-3">{{ user_info.upi_id }}</td>
-                        </tr>
-                        <tr style="border-bottom: 1px dashed var(--border);">
-                            <td class="text-muted fw-bold py-3">API KEY</td>
-                            <td class="text-end gp-mono text-primary py-3" style="word-break: break-all;">{{ user_info.api_key }}</td>
-                        </tr>
-                        <tr style="border-bottom: 1px dashed var(--border);">
-                            <td class="text-muted fw-bold py-3">STATUS</td>
-                            <td class="text-end py-3"><span class="badge rounded-pill" style="border: 1px solid var(--mint); color: var(--mint); background: transparent; font-weight: 600; letter-spacing: 1px;">● ACTIVE</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted fw-bold py-3">ACTION</td>
-                            <td class="text-end py-3">
-                                <a href="/delete_account" class="text-danger" title="Delete Connection" style="text-decoration: none;">
-                                    <i class="fas fa-trash-alt p-2" style="border: 1px solid #f5c2c7; border-radius: 4px; background: #f8d7da;"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="p-4 text-center text-muted border rounded" style="background: var(--card);">
-                No active connections found.
-            </div>
-            {% endif %}
-
-        </div>
-        
-        <!-- PAYMENT LINKS SECTION --><!-- PAYMENT LINKS SECTION -->
-        <div id="section-links" class="content-section">
-            <div class="ledger-card" style="max-width: 500px;">
-                <div class="lc-head">
-                    <h4>Test Payment Link</h4>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-sm"></i>
                 </div>
-                {% if user_info and user_info.api_key %}
-                <p class="text-muted">Generate a live checkout link to test your gateway.</p>
-                <form action="/generate_link" method="POST">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Amount (₹)</label>
-                        <input type="number" name="amount" class="form-control" placeholder="100" required>
+                
+                {% if not user_info or not user_info.api_key %}
+                <div class="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-100 flex items-start gap-3">
+                    <i class="fa-solid fa-circle-exclamation text-amber-500 mt-0.5"></i>
+                    <div>
+                        <p class="text-xs font-bold text-amber-800">Setup Required</p>
+                        <p class="text-[11px] text-amber-700 mt-0.5">Connect your FamPay or Paytm account to start accepting payments automatically.</p>
+                        <button onclick="showConnectModal()" class="mt-2 text-xs font-bold bg-amber-500 text-white px-3 py-1.5 rounded hover:bg-amber-600 transition-colors">Connect Now</button>
                     </div>
-                    <button type="submit" class="btn btn-gold w-100 py-2">Generate Link</button>
-                </form>
-                {% else %}
-                <div class="alert alert-warning">Please Setup your Connect Account first to get an API key!</div>
+                </div>
                 {% endif %}
             </div>
         </div>
         
-        
-        <!-- CUSTOMIZE SECTION -->
-        <div id="section-customize" class="content-section">
-            <div class="ledger-card" style="max-width: 800px;">
-                <div class="lc-head">
-                    <h4>Customize Payment Page</h4>
+        <!-- Live System Status -->
+        <div class="bg-[#1e293b] rounded-2xl p-5 shadow-lg border border-slate-700">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-sm font-bold text-white">Live System Status</h3>
+                <div class="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+                    Operational
                 </div>
-                <p class="text-muted">Choose how your checkout page looks to customers.</p>
-                
-                <form action="/save_customize" method="POST">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Checkout Display Name</label>
-                        <input type="text" name="display_name" class="form-control" value="{{ user_info.display_name if user_info else 'Merchant' }}" placeholder="Business Name" required>
-                        <small class="text-muted">The business name shown to customers. e.g., Karan Bhaiya</small>
+            </div>
+            
+            <div class="space-y-3">
+                <div class="flex justify-between items-center text-xs font-medium border-b border-slate-700 pb-2">
+                    <div class="flex items-center gap-2 text-slate-300">
+                        <i class="fa-solid fa-bolt text-yellow-400 w-4"></i> IMAP Gateway
                     </div>
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-bold mb-3">Payment Page Theme</label>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <div class="p-3 border rounded text-center" style="background: #12141c; color: white;">
-                                    <input type="radio" name="theme" value="default" id="t1" {% if not user_info or user_info.theme == 'default' %}checked{% endif %}>
-                                    <label for="t1" class="fw-bold d-block mt-2">Premium Dark</label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="p-3 border rounded text-center" style="background: #fde047; color: black; border: 3px solid black !important; box-shadow: 4px 4px 0px black;">
-                                    <input type="radio" name="theme" value="retro" id="t2" {% if user_info and user_info.theme == 'retro' %}checked{% endif %}>
-                                    <label for="t2" class="fw-bold d-block mt-2">Neo-Brutalist</label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="p-3 border rounded text-center" style="background: #000; color: #0f0; box-shadow: 0 0 10px #0f0;">
-                                    <input type="radio" name="theme" value="cyberpunk" id="t3" {% if user_info and user_info.theme == 'cyberpunk' %}checked{% endif %}>
-                                    <label for="t3" class="fw-bold d-block mt-2">Cyberpunk Neon</label>
-                                </div>
-                            </div>
-                        </div>
+                    <span class="text-emerald-400">Working</span>
+                </div>
+                <div class="flex justify-between items-center text-xs font-medium pb-1">
+                    <div class="flex items-center gap-2 text-slate-300">
+                        <i class="fa-solid fa-shield-halved text-blue-400 w-4"></i> Webhooks
                     </div>
-                    
-                    <button type="submit" class="btn btn-gold w-100 py-2">Save Customizations</button>
-                </form>
+                    <span class="text-emerald-400">Working</span>
+                </div>
             </div>
         </div>
-
-        <!-- DOCS SECTION -->
-        <div id="section-docs" class="content-section">
-            <div class="mb-4">
-                <span class="gp-mono text-muted text-uppercase" style="font-size: 10px; font-weight: 600; letter-spacing: 2px;">DEVELOPER · LEDGER · CREDENTIALS</span>
-                <h2 class="gp-serif mt-1 mb-2" style="color: var(--ink); font-weight: 700;"><span class="pb-icon d-inline-flex me-2" style="width: 32px; height: 32px; font-size: 14px; background: var(--ink); color: var(--brass-light); border: none;"><i class="fas fa-key"></i></span>Developer Console</h2>
-                <p class="text-muted" style="font-size: 13.5px;">Integrate FamPay Payment Gateway into your app using our REST API.</p>
-                <hr style="border-color: var(--brass); border-width: 2px; opacity: 1;">
-            </div>
-
-            <div class="row g-4">
-                <!-- Left Column: API Keys -->
-                <div class="col-lg-5">
-                    <div class="p-4 rounded mb-4" style="border: 1px solid var(--border); background: var(--card);">
-                        <h5 class="gp-serif" style="font-weight: 600;"><i class="fas fa-link text-muted me-2" style="font-size:14px;"></i>API Keys</h5>
-                        <p class="text-muted mb-4" style="font-size: 13px;">Manage your API credentials & settings</p>
-                        
-                        <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;"><i class="fas fa-bolt me-1"></i> FAMKEY</div>
-                        
-                        {% if user_info and user_info.api_key %}
-                        <div class="d-flex justify-content-between align-items-center p-3 rounded mb-3" style="background: var(--ink); color: var(--brass-light); font-family: monospace; font-size: 13px;">
-                            <span id="apiKeyText">{{ user_info.api_key }}</span>
-                            <i class="far fa-copy" style="cursor: pointer;" onclick="navigator.clipboard.writeText('{{ user_info.api_key }}'); alert('Copied!');"></i>
-                        </div>
-                        <p class="text-muted mb-2" style="font-size: 12px;"><i class="fas fa-info-circle text-warning me-1"></i> Your unique API key for authentication. Send this as `api_key` param in every request.</p>
-                          <form method="POST" action="/regenerate_key" onsubmit="return confirm('Are you sure you want to regenerate your API Key? All existing integrations will break instantly!');">
-                              <button type="submit" class="btn btn-sm btn-outline-danger mb-4" style="font-size: 11px; font-weight: 600;"><i class="fas fa-sync-alt me-1"></i>Regenerate Key</button>
-                          </form>
-                        {% else %}
-                        <div class="p-3 rounded mb-3 text-center text-muted" style="background: #f1eada; border: 1px dashed var(--border);">
-                            Please Connect Account first to generate API Key.
-                        </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="p-4 rounded" style="background: var(--ink); color: var(--paper); border-top: 4px dashed var(--brass-dark);">
-                        <h6 class="gp-serif mb-2" style="color: var(--brass-light); font-style: italic;"><i class="fas fa-code me-2"></i>Integration Note</h6>
-                        <p style="font-size: 12.5px; margin: 0; opacity: 0.9;">FamPay PRO uses a single API key for all requests. No separate secret key required. Keep your key secure and do not share it.</p>
-                    </div>
-                </div>
-
-                <!-- Right Column: API Guide -->
-                <div class="col-lg-7">
-                    <div class="p-0 rounded" style="background: transparent;">
-                        <h5 class="gp-serif mb-4" style="font-weight: 600;"><i class="fas fa-book-open text-muted me-2" style="font-size:14px;"></i>API Integration Guide</h5>
-                        
-                        <!-- Tabs -->
-                        <ul class="nav nav-tabs mb-4" style="border-bottom-color: var(--border);">
-                            <li class="nav-item">
-                                <a class="nav-link active fw-bold api-tab" id="tab-create" style="color: var(--ink); border-color: var(--border) var(--border) var(--paper); background: var(--paper); cursor: pointer;" onclick="switchApiTab('create', this)">Create Order</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-muted fw-bold api-tab" id="tab-status" style="border-color: transparent; cursor: pointer;" onclick="switchApiTab('status', this)">Check Status</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-muted fw-bold api-tab" id="tab-webhook" style="border-color: transparent; cursor: pointer;" onclick="switchApiTab('webhook', this)">Webhook Payload</a>
-                            </li>
-                        </ul>
-
-                        <!-- Content: Create Order -->
-                        <div id="content-create" class="api-content">
-                            <div class="d-flex align-items-center gap-3 mb-4 p-2 rounded" style="background: var(--card); border: 1px solid var(--border);">
-                                <span class="badge" style="background: var(--paper); border: 1px solid var(--mint); color: var(--mint); letter-spacing: 1px;">POST</span>
-                                <code style="color: var(--ink); font-size: 13px;">{{ request.host_url.rstrip('/') }}/api/create-order</code>
-                            </div>
-                            <p class="text-muted mb-4" style="font-size: 13px;">Initiates a payment order and returns a secure payment URL to redirect your customer.</p>
-
-                            <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">REQUEST HEADERS</div>
-                            <div class="p-3 rounded mb-4" style="background: var(--ink); color: var(--brass-light); font-family: monospace; font-size: 12px; overflow-x: auto;">
-                                X-Fam-Key: {{ user_info.api_key if user_info else 'YOUR_API_KEY' }}<br>
-                                Content-Type: application/json
-                            </div>
-
-                            <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">JSON REQUEST BODY</div>
-                            <div class="p-3 rounded mb-4" style="background: var(--ink); color: #a4b3ac; font-family: monospace; font-size: 12px; overflow-x: auto;">
-{<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"amount"</span>: <span style="color: var(--paper);">"100.00"</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"order_id"</span>: <span style="color: var(--paper);">"ORD12345"</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"customer_name"</span>: <span style="color: var(--paper);">"Raushan Kumar"</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"callback_url"</span>: <span style="color: var(--paper);">"{{ request.host_url.rstrip('/') }}/callback"</span><br>
-}
-                            </div>
-
-                            <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">RESPONSE BODY</div>
-                            <div class="p-3 rounded" style="background: var(--ink); color: #a4b3ac; font-family: monospace; font-size: 12px; overflow-x: auto;">
-{<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"status"</span>: <span style="color: var(--paper);">"success"</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"payment_url"</span>: <span style="color: var(--paper);">"{{ request.host_url.rstrip('/') }}/pay/LRd7jTF0V2sFyhMyOBzbJLL1S"</span><br>
-}
-                            </div>
-                        </div>
-
-                        <!-- Content: Check Status -->
-                        <div id="content-status" class="api-content" style="display: none;">
-                            <div class="d-flex align-items-center gap-3 mb-4 p-2 rounded" style="background: var(--card); border: 1px solid var(--border);">
-                                <span class="badge" style="background: var(--paper); border: 1px solid #0dcaf0; color: #0dcaf0; letter-spacing: 1px;">GET</span>
-                                <code style="color: var(--ink); font-size: 13px;">{{ request.host_url.rstrip('/') }}/api/verify?api_key={{ user_info.api_key if user_info else 'YOUR_API_KEY' }}&txn_id=FAM172...</code>
-                            </div>
-                            <p class="text-muted mb-4" style="font-size: 13px;">Check the status of a specific transaction ID programmatically.</p>
-
-                            <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">RESPONSE BODY</div>
-                            <div class="p-3 rounded" style="background: var(--ink); color: #a4b3ac; font-family: monospace; font-size: 12px; overflow-x: auto;">
-{<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"status"</span>: <span style="color: var(--paper);">"completed"</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"data"</span>: {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"amount"</span>: <span style="color: var(--paper);">100.0</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"paid_at"</span>: <span style="color: var(--paper);">"2026-08-27T10:15:30"</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"txn_id"</span>: <span style="color: var(--paper);">"FAM1723..."</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"utr"</span>: <span style="color: var(--paper);">"412345678901"</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;}<br>
-}
-                            </div>
-                        </div>
-
-                        <!-- Content: Webhook Payload -->
-                        <div id="content-webhook" class="api-content" style="display: none;">
-                            <p class="text-muted mb-4" style="font-size: 13px;">When a payment is successfully verified, we will instantly send a <code>POST</code> request containing the transaction details to the <code>callback_url</code> you provided during Order Creation.</p>
-                            
-                            <div class="gp-mono text-uppercase mb-2" style="font-size: 10px; color: var(--brass-dark); font-weight: 600; letter-spacing: 1px;">WEBHOOK POST BODY</div>
-                            <div class="p-3 rounded" style="background: var(--ink); color: #a4b3ac; font-family: monospace; font-size: 12px; overflow-x: auto;">
-{<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"amount"</span>: <span style="color: var(--paper);">100.0</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"merchant_order_id"</span>: <span style="color: var(--paper);">"ORD12345"</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"status"</span>: <span style="color: var(--paper);">"success"</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"txn_id"</span>: <span style="color: var(--paper);">"FAM1723..."</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--brass-light);">"utr"</span>: <span style="color: var(--paper);">"412345678901"</span><br>
-}
-                            </div>
-                            <p class="text-muted mt-3" style="font-size: 12px;"><i class="fas fa-lightbulb text-warning me-1"></i> <strong>Tip:</strong> Always verify the payment amount and order ID on your end before fulfilling the order.</p>
-                        </div>
-                    </div>
-                </div>            </div>
-        </div>>
-
     </div>
-<!-- Webhooks SECTION -->
-        <div id="section-webhooks" class="content-section">
-            <h4 class="gp-serif mb-4" style="font-weight: 600;">Webhook Delivery Logs</h4>
-            <div class="p-0 rounded" style="background: var(--card); border: 1px solid var(--border);">
-                <div class="table-responsive">
-                    <table class="table table-borderless table-custom mb-0">
-                        <thead>
-                            <tr>
-                                <th>TIME</th>
-                                <th>TXN ID</th>
-                                <th>ENDPOINT URL</th>
-                                <th>STATUS</th>
-                                <th>ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for log in webhook_logs %}
-                            <tr>
-                                <td class="text-muted">{{ log.created_at.split('.')[0] }}</td>
-                                <td class="gp-mono">{{ log.txn_id }}</td>
-                                <td class="text-muted" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ log.url }}</td>
-                                <td>
-                                    {% if log.status == 'success' %}
-                                    <span class="badge bg-success-subtle text-success border border-success px-2 py-1">Delivered</span>
-                                    {% else %}
-                                    <span class="badge bg-danger-subtle text-danger border border-danger px-2 py-1">Failed</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary" onclick="retryWebhook({{ log.id }}, this)"><i class="fas fa-redo fa-xs"></i> Retry</button>
-                                </td>
-                            </tr>
+</div>
+
+<!-- Transactions Table -->
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-8">
+    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
+        <h3 class="text-lg font-bold text-slate-800">Recent Transactions</h3>
+        <a href="#" class="text-xs font-bold text-primary hover:text-indigo-800">View All Transactions &rarr;</a>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 font-bold border-b border-slate-100">
+                    <th class="py-4 px-6">Order ID</th>
+                    <th class="py-4 px-6">Amount</th>
+                    <th class="py-4 px-6">UTR Reference</th>
+                    <th class="py-4 px-6">Method</th>
+                    <th class="py-4 px-6">Status</th>
+                    <th class="py-4 px-6">Date & Time</th>
+                    <th class="py-4 px-6"></th>
+                </tr>
+            </thead>
+            <tbody class="text-sm font-medium text-slate-700">
+                {% if txns %}
+                    {% for txn in txns %}
+                    <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
+                        <td class="py-4 px-6 font-bold text-slate-800">{{ txn[0] }}</td>
+                        <td class="py-4 px-6 font-bold">₹ {{ "%.2f"|format(txn[1]) }}</td>
+                        <td class="py-4 px-6 text-slate-500">{{ txn[2] or '-' }}</td>
+                        <td class="py-4 px-6">
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 rounded bg-indigo-50 flex items-center justify-center text-primary text-xs">
+                                    <i class="fa-brands fa-google-pay"></i>
+                                </div>
+                                <span>UPI</span>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6">
+                            {% if txn[4] == 'completed' %}
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Success
+                            </span>
+                            {% elif txn[4] == 'pending' %}
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-600 border border-amber-100">
+                                <div class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div> Pending
+                            </span>
                             {% else %}
-                            <tr><td colspan="5" class="text-center text-muted py-4">No webhooks fired yet.</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <!-- SYSTEM LOGS SECTION -->
-        <div id="section-system-logs" class="content-section">
-            <div class="mb-4">
-                <span class="gp-mono text-muted text-uppercase" style="font-size: 10px; font-weight: 600; letter-spacing: 2px;">LIVE MONITORING</span>
-                <h2 class="gp-serif mt-1 mb-2" style="color: var(--ink); font-weight: 700;"><i class="fas fa-terminal me-2"></i>Live System Logs</h2>
-                <p class="text-muted" style="font-size: 13.5px;">View live server output of IMAP email fetching, parsing, and background activity.</p>
-                <hr style="border-color: var(--brass); border-width: 2px; opacity: 1;">
-            </div>
-            
-            <div class="mb-3 d-flex gap-2">
-                <button id="startLogBtn" class="btn btn-dark" onclick="startSystemLogs()"><i class="fas fa-play me-2"></i>Start Log</button>
-                <button id="stopLogBtn" class="btn btn-outline-danger" style="display:none;" onclick="stopSystemLogs()"><i class="fas fa-stop me-2"></i>Stop Log</button>
-            </div>
-            
-            <div id="sysLogTerminal" class="p-3 rounded" style="background: #0f172a; color: #38bdf8; font-family: monospace; font-size: 13px; height: 400px; overflow-y: auto; border: 1px solid #1e293b;">
-                <div class="text-muted mb-2"># System logs will appear here...</div>
-            </div>
-        </div>
-        </div>
-</main>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-red-50 text-red-600 border border-red-100">
+                                <div class="w-1.5 h-1.5 rounded-full bg-red-500"></div> Failed
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-6 text-slate-500">{{ txn[3] or '-' }}</td>
+                        <td class="py-4 px-6 text-right">
+                            <button class="text-slate-400 hover:text-primary transition-colors opacity-0 group-hover:opacity-100"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="py-12 text-center">
+                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4">
+                                <i class="fa-regular fa-folder-open text-2xl text-slate-400"></i>
+                            </div>
+                            <h4 class="text-base font-bold text-slate-800 mb-1">No transactions yet</h4>
+                            <p class="text-sm text-slate-500 mb-4 max-w-sm mx-auto">When you receive payments, they will appear here in real-time.</p>
+                            <form action="/generate_link" method="POST" class="flex items-center justify-center gap-2 max-w-xs mx-auto">
+                                <input type="number" name="amount" placeholder="Amount (₹)" value="10" class="w-24 px-3 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:border-primary">
+                                <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold px-4 py-2 rounded-lg shadow-sm transition-colors">Test Payment</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
 <script>
-    async function retryWebhook(logId, btn) {
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        btn.disabled = true;
-        try {
-            const res = await fetch('/api/retry-webhook/' + logId, {method: 'POST'});
-            const data = await res.json();
-            if(data.status === 'success') {
-                btn.innerHTML = '<i class="fas fa-check text-success"></i> Sent';
-            } else {
-                btn.innerHTML = '<i class="fas fa-times text-danger"></i> Failed';
-            }
-        } catch (e) {
-            btn.innerHTML = 'Error';
-        }
-    }
-
-    let logInterval = null;
-    let lastLogMsg = "";
-
-    async function fetchLogs() {
-        try {
-            const res = await fetch('/api/system_logs');
-            const logs = await res.json();
-            const term = document.getElementById('sysLogTerminal');
-            if (logs.length > 0 && logs[0].msg !== lastLogMsg) {
-                term.innerHTML = '';
-                logs.reverse().forEach(log => {
-                    const div = document.createElement('div');
-                    div.style.marginBottom = '4px';
-                    div.innerHTML = `<span style="color: #64748b;">[${log.time}]</span> <span style="color: #4ade80;">${log.msg}</span>`;
-                    term.appendChild(div);
-                });
-                lastLogMsg = logs[logs.length - 1].msg;
-                term.scrollTop = term.scrollHeight;
-            }
-        } catch (e) {
-            console.error("Failed to fetch logs");
-        }
-    }
-
-    function startSystemLogs() {
-        document.getElementById('startLogBtn').style.display = 'none';
-        document.getElementById('stopLogBtn').style.display = 'inline-block';
-        fetchLogs();
-        logInterval = setInterval(fetchLogs, 1500);
-        document.getElementById('sysLogTerminal').innerHTML += `<div style="color: #fde047;"># LIVE LOGGING STARTED...</div>`;
-    }
-
-    function stopSystemLogs() {
-        document.getElementById('startLogBtn').style.display = 'inline-block';
-        document.getElementById('stopLogBtn').style.display = 'none';
-        clearInterval(logInterval);
-        document.getElementById('sysLogTerminal').innerHTML += `<div style="color: #ef4444;"># LIVE LOGGING STOPPED.</div>`;
-    }
-
-    function switchTab(tabId, el) {
-        // Update sidebar UI
-        document.querySelectorAll('.sidebar-menu-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-
-        // Update content sections
-        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-        document.getElementById('section-' + tabId).classList.add('active');
-
-        // Update Title
-        const titles = {
-            'dashboard': 'Dashboard Overview',
-            'connect': 'Connect Accounts',
-            'links': 'Payment Links',
-            'customize': 'Customize',
-            'docs': 'API Documentation',
-            'webhooks': 'Webhook Logs',
-            'system-logs': 'Live System Logs'
-        };
-        document.getElementById('topTitle').innerText = titles[tabId];
+    // Initialize Chart.js for Revenue Analytics
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('revenueChart').getContext('2d');
         
-        if(tabId !== 'system-logs' && logInterval) {
-            stopSystemLogs();
-        }
-    }
-</script>
+        // Gradient for the area under the line
+        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(79, 70, 229, 0.5)'); // Indigo 600
+        gradient.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
 
-<script>
-    async function retryWebhook(logId, btn) {
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        btn.disabled = true;
-        try {
-            const res = await fetch('/api/retry-webhook/' + logId, {method: 'POST'});
-            const data = await res.json();
-            if(data.status === 'success') {
-                btn.innerHTML = '<i class="fas fa-check text-success"></i> Sent';
-            } else {
-                btn.innerHTML = '<i class="fas fa-times text-danger"></i> Failed';
-            }
-        } catch (e) {
-            btn.innerHTML = 'Error';
-        }
-    }
+        const labels = {{ chart_labels | tojson | safe }};
+        const data = {{ chart_data | tojson | safe }};
 
-    function switchApiTab(tabId, el) {
-        document.querySelectorAll('.api-content').forEach(d => { d.style.display = 'none'; });
-        document.querySelectorAll('.api-tab').forEach(t => {
-            t.classList.remove('active', 'text-ink');
-            t.classList.add('text-muted');
-            t.style.borderColor = 'transparent';
-            t.style.background = 'transparent';
-            t.style.color = ''; 
-        });
-        
-        document.getElementById('content-' + tabId).style.display = 'block';
-        el.classList.add('active');
-        el.classList.remove('text-muted');
-        el.style.color = 'var(--ink)';
-        el.style.borderColor = 'var(--border) var(--border) var(--paper)';
-        el.style.background = 'var(--paper)';
-    }
-
-    // Initialize Chart
-    const ctx = document.getElementById('revenueChart');
-    if (ctx) {
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: {{ chart_labels | safe | default('[]') }},
+                labels: labels,
                 datasets: [{
                     label: 'Revenue (₹)',
-                    data: {{ chart_data | safe | default('[]') }},
-                    borderColor: '#C9A227',
-                    backgroundColor: 'rgba(201, 162, 39, 0.1)',
-                    borderWidth: 2,
+                    data: data,
+                    borderColor: '#818cf8', // Indigo 400
+                    backgroundColor: gradient,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#818cf8',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     fill: true,
-                    tension: 0.4
+                    tension: 0.4 // Smooth curves
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#f8fafc',
+                        padding: 12,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return '₹ ' + context.parsed.y.toLocaleString('en-IN');
+                            }
+                        }
+                    }
                 },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
-                    x: { grid: { display: false } }
-                }
+                    x: {
+                        grid: { display: false, drawBorder: false },
+                        ticks: { color: '#94a3b8', font: { size: 11, family: 'Inter', weight: '500' } }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(148, 163, 184, 0.1)',
+                            drawBorder: false,
+                        },
+                        ticks: {
+                            color: '#94a3b8',
+                            font: { size: 11, family: 'Inter', weight: '500' },
+                            callback: function(value) {
+                                return '₹' + value;
+                            }
+                        },
+                        beginAtZero: true
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
             }
         });
-    }
+        
+        // Show alerts if any (from standard redirects)
+        {% if success %}
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: '{{ success }}',
+            confirmButtonColor: '#4f46e5',
+            timer: 3000,
+            showConfirmButton: false
+        });
+        {% endif %}
+        
+        {% if error %}
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: '{{ error }}',
+            confirmButtonColor: '#ef4444'
+        });
+        {% endif %}
+    });
 </script>
-</body>
-</html>
+{% endblock %}

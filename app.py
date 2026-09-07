@@ -1,4 +1,4 @@
-import os
+﻿import os
 import re
 import time
 import uuid
@@ -105,6 +105,8 @@ def init_db():
     try: c.execute("ALTER TABLE transactions ADD COLUMN customer_name TEXT")
     except: pass
     try: c.execute("ALTER TABLE transactions ADD COLUMN callback_url TEXT")
+    except: pass
+    try: c.execute("ALTER TABLE transactions ADD COLUMN customer_email TEXT")
     except: pass
 
     c.execute('''
@@ -411,6 +413,7 @@ def generate_link():
     user_id = session['user_id']
     amount_raw = request.form.get('amount')
     expiry_mins_raw = request.form.get('expiry', '1440')
+    customer_email = request.form.get('customer_email', '')
     user_info = get_user(user_id)
     
     if not user_info or not user_info.get('api_key'):
@@ -432,9 +435,9 @@ def generate_link():
 
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute('''INSERT INTO transactions (txn_id, user_id, amount, status, created_at, expires_at)
-                 VALUES (?, ?, ?, 'pending', ?, ?)''', 
-              (txn_id, user_id, amount, now.isoformat(), expires.isoformat()))
+    c.execute('''INSERT INTO transactions (txn_id, user_id, amount, status, created_at, expires_at, customer_email)
+                 VALUES (?, ?, ?, 'pending', ?, ?, ?)''', 
+              (txn_id, user_id, amount, now.isoformat(), expires.isoformat(), customer_email))
     conn.commit()
     conn.close()
 
@@ -701,6 +704,75 @@ def add_sys_log(user_id, msg):
     except Exception as e:
         print("Log error:", e)
 
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+def send_email_receipt(user_id, customer_email, txn_id, amount, utr, date_str):
+    try:
+        if not customer_email or '@' not in customer_email: return
+        conn = sqlite3.connect(DB_FILE)
+        c = conn.cursor()
+        c.execute("SELECT gmail, app_pass, display_name FROM users WHERE user_id=?", (user_id,))
+        row = c.fetchone()
+        conn.close()
+        if not row: return
+        
+        gmail, app_pass_enc, display_name = row
+        if not gmail or not app_pass_enc: return
+        
+        app_pass = decrypt_pass(app_pass_enc)
+        display_name = display_name if display_name else "Merchant"
+        
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f"Payment Receipt - {display_name}"
+        msg['From'] = f"{display_name} <{gmail}>"
+        msg['To'] = customer_email
+        
+        html = f'''
+        <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f4f4f5; padding: 20px;">
+            <div style="max-w-md mx-auto background-color: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="background-color: #4f46e5; color: white; width: 60px; height: 60px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin-bottom: 10px;">✓</div>
+                    <h2 style="color: #1e293b; margin: 0;">Payment Successful</h2>
+                    <p style="color: #64748b; margin-top: 5px; font-size: 14px;">Receipt from {display_name}</p>
+                </div>
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h1 style="color: #0f172a; font-size: 36px; margin: 0;">₹{amount}</h1>
+                </div>
+                <div style="border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                    <div style="margin-bottom: 10px;">
+                        <span style="color: #64748b; font-size: 12px; text-transform: uppercase;">Transaction ID</span><br>
+                        <strong style="color: #1e293b; font-family: monospace;">{txn_id}</strong>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="color: #64748b; font-size: 12px; text-transform: uppercase;">Bank UTR / Ref No</span><br>
+                        <strong style="color: #10b981; font-family: monospace;">{utr}</strong>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="color: #64748b; font-size: 12px; text-transform: uppercase;">Date</span><br>
+                        <strong style="color: #1e293b;">{date_str}</strong>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 30px; color: #94a3b8; font-size: 12px;">
+                    Powered by NovaPay
+                </div>
+            </div>
+        </body>
+        </html>
+        '''
+        part = MIMEText(html, 'html')
+        msg.attach(part)
+        
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.login(gmail, app_pass)
+        server.sendmail(gmail, customer_email, msg.as_string())
+        server.quit()
+        add_sys_log(user_id, f"Email receipt sent to {customer_email}")
+    except Exception as e:
+        print(f"Email failed: {e}")
+        
 def send_webhook(user_id, callback_url, txn_id, merchant_order_id, amount, utr):
     try:
         conn = sqlite3.connect(DB_FILE)
@@ -834,13 +906,13 @@ def monitor_gmails():
                                     body = payload
 
                             text = str(msg.get("Subject", "")) + " " + body
-                            amt_match = re.search(r'(?:Rs\.?|INR|₹)\s*([\d,]+\.?\d*)', text, re.IGNORECASE)
+                            amt_match = re.search(r'(?:Rs\.?|INR|â‚¹)\s*([\d,]+\.?\d*)', text, re.IGNORECASE)
                             utr_match = re.search(r'(?:UPI\s*Ref|UTR|Txn\s*ID|RRN|Order\s*ID)\s*[:.]?\s*([A-Z0-9]{8,30})', text, re.IGNORECASE)
 
                             if amt_match and utr_match:
                                 amount = float(amt_match.group(1).replace(',', ''))
                                 utr = utr_match.group(1)
-                                add_sys_log(user_id, f"Parsed Payment: ₹{amount} with UTR: {utr}")
+                                add_sys_log(user_id, f"Parsed Payment: â‚¹{amount} with UTR: {utr}")
 
                                 conn_db = sqlite3.connect(DB_FILE)
                                 c_db = conn_db.cursor()
@@ -869,10 +941,22 @@ def monitor_gmails():
                                         
                                 conn_db.close()
                                 
-                                # Fire webhook if completed now
-                                if txn_completed_now and completed_txn[2]:
+                                # Fire webhook and Email if completed now
+                                if txn_completed_now:
                                     add_sys_log(user_id, f"Match Success! Verified Txn ID: {completed_txn[0]}")
-                                    threading.Thread(target=send_webhook, args=(user_id, completed_txn[2], completed_txn[0], completed_txn[3], amount, utr)).start()
+                                    
+                                    # Fetch email just in case
+                                    conn_fetch = sqlite3.connect(DB_FILE)
+                                    c_fetch = conn_fetch.cursor()
+                                    c_fetch.execute("SELECT customer_email FROM transactions WHERE txn_id=?", (completed_txn[0],))
+                                    email_row = c_fetch.fetchone()
+                                    conn_fetch.close()
+                                    
+                                    if email_row and email_row[0]:
+                                        threading.Thread(target=send_email_receipt, args=(user_id, email_row[0], completed_txn[0], amount, utr, now_str)).start()
+                                    
+                                    if completed_txn[2]:
+                                        threading.Thread(target=send_webhook, args=(user_id, completed_txn[2], completed_txn[0], completed_txn[3], amount, utr)).start()
                                     
                 except Exception as e:
                     # If any error (e.g. connection drop), remove from persistent dict to force reconnect next loop
@@ -1013,8 +1097,12 @@ def main():
     t_gmail = threading.Thread(target=monitor_gmails, daemon=True)
     t_gmail.start()
     
-    print(f"🚀 FamPay Web Gateway Running on Port {PORT}...")
+    print(f"ðŸš€ FamPay Web Gateway Running on Port {PORT}...")
     app.run(host='0.0.0.0', port=PORT, debug=False, use_reloader=False)
 
 if __name__ == "__main__":
     main()
+
+
+
+

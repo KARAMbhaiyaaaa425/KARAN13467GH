@@ -98,18 +98,19 @@
         </form>
     </div>
     
-    <!-- Info -->
-    <div class="bg-indigo-50 rounded-2xl p-6 border border-indigo-100 flex flex-col justify-center">
-        <div class="w-12 h-12 bg-white text-primary rounded-xl flex items-center justify-center text-2xl mb-4 shadow-sm">
-            <i class="fa-solid fa-paintbrush"></i>
+    <!-- Live Preview -->
+    <div class="bg-slate-100 rounded-3xl p-4 lg:p-8 flex items-center justify-center border border-slate-200 relative overflow-hidden h-[800px]">
+        <div class="absolute top-4 left-4 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-slate-500 shadow-sm border border-slate-200 z-10 flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+            Live Preview
         </div>
-        <h3 class="text-lg font-black text-slate-800 mb-2">Checkout Themes</h3>
-        <p class="text-sm text-slate-600 mb-4">We've added 4 brand new checkout themes. Save your selection to see the preview live on your payment links.</p>
-        <ul class="text-xs text-slate-500 space-y-2">
-            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i><b>Nova Light/Dark</b> - Card with colored header</li>
-            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i><b>Clean White</b> - Clean background showing your Profile Photo at top (Like screenshot)</li>
-            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i><b>Gradient</b> - A vibrant purple/indigo gradient background with glassmorphism card</li>
-        </ul>
+        
+        <div class="w-full max-w-[360px] h-[720px] bg-white rounded-[2.5rem] shadow-2xl border-[8px] border-slate-800 overflow-hidden relative">
+            <!-- Notch -->
+            <div class="absolute top-0 inset-x-0 h-6 bg-slate-800 rounded-b-3xl w-40 mx-auto z-20"></div>
+            <!-- Iframe -->
+            <iframe src="/preview_checkout" class="w-full h-full border-0 bg-slate-50"></iframe>
+        </div>
     </div>
 </div>
 
@@ -124,4 +125,19 @@ function selectTheme(element, theme) {
     element.querySelector('input').checked = true;
 }
 </script>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.has("success")) {
+        Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: urlParams.get("success"),
+            confirmButtonColor: "#4f46e5",
+            timer: 2000,
+            showConfirmButton: false
+        });
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+</script>
 {% endblock %}
+

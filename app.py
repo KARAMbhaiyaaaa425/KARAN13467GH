@@ -393,12 +393,36 @@ def transactions():
 @login_required
 def generate_link():
     user_id = session['user_id']
-    amount = request.form.get('amount')
-    expiry = request.form.get('expiry', '1440') # Default 1 day in minutes
+    amount_raw = request.form.get('amount')
+    expiry_mins_raw = request.form.get('expiry', '1440')
     user_info = get_user(user_id)
-    if user_info and user_info.get('api_key') and amount:
-        return redirect(f"/pay?api_key={user_info['api_key']}&amount={amount}&expiry={expiry}")
-    return redirect(url_for('payment_links', error='Please connect account first'))
+    
+    if not user_info or not user_info.get('api_key'):
+        return redirect(url_for('payment_links', error='Please connect account first'))
+
+    try:
+        amount = float(amount_raw)
+        if amount <= 0: raise ValueError
+        if amount == int(amount):
+            amount += round(random.uniform(0.01, 0.99), 2)
+        amount = round(amount, 2)
+        expiry_mins = int(expiry_mins_raw)
+    except Exception:
+        return redirect(url_for('payment_links', error='Invalid amount or expiry'))
+
+    txn_id = f"FAM{int(time.time())}{uuid.uuid4().hex[:4].upper()}"
+    now = datetime.now()
+    expires = now + timedelta(minutes=expiry_mins)
+
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute('''INSERT INTO transactions (txn_id, user_id, amount, status, created_at, expires_at)
+                 VALUES (?, ?, ?, 'pending', ?, ?)''', 
+              (txn_id, user_id, amount, now.isoformat(), expires.isoformat()))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('payment_links', success='Payment link generated successfully!'))
 
 # ============================================
 # PAYMENT GATEWAY API & CHECKOUT

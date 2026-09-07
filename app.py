@@ -262,6 +262,13 @@ def dashboard():
                            error=error,
                            success=success)
 
+@app.route('/settings')
+@login_required
+def settings():
+    user_id = session['user_id']
+    user_info = get_user(user_id)
+    return render_template('settings.html', user_info=user_info)
+
 @app.route('/save_account', methods=['POST'])
 @login_required
 def save_account():
@@ -328,7 +335,7 @@ def delete_account():
     c.execute("UPDATE users SET upi_id=NULL, gmail=NULL, app_pass=NULL WHERE user_id=?", (user_id,))
     conn.commit()
     conn.close()
-    return redirect(url_for('dashboard', success='Account Connection Deleted!'))
+    return redirect(url_for('settings', success='Account Connection Deleted!'))
 
 @app.route('/generate_link', methods=['POST'])
 @login_required

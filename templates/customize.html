@@ -10,27 +10,84 @@
     <!-- Form -->
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
         <h3 class="text-base font-bold text-slate-800 mb-6">Brand Settings</h3>
-        <form action="/save_customize" method="POST">
+        <form action="/save_customize" method="POST" enctype="multipart/form-data">
             <div class="space-y-6">
+                <!-- Profile Picture -->
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-full overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center shrink-0">
+                        {% if user_info and user_info.profile_pic %}
+                            <img src="{{ user_info.profile_pic }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <i class="fa-solid fa-camera text-slate-400 text-xl"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Profile Photo</label>
+                        <input type="file" name="profile_pic" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-indigo-50 file:text-primary hover:file:bg-indigo-100 transition-all cursor-pointer">
+                        <p class="text-[11px] text-slate-400 mt-1">Shown on specific templates (JPG, PNG)</p>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">Display Name</label>
                     <input type="text" name="display_name" value="{{ user_info.display_name if user_info and user_info.display_name else 'Merchant' }}" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all shadow-sm" placeholder="e.g. My Awesome Shop">
-                    <p class="text-xs text-slate-500 mt-2">This name will be shown to your customers on the checkout page.</p>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Checkout Theme</label>
-                    <div class="grid grid-cols-2 gap-4">
-                        <label class="border rounded-xl p-4 cursor-pointer flex items-center gap-3 transition-all {% if not user_info or user_info.theme == 'default' %}border-primary bg-indigo-50 ring-2 ring-primary ring-offset-1{% else %}border-slate-200{% endif %}" onclick="selectTheme(this, 'default')">
+                    <label class="block text-sm font-bold text-slate-700 mb-3">Checkout Theme <span class="bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full ml-2">4 New Themes</span></label>
+                    <div class="grid grid-cols-2 gap-3">
+                        
+                        <!-- Theme 1: Default Light -->
+                        <label class="border rounded-xl p-3 cursor-pointer flex items-center gap-3 transition-all {% if not user_info or user_info.theme == 'default' %}border-primary bg-indigo-50 ring-2 ring-primary ring-offset-1{% else %}border-slate-200{% endif %}" onclick="selectTheme(this, 'default')">
                             <input type="radio" name="theme" value="default" class="hidden" {% if not user_info or user_info.theme == 'default' %}checked{% endif %}>
-                            <div class="w-6 h-6 rounded-full bg-slate-100 border border-slate-300"></div>
-                            <span class="text-sm font-bold text-slate-700">Light (Default)</span>
+                            <div class="w-8 h-8 rounded-md bg-white border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+                                <div class="w-full h-3 bg-primary"></div>
+                                <div class="flex-1 w-full bg-white flex items-center justify-center"><div class="w-4 h-4 rounded-sm bg-slate-100"></div></div>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-slate-700 leading-tight">Nova Light</span>
+                                <span class="block text-[10px] text-slate-500">Standard</span>
+                            </div>
                         </label>
-                        <label class="border rounded-xl p-4 cursor-pointer flex items-center gap-3 transition-all {% if user_info and user_info.theme == 'premium' %}border-primary bg-indigo-50 ring-2 ring-primary ring-offset-1{% else %}border-slate-200{% endif %}" onclick="selectTheme(this, 'premium')">
+
+                        <!-- Theme 2: Premium Dark -->
+                        <label class="border rounded-xl p-3 cursor-pointer flex items-center gap-3 transition-all {% if user_info and user_info.theme == 'premium' %}border-primary bg-indigo-50 ring-2 ring-primary ring-offset-1{% else %}border-slate-200{% endif %}" onclick="selectTheme(this, 'premium')">
                             <input type="radio" name="theme" value="premium" class="hidden" {% if user_info and user_info.theme == 'premium' %}checked{% endif %}>
-                            <div class="w-6 h-6 rounded-full bg-slate-900 border border-slate-700"></div>
-                            <span class="text-sm font-bold text-slate-700">Dark (Premium)</span>
+                            <div class="w-8 h-8 rounded-md bg-slate-900 border border-slate-700 shadow-sm flex flex-col overflow-hidden">
+                                <div class="w-full h-3 bg-slate-800 border-b border-slate-700"></div>
+                                <div class="flex-1 w-full flex items-center justify-center"><div class="w-4 h-4 rounded-sm bg-slate-800"></div></div>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-slate-700 leading-tight">Nova Dark</span>
+                                <span class="block text-[10px] text-slate-500">Premium</span>
+                            </div>
                         </label>
+                        
+                        <!-- Theme 3: Clean White (GuruPay) -->
+                        <label class="border rounded-xl p-3 cursor-pointer flex items-center gap-3 transition-all {% if user_info and user_info.theme == 'clean' %}border-primary bg-indigo-50 ring-2 ring-primary ring-offset-1{% else %}border-slate-200{% endif %}" onclick="selectTheme(this, 'clean')">
+                            <input type="radio" name="theme" value="clean" class="hidden" {% if user_info and user_info.theme == 'clean' %}checked{% endif %}>
+                            <div class="w-8 h-8 rounded-md bg-white border border-slate-200 shadow-sm flex flex-col items-center justify-center p-1 gap-1">
+                                <div class="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
+                                <div class="w-5 h-4 bg-slate-100 rounded-sm"></div>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-slate-700 leading-tight">Clean White</span>
+                                <span class="block text-[10px] text-slate-500">With Photo</span>
+                            </div>
+                        </label>
+                        
+                        <!-- Theme 4: Modern Gradient -->
+                        <label class="border rounded-xl p-3 cursor-pointer flex items-center gap-3 transition-all {% if user_info and user_info.theme == 'gradient' %}border-primary bg-indigo-50 ring-2 ring-primary ring-offset-1{% else %}border-slate-200{% endif %}" onclick="selectTheme(this, 'gradient')">
+                            <input type="radio" name="theme" value="gradient" class="hidden" {% if user_info and user_info.theme == 'gradient' %}checked{% endif %}>
+                            <div class="w-8 h-8 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 shadow-sm flex items-center justify-center p-1">
+                                <div class="w-5 h-6 bg-white/20 rounded-sm backdrop-blur-sm border border-white/30"></div>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-slate-700 leading-tight">Gradient</span>
+                                <span class="block text-[10px] text-slate-500">Vibrant</span>
+                            </div>
+                        </label>
+
                     </div>
                 </div>
                 
@@ -41,24 +98,18 @@
         </form>
     </div>
     
-    <!-- Preview -->
-    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200 flex flex-col items-center justify-center min-h-[400px]">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6">Live Preview</h3>
-        <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 relative" id="previewBox">
-            <div class="bg-primary h-24 absolute top-0 w-full" id="previewHeader"></div>
-            <div class="relative pt-10 px-6 pb-8 text-center z-10">
-                <div class="w-20 h-20 bg-white rounded-2xl shadow-md mx-auto mb-4 flex items-center justify-center border-4 border-white text-primary font-bold text-2xl" id="previewLogo">
-                    {{ user_info.display_name[:1].upper() if user_info and user_info.display_name else 'M' }}
-                </div>
-                <h2 class="text-xl font-black text-slate-800 mb-1" id="previewName">{{ user_info.display_name if user_info and user_info.display_name else 'Merchant' }}</h2>
-                <p class="text-sm font-medium text-slate-500 mb-6">Paying for Order #FAM1234</p>
-                <h1 class="text-4xl font-black text-slate-800 mb-8">₹499.00</h1>
-                <div class="w-48 h-48 bg-slate-100 mx-auto rounded-xl border border-slate-200 mb-6 flex items-center justify-center">
-                    <i class="fa-solid fa-qrcode text-6xl text-slate-300"></i>
-                </div>
-                <div class="w-full h-12 bg-primary rounded-xl opacity-50"></div>
-            </div>
+    <!-- Info -->
+    <div class="bg-indigo-50 rounded-2xl p-6 border border-indigo-100 flex flex-col justify-center">
+        <div class="w-12 h-12 bg-white text-primary rounded-xl flex items-center justify-center text-2xl mb-4 shadow-sm">
+            <i class="fa-solid fa-paintbrush"></i>
         </div>
+        <h3 class="text-lg font-black text-slate-800 mb-2">Checkout Themes</h3>
+        <p class="text-sm text-slate-600 mb-4">We've added 4 brand new checkout themes. Save your selection to see the preview live on your payment links.</p>
+        <ul class="text-xs text-slate-500 space-y-2">
+            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i><b>Nova Light/Dark</b> - Card with colored header</li>
+            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i><b>Clean White</b> - Clean background showing your Profile Photo at top (Like screenshot)</li>
+            <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i><b>Gradient</b> - A vibrant purple/indigo gradient background with glassmorphism card</li>
+        </ul>
     </div>
 </div>
 
@@ -71,31 +122,6 @@ function selectTheme(element, theme) {
     element.classList.remove('border-slate-200');
     element.classList.add('border-primary', 'bg-indigo-50', 'ring-2', 'ring-primary', 'ring-offset-1');
     element.querySelector('input').checked = true;
-    
-    // Update preview
-    const box = document.getElementById('previewBox');
-    const name = document.getElementById('previewName');
-    const header = document.getElementById('previewHeader');
-    if (theme === 'premium') {
-        box.classList.remove('bg-white');
-        box.classList.add('bg-slate-900');
-        name.classList.remove('text-slate-800');
-        name.classList.add('text-white');
-        header.classList.remove('bg-primary');
-        header.classList.add('bg-slate-800');
-    } else {
-        box.classList.remove('bg-slate-900');
-        box.classList.add('bg-white');
-        name.classList.remove('text-white');
-        name.classList.add('text-slate-800');
-        header.classList.remove('bg-slate-800');
-        header.classList.add('bg-primary');
-    }
 }
-
-document.querySelector('input[name="display_name"]').addEventListener('input', function(e) {
-    document.getElementById('previewName').innerText = e.target.value || 'Merchant';
-    document.getElementById('previewLogo').innerText = (e.target.value || 'M').charAt(0).toUpperCase();
-});
 </script>
 {% endblock %}

@@ -18,57 +18,110 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; }
         .success-overlay {
             position: fixed; top: 0; left: 0; w-full h-full; z-index: 50;
-            background: rgba(255, 255, 255, 0.95);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
         .success-overlay.active { opacity: 1; pointer-events: auto; }
         
-        .theme-dark { background-color: #0f172a; color: white; }
-        .theme-dark .card-bg { background-color: #1e293b; border-color: #334155; }
-        .theme-dark .text-dark { color: white; }
-        .theme-dark .text-muted { color: #94a3b8; }
-        .theme-dark .qr-bg { background-color: #f8fafc; padding: 0.5rem; }
+        /* Nova Light (default) */
+        .theme-default { background-color: #f8fafc; }
+        .theme-default .card-bg { background-color: white; border-color: #f1f5f9; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+        .theme-default .text-dark { color: #1e293b; }
+        .theme-default .text-muted { color: #64748b; }
+        .theme-default .qr-bg { background-color: white; border: 1px solid #e2e8f0; }
+        .theme-default .success-overlay { background: rgba(255, 255, 255, 0.98); }
         
-        .theme-light { background-color: #f8fafc; }
-        .theme-light .card-bg { background-color: white; border-color: #f1f5f9; }
-        .theme-light .text-dark { color: #1e293b; }
-        .theme-light .text-muted { color: #64748b; }
-        .theme-light .qr-bg { background-color: white; }
+        /* Nova Dark (premium) */
+        .theme-premium { background-color: #0f172a; color: white; }
+        .theme-premium .card-bg { background-color: #1e293b; border-color: #334155; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .theme-premium .text-dark { color: white; }
+        .theme-premium .text-muted { color: #94a3b8; }
+        .theme-premium .qr-bg { background-color: #f8fafc; padding: 0.5rem; }
+        .theme-premium .success-overlay { background: rgba(15, 23, 42, 0.98); }
+        
+        /* Clean White (GuruPay style) */
+        .theme-clean { background-color: #f4f5f7; }
+        .theme-clean .card-bg { background-color: white; border: none; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); border-radius: 24px; }
+        .theme-clean .text-dark { color: #111827; }
+        .theme-clean .text-muted { color: #6b7280; }
+        .theme-clean .qr-bg { background-color: white; border: none; }
+        .theme-clean .success-overlay { background: rgba(255, 255, 255, 0.98); }
+        
+        /* Gradient */
+        .theme-gradient { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
+        .theme-gradient .card-bg { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .theme-gradient .text-dark { color: #1e293b; }
+        .theme-gradient .text-muted { color: #64748b; }
+        .theme-gradient .qr-bg { background-color: white; border: 1px solid #e2e8f0; }
+        .theme-gradient .success-overlay { background: rgba(255, 255, 255, 0.98); }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4 {% if theme == 'premium' %}theme-dark{% else %}theme-light{% endif %}">
+<body class="flex items-center justify-center min-h-screen p-4 sm:p-6 theme-{{ theme }}">
     
     <input type="hidden" id="txn_id" value="{{ txn_id }}">
     <input type="hidden" id="api_key" value="{{ api_key }}">
     <input type="hidden" id="callback_url" value="{{ callback_url }}">
 
-    <div class="w-full max-w-sm card-bg rounded-3xl shadow-xl overflow-hidden border relative mx-auto">
-        <div class="bg-primary h-28 absolute top-0 w-full {% if theme == 'premium' %}bg-slate-800{% endif %}" id="previewHeader"></div>
+    <div class="w-full max-w-sm card-bg rounded-3xl overflow-hidden relative mx-auto pb-4">
         
-        <div class="relative pt-12 px-6 pb-8 text-center z-10">
-            <div class="w-24 h-24 bg-white rounded-2xl shadow-md mx-auto mb-5 flex items-center justify-center border-4 {% if theme == 'premium' %}border-slate-800{% else %}border-white{% endif %} text-primary font-black text-3xl">
-                {{ display_name[:1].upper() if display_name else 'M' }}
-            </div>
+        <!-- Header variations based on theme -->
+        {% if theme == 'default' %}
+            <div class="bg-primary h-28 absolute top-0 w-full" id="previewHeader"></div>
+        {% elif theme == 'premium' %}
+            <div class="bg-slate-800 h-28 absolute top-0 w-full" id="previewHeader"></div>
+        {% endif %}
+        
+        <div class="relative pt-8 px-6 pb-6 text-center z-10">
             
-            <h2 class="text-2xl font-black text-dark mb-1">{{ display_name if display_name else 'Merchant' }}</h2>
+            <!-- Profile Photo / Logo Area -->
+            {% if theme == 'clean' or theme == 'gradient' %}
+                <!-- Circular Avatar (No overlap header) -->
+                {% if profile_pic %}
+                    <img src="{{ profile_pic }}" class="w-16 h-16 rounded-full mx-auto mb-4 object-cover shadow-sm border border-slate-100">
+                {% else %}
+                    <div class="w-16 h-16 bg-slate-100 rounded-full mx-auto mb-4 flex items-center justify-center border border-slate-200 text-slate-400 font-bold text-2xl">
+                        {{ display_name[:1].upper() if display_name else 'M' }}
+                    </div>
+                {% endif %}
+            {% else %}
+                <!-- Overlapping Square Logo -->
+                <div class="w-24 h-24 bg-white rounded-2xl shadow-md mx-auto mb-5 flex items-center justify-center border-4 {% if theme == 'premium' %}border-slate-800{% else %}border-white{% endif %} text-primary font-black text-3xl overflow-hidden">
+                    {% if profile_pic %}
+                        <img src="{{ profile_pic }}" class="w-full h-full object-cover">
+                    {% else %}
+                        {{ display_name[:1].upper() if display_name else 'M' }}
+                    {% endif %}
+                </div>
+            {% endif %}
+            
+            <h2 class="text-2xl font-black text-dark mb-1 tracking-tight">{{ display_name if display_name else 'Merchant' }}</h2>
             <p class="text-sm font-medium text-muted mb-6">Paying for Order #{{ txn_id[-6:] }}</p>
             
-            <h1 class="text-5xl font-black text-dark mb-8">₹{{ amount }}</h1>
+            <h1 class="text-[2.75rem] font-black text-dark mb-6 leading-none">₹{{ amount }}</h1>
+            
+            <!-- Timer above QR for clean theme, else bottom -->
+            {% if theme == 'clean' %}
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <i class="fa-solid fa-spinner fa-spin text-slate-300 text-xs"></i>
+                <span id="countdown_top" class="text-xs font-bold text-slate-500">05:00 mins left</span>
+            </div>
+            {% endif %}
             
             <!-- QR Section (Desktop) -->
             <div id="desktopQrSection">
-                <div class="w-56 h-56 mx-auto rounded-2xl border border-slate-200 mb-6 flex items-center justify-center qr-bg shadow-sm overflow-hidden p-2">
+                <div class="w-56 h-56 mx-auto rounded-2xl mb-4 flex items-center justify-center qr-bg overflow-hidden p-2">
                     <img src="{{ qr_url }}" alt="QR Code" class="w-full h-full object-contain rounded-xl">
                 </div>
-                <p class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Scan to Pay with</p>
-                <div class="flex justify-center items-center gap-4 mb-6">
+                
+                <p class="text-xs font-bold text-muted mb-4 font-mono">{{ user_info.upi_id if user_info else '' }}</p>
+                
+                <div class="flex justify-center items-center gap-4 mb-2">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg" class="h-4 opacity-70">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" class="h-4 opacity-70">
-                    <img src="https://cdn.freelogovectors.net/wp-content/uploads/2023/11/fampay_logo-freelogovectors.net_.png" class="h-5 rounded-md opacity-80" alt="FamPay">
+                    <img src="https://i.ibb.co/bRMDCCVC/279e01e3d0f86ec724cc04e47746cd50-1.jpg" class="h-5 rounded-md opacity-80" alt="FamPay">
                 </div>
             </div>
             
@@ -82,19 +135,23 @@
                 </button>
             </div>
             
-            <div class="flex items-center justify-between px-2 mt-4 pt-4 border-t border-slate-200/50">
+            {% if theme != 'clean' %}
+            <div class="flex items-center justify-between px-2 mt-4 pt-4 border-t border-slate-200/50 {% if theme=='premium' %}border-slate-700{% endif %}">
                 <div class="flex items-center gap-2">
                     <i class="fa-regular fa-clock text-amber-500"></i>
                     <span id="countdown" class="text-sm font-bold text-amber-600">05:00</span>
                 </div>
                 <button id="cancelBtn" class="text-xs font-bold text-red-500 hover:text-red-600 transition-colors">Cancel Payment</button>
             </div>
+            {% else %}
+                <button id="cancelBtn" class="text-xs font-bold text-slate-400 hover:text-red-500 transition-colors mt-2">Cancel Payment</button>
+            {% endif %}
         </div>
     </div>
 
     <!-- Manual UTR Modal -->
-    <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity opacity-0" id="utrModal">
-        <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl transform scale-95 transition-transform" id="utrModalContent">
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity opacity-0" id="utrModal">
+        <div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl transform scale-95 transition-transform" id="utrModalContent">
             <div class="p-6">
                 <div class="w-12 h-12 bg-indigo-50 text-primary rounded-full flex items-center justify-center text-xl mb-4">
                     <i class="fa-solid fa-receipt"></i>
@@ -103,15 +160,15 @@
                 <p class="text-sm text-slate-500 mb-6">If you have paid but the screen hasn't updated, please enter the 12-digit UTR/Reference Number below.</p>
                 <input type="text" id="utrInput" placeholder="e.g. 321456789012" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold focus:ring-2 focus:ring-primary outline-none mb-6 text-center tracking-widest">
                 <div class="flex gap-3">
-                    <button onclick="closeUtrModal()" class="flex-1 bg-slate-100 text-slate-700 font-bold py-3 rounded-xl">Close</button>
-                    <button onclick="submitUtrManual()" id="submitUtrBtn" class="flex-1 bg-primary text-white font-bold py-3 rounded-xl">Verify</button>
+                    <button onclick="closeUtrModal()" class="flex-1 bg-slate-100 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-200">Close</button>
+                    <button onclick="submitUtrManual()" id="submitUtrBtn" class="flex-1 bg-primary text-white font-bold py-3 rounded-xl hover:bg-indigo-700">Verify</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Success Screen -->
-    <div class="success-overlay {% if theme == 'premium' %}theme-dark{% endif %}" id="successScreen">
+    <div class="success-overlay" id="successScreen">
         <div class="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center text-5xl mb-6 shadow-lg shadow-emerald-500/20">
             <i class="fa-solid fa-check"></i>
         </div>
@@ -134,17 +191,20 @@
     <script>
         let timeLeft = 300;
         const timerEl = document.getElementById('countdown');
+        const timerElTop = document.getElementById('countdown_top');
         
         const timerInterval = setInterval(() => {
             timeLeft--;
             const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
             const s = (timeLeft % 60).toString().padStart(2, '0');
-            timerEl.textContent = ${m}:;
+            const timeText = ${m}:;
+            if(timerEl) timerEl.textContent = timeText;
+            if(timerElTop) timerElTop.textContent = timeText + " mins left";
 
             if(timeLeft <= 0) {
                 clearInterval(timerInterval);
-                timerEl.textContent = "EXPIRED";
-                timerEl.classList.replace('text-amber-600', 'text-red-500');
+                if(timerEl) { timerEl.textContent = "EXPIRED"; timerEl.classList.replace('text-amber-600', 'text-red-500'); }
+                if(timerElTop) { timerElTop.textContent = "EXPIRED"; timerElTop.classList.replace('text-slate-500', 'text-red-500'); }
                 fetch('/api/cancel_txn', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -192,7 +252,6 @@
                     body: JSON.stringify({txn_id: txnId, utr: utr})
                 });
                 closeUtrModal();
-                // Alert removed, will just poll
             } catch(e) {}
             btn.innerHTML = orig;
             btn.disabled = false;
@@ -257,5 +316,4 @@
     </script>
 </body>
 </html>
-
 

@@ -702,11 +702,18 @@ def monitor_gmails():
                             body = ""
                             if msg.is_multipart():
                                 for part in msg.walk():
-                                    if part.get_content_type() == "text/plain":
-                                        body = part.get_payload(decode=True).decode('utf-8', errors='ignore')
-                                        break
+                                    ctype = part.get_content_type()
+                                    if ctype == "text/plain":
+                                        body += part.get_payload(decode=True).decode('utf-8', errors='ignore') + " "
+                                    elif ctype == "text/html":
+                                        html = part.get_payload(decode=True).decode('utf-8', errors='ignore')
+                                        body += re.sub(r'<[^>]+>', ' ', html) + " "
                             else:
-                                body = msg.get_payload(decode=True).decode('utf-8', errors='ignore')
+                                payload = msg.get_payload(decode=True).decode('utf-8', errors='ignore')
+                                if msg.get_content_type() == "text/html":
+                                    body = re.sub(r'<[^>]+>', ' ', payload)
+                                else:
+                                    body = payload
 
                             text = str(msg.get("Subject", "")) + " " + body
                             amt_match = re.search(r'(?:Rs\.?|INR|₹)\s*([\d,]+\.?\d*)', text, re.IGNORECASE)

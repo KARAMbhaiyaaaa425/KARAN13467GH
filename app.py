@@ -349,6 +349,8 @@ def payment_links():
     links = c.fetchall()
     conn.close()
     
+    return render_template('payment_links.html', user_info=user_info, links=links)
+    
 @app.route('/transactions')
 @login_required
 def transactions():

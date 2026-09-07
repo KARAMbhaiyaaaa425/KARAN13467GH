@@ -65,6 +65,7 @@
   <span class="text-emerald-400">"amount"</span>: <span class="text-orange-400">499.00</span>, <span class="text-slate-500">// (Required) Float. Amount in INR</span>
   <span class="text-emerald-400">"order_id"</span>: <span class="text-yellow-300">"ORDER_987654"</span>, <span class="text-slate-500">// (Optional) Your internal order ID</span>
   <span class="text-emerald-400">"customer_name"</span>: <span class="text-yellow-300">"John Doe"</span>, <span class="text-slate-500">// (Optional) Customer Name</span>
+  <span class="text-emerald-400">"customer_email"</span>: <span class="text-yellow-300">"john@example.com"</span>, <span class="text-slate-500">// (Optional) Email for automated receipt</span>
   <span class="text-emerald-400">"callback_url"</span>: <span class="text-yellow-300">"https://your-site.com/webhook"</span> <span class="text-slate-500">// (Optional) URL to receive webhooks</span>
 }</pre>
                 </div>
@@ -141,3 +142,4 @@ if signature == headers.get('X-FamGateway-Signature'):
     }
 </script>
 {% endblock %}
+

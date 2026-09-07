@@ -337,15 +337,30 @@ def delete_account():
     conn.close()
     return redirect(url_for('settings', success='Account Connection Deleted!'))
 
+@app.route('/payment_links')
+@login_required
+def payment_links():
+    user_id = session['user_id']
+    user_info = get_user(user_id)
+    
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT txn_id, amount, status, created_at FROM transactions WHERE user_id=? ORDER BY created_at DESC", (user_id,))
+    links = c.fetchall()
+    conn.close()
+    
+    return render_template('payment_links.html', user_info=user_info, links=links)
+
 @app.route('/generate_link', methods=['POST'])
 @login_required
 def generate_link():
     user_id = session['user_id']
     amount = request.form.get('amount')
+    expiry = request.form.get('expiry', '1440') # Default 1 day in minutes
     user_info = get_user(user_id)
     if user_info and user_info.get('api_key') and amount:
-        return redirect(f"/pay?api_key={user_info['api_key']}&amount={amount}")
-    return redirect(url_for('dashboard', error='Please connect account first'))
+        return redirect(f"/pay?api_key={user_info['api_key']}&amount={amount}&expiry={expiry}")
+    return redirect(url_for('payment_links', error='Please connect account first'))
 
 # ============================================
 # PAYMENT GATEWAY API & CHECKOUT
@@ -499,9 +514,15 @@ def checkout_page_legacy():
     except ValueError:
         return "<h1>Error: Invalid amount</h1>", 400
 
+    expiry_mins = request.args.get('expiry', '1440')
+    try:
+        expiry_mins = int(expiry_mins)
+    except ValueError:
+        expiry_mins = 1440
+
     txn_id = f"FAM{int(time.time())}{uuid.uuid4().hex[:4].upper()}"
     now = datetime.now()
-    expires = now + timedelta(minutes=5)
+    expires = now + timedelta(minutes=expiry_mins)
 
     c.execute('''INSERT INTO transactions (txn_id, user_id, amount, status, created_at, expires_at)
                  VALUES (?, ?, ?, 'pending', ?, ?)''', 

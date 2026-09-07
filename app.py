@@ -332,7 +332,7 @@ def delete_account():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     # Just clear the payment details
-    c.execute("UPDATE users SET upi_id=NULL, gmail=NULL, app_pass=NULL WHERE user_id=?", (user_id,))
+    c.execute("UPDATE users SET upi_id=NULL, gmail=NULL, app_pass=NULL, api_key=NULL WHERE user_id=?", (user_id,))
     conn.commit()
     conn.close()
     return redirect(url_for('settings', success='Account Connection Deleted!'))

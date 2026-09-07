@@ -266,17 +266,27 @@ def dashboard():
 @login_required
 def save_account():
     user_id = session['user_id']
-    provider = request.form.get('provider', 'fampay')
-    upi_id = request.form.get('upi_id')
-    gmail = request.form.get('gmail')
-    app_pass = request.form.get('app_pass')
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json
+    
+    if request.is_json:
+        provider = request.json.get('provider', 'fampay')
+        upi_id = request.json.get('upi_id')
+        gmail = request.json.get('gmail')
+        app_pass = request.json.get('app_pass')
+    else:
+        provider = request.form.get('provider', 'fampay')
+        upi_id = request.form.get('upi_id')
+        gmail = request.form.get('gmail')
+        app_pass = request.form.get('app_pass')
     
     if upi_id and gmail and app_pass:
         if '@' not in upi_id:
-            return redirect(url_for('dashboard', error='Invalid UPI ID format! Must contain @'))
+            msg = 'Invalid UPI ID format! Must contain @'
+            return jsonify({'status': 'error', 'message': msg}) if is_ajax else redirect(url_for('dashboard', error=msg))
             
         if '@' not in gmail or '.com' not in gmail:
-            return redirect(url_for('dashboard', error='Invalid Gmail Address!'))
+            msg = 'Invalid Gmail Address!'
+            return jsonify({'status': 'error', 'message': msg}) if is_ajax else redirect(url_for('dashboard', error=msg))
             
         # Verify the IMAP connection instantly
         try:
@@ -285,12 +295,14 @@ def save_account():
             mail.login(gmail, app_pass)
             mail.logout()
         except Exception as e:
-            return redirect(url_for('dashboard', error='Connection Failed! Please check your Gmail App Password.'))
+            msg = 'Connection Failed! Please check your Gmail App Password.'
+            return jsonify({'status': 'error', 'message': msg}) if is_ajax else redirect(url_for('dashboard', error=msg))
             
         save_user_account(user_id, upi_id, gmail, app_pass, provider)
-        return redirect(url_for('dashboard', success='Account Connected & Verified Perfectly!'))
+        msg = 'Account Connected & Verified Perfectly!'
+        return jsonify({'status': 'success', 'message': msg}) if is_ajax else redirect(url_for('dashboard', success=msg))
         
-    return redirect(url_for('dashboard'))
+    return jsonify({'status': 'error', 'message': 'All fields are required.'}) if is_ajax else redirect(url_for('dashboard'))
 
 
 @app.route('/save_customize', methods=['POST'])

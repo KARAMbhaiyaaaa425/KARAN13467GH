@@ -110,6 +110,12 @@ def init_db():
     except: pass
     try: c.execute("ALTER TABLE users ADD COLUMN profile_pic TEXT")
     except: pass
+    try: c.execute("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'merchant'")
+    except: pass
+    try: c.execute("ALTER TABLE users ADD COLUMN plan_name TEXT DEFAULT 'Free'")
+    except: pass
+    try: c.execute("ALTER TABLE users ADD COLUMN plan_expiry TEXT")
+    except: pass
 
     c.execute('''
         CREATE TABLE IF NOT EXISTS webhook_logs (
@@ -138,7 +144,7 @@ def init_db():
 def get_user(user_id):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("SELECT upi_id, gmail, app_pass, api_key, display_name, theme, username, provider, profile_pic FROM users WHERE user_id = ?", (user_id,))
+    c.execute("SELECT upi_id, gmail, app_pass, api_key, display_name, theme, username, provider, profile_pic, role, plan_name, plan_expiry FROM users WHERE user_id = ?", (user_id,))
     row = c.fetchone()
     conn.close()
     if row:
@@ -151,7 +157,10 @@ def get_user(user_id):
             "theme": row[5] or "default",
             "username": row[6],
             "provider": row[7] or "fampay",
-            "profile_pic": row[8] if len(row) > 8 and row[8] else None
+            "profile_pic": row[8] if len(row) > 8 and row[8] else None,
+            "role": row[9] if len(row) > 9 and row[9] else "merchant",
+            "plan_name": row[10] if len(row) > 10 and row[10] else "Free",
+            "plan_expiry": row[11] if len(row) > 11 and row[11] else None
         }
     return None
 
@@ -218,6 +227,79 @@ def register():
         finally:
             conn.close()
     return render_template('register.html')
+
+
+@app.route('/subscription')
+@login_required
+def subscription():
+    user_id = session['user_id']
+    user_info = get_user(user_id)
+    return render_template('subscription.html', user_info=user_info)
+
+@app.route('/admin')
+@login_required
+def admin_panel():
+    user_id = session['user_id']
+    user_info = get_user(user_id)
+    if user_info.get('role') != 'admin':
+        return "<h1>Access Denied</h1><p>You are not an admin.</p>", 403
+    
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT user_id, username, display_name, plan_name, plan_expiry, role FROM users")
+    all_users = c.fetchall()
+    conn.close()
+    return render_template('admin.html', user_info=user_info, all_users=all_users)
+
+@app.route('/admin/update_plan', methods=['POST'])
+@login_required
+def admin_update_plan():
+    user_id = session['user_id']
+    user_info = get_user(user_id)
+    if user_info.get('role') != 'admin': return "Access Denied", 403
+    
+    target_user = request.form.get('target_user')
+    new_plan = request.form.get('new_plan')
+    expiry_days = int(request.form.get('expiry_days', 30))
+    
+    if expiry_days > 0:
+        expiry_date = (datetime.now() + timedelta(days=expiry_days)).isoformat()
+    else:
+        expiry_date = None # Lifetime or free
+        
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("UPDATE users SET plan_name=?, plan_expiry=? WHERE user_id=?", (new_plan, expiry_date, target_user))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin_panel', success='Plan updated successfully'))
+
+@app.route('/admin/make_admin', methods=['POST'])
+@login_required
+def admin_make_admin():
+    user_id = session['user_id']
+    user_info = get_user(user_id)
+    if user_info.get('role') != 'admin': return "Access Denied", 403
+    
+    target_user = request.form.get('target_user')
+    
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("UPDATE users SET role='admin' WHERE user_id=?", (target_user,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin_panel', success='User promoted to admin'))
+
+@app.route('/make_me_admin')
+@login_required
+def make_me_admin():
+    user_id = session['user_id']
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("UPDATE users SET role='admin' WHERE user_id=?", (user_id,))
+    conn.commit()
+    conn.close()
+    return "You are now a Super Admin! <a href='/admin'>Go to Admin Panel</a>"
 
 @app.route('/logout')
 def logout():
@@ -1151,6 +1233,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
 
 
 

@@ -112,7 +112,7 @@
             {% if user_info and user_info.plan_name == 'Micro' %}
                 <button class="plan-btn current-plan-btn"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Current Active Plan</button>
             {% else %}
-                <button class="plan-btn">Subscribe Now</button>
+                <button onclick="showUpgradeAlert()" class="plan-btn">Subscribe Now</button>
             {% endif %}
         </div>
 
@@ -134,7 +134,7 @@
             {% if user_info and user_info.plan_name == 'Starter' %}
                 <button class="plan-btn current-plan-btn"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Current Active Plan</button>
             {% else %}
-                <button class="plan-btn">Subscribe Now</button>
+                <button onclick="showUpgradeAlert()" class="plan-btn">Subscribe Now</button>
             {% endif %}
         </div>
 
@@ -156,7 +156,7 @@
             {% if user_info and user_info.plan_name == 'Basic' %}
                 <button class="plan-btn current-plan-btn"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Current Active Plan</button>
             {% else %}
-                <button class="plan-btn">Subscribe Now</button>
+                <button onclick="showUpgradeAlert()" class="plan-btn">Subscribe Now</button>
             {% endif %}
         </div>
 
@@ -179,7 +179,7 @@
             {% if user_info and user_info.plan_name == 'Growth' %}
                 <button class="plan-btn current-plan-btn"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Current Active Plan</button>
             {% else %}
-                <button class="plan-btn plan-btn-gold">Subscribe Now</button>
+                <button onclick="showUpgradeAlert()" class="plan-btn plan-btn-gold">Subscribe Now</button>
             {% endif %}
         </div>
 
@@ -201,7 +201,7 @@
             {% if user_info and user_info.plan_name == 'Pro' %}
                 <button class="plan-btn current-plan-btn"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Current Active Plan</button>
             {% else %}
-                <button class="plan-btn">Subscribe Now</button>
+                <button onclick="showUpgradeAlert()" class="plan-btn">Subscribe Now</button>
             {% endif %}
         </div>
 
@@ -224,10 +224,22 @@
             {% if user_info and user_info.plan_name == 'Elite' %}
                 <button class="plan-btn current-plan-btn"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Current Active Plan</button>
             {% else %}
-                <button class="plan-btn">Subscribe Now</button>
+                <button onclick="showUpgradeAlert()" class="plan-btn">Subscribe Now</button>
             {% endif %}
         </div>
 
     </div>
 </div>
+<script>
+    function showUpgradeAlert() {
+        Swal.fire({
+            title: 'Upgrade Plan',
+            text: 'To upgrade your subscription, please contact the Admin via WhatsApp at +91 XXXXXXXXXX to complete the payment.',
+            icon: 'info',
+            confirmButtonText: 'Understood',
+            confirmButtonColor: '#1a362b'
+        });
+    }
+</script>
 {% endblock %}
+

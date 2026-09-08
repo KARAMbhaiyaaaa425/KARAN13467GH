@@ -283,6 +283,28 @@ def admin_panel():
     
     return render_template('admin.html', user_info=user_info, all_users=all_users, stats=stats)
 
+
+@app.route('/admin/transactions')
+@login_required
+def admin_transactions():
+    user_id = session['user_id']
+    user_info = get_user(user_id)
+    if user_info.get('role') != 'admin':
+        return "Access Denied", 403
+        
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute('''
+        SELECT t.txn_id, t.amount, t.status, t.created_at, u.display_name, u.username, t.customer_name
+        FROM transactions t
+        LEFT JOIN users u ON t.user_id = u.user_id
+        ORDER BY t.created_at DESC LIMIT 50
+    ''')
+    recent_txns = c.fetchall()
+    conn.close()
+    
+    return render_template('admin_transactions.html', user_info=user_info, txns=recent_txns)
+
 @app.route('/admin/update_plan', methods=['POST'])
 @login_required
 def admin_update_plan():
@@ -1265,6 +1287,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 

@@ -246,10 +246,42 @@ def admin_panel():
     
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
+    
+    # Get all users
     c.execute("SELECT user_id, username, display_name, plan_name, plan_expiry, role FROM users")
     all_users = c.fetchall()
+    
+    # Get Stats
+    c.execute("SELECT COUNT(*) FROM users")
+    total_users = c.fetchone()[0] or 0
+    
+    c.execute("SELECT COUNT(*) FROM transactions")
+    total_orders = c.fetchone()[0] or 0
+    
+    c.execute("SELECT COUNT(*) FROM transactions WHERE status='completed'")
+    successful_orders = c.fetchone()[0] or 0
+    
+    c.execute("SELECT COUNT(*) FROM transactions WHERE status='pending'")
+    pending_orders = c.fetchone()[0] or 0
+    
+    c.execute("SELECT COUNT(*) FROM transactions WHERE status IN ('failed', 'expired')")
+    failed_orders = c.fetchone()[0] or 0
+    
+    c.execute("SELECT SUM(amount) FROM transactions WHERE status='completed'")
+    total_revenue = c.fetchone()[0] or 0.0
+    
     conn.close()
-    return render_template('admin.html', user_info=user_info, all_users=all_users)
+    
+    stats = {
+        "total_revenue": round(total_revenue, 2),
+        "total_users": total_users,
+        "total_orders": total_orders,
+        "successful": successful_orders,
+        "pending": pending_orders,
+        "failed": failed_orders
+    }
+    
+    return render_template('admin.html', user_info=user_info, all_users=all_users, stats=stats)
 
 @app.route('/admin/update_plan', methods=['POST'])
 @login_required
@@ -1233,6 +1265,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 

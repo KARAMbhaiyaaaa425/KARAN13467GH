@@ -223,12 +223,39 @@ def add_sys_log(type_str, msg):
     except:
         pass
 
+PLAN_LIMITS = {
+    'Free': 10000,
+    'Micro': 50000,
+    'Starter': 100000,
+    'Basic': 250000,
+    'Growth': 500000,
+    'Pro': 1000000,
+    'Elite': 5000000
+}
+
 @app.before_request
 def check_maintenance():
     if request.path.startswith('/admin') or request.path.startswith('/static') or request.path == '/api/create-order' or request.path.startswith('/pay'):
         return
     if get_sys_setting('maintenance_mode') == 'true':
         return "<h1>Platform Under Maintenance</h1><p>We are upgrading our systems. Please check back in a few minutes.</p>", 503
+
+@app.before_request
+def check_plan_expiry():
+    if 'user_id' in session and not request.path.startswith('/admin') and not request.path.startswith('/static'):
+        try:
+            conn = sqlite3.connect(DB_FILE)
+            c = conn.cursor()
+            c.execute("SELECT plan_expiry FROM users WHERE user_id=?", (session['user_id'],))
+            row = c.fetchone()
+            if row and row[0]:
+                expiry_date = datetime.fromisoformat(row[0])
+                if datetime.now() > expiry_date:
+                    c.execute("UPDATE users SET plan_name='Free', plan_expiry=NULL WHERE user_id=?", (session['user_id'],))
+                    conn.commit()
+            conn.close()
+        except:
+            pass
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():

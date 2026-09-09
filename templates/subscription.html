@@ -234,12 +234,20 @@
     function showUpgradeAlert() {
         Swal.fire({
             title: 'Upgrade Plan',
-            text: 'To upgrade your subscription, please contact the Admin via WhatsApp at +91 XXXXXXXXXX to complete the payment.',
+            text: 'You will be redirected to WhatsApp to contact the Admin for payment.',
             icon: 'info',
-            confirmButtonText: 'Understood',
-            confirmButtonColor: '#1a362b'
+            showCancelButton: true,
+            confirmButtonText: '<i class="fa-brands fa-whatsapp"></i> Chat Now',
+            confirmButtonColor: '#25D366',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Replace with your actual WhatsApp number
+                window.open('https://wa.me/919999999999?text=Hello%20Admin,%20I%20want%20to%20upgrade%20my%20NovaPay%20subscription%20plan.', '_blank');
+            }
         });
     }
 </script>
 {% endblock %}
+
 

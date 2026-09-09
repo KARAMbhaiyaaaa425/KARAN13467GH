@@ -1,72 +1,149 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Register - FamPay PRO</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - NovaPay Gateway</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { 
+                    colors: { 
+                        primary: '#2563eb', /* Royal Blue */
+                        darkblue: '#1e3a8a',
+                        textMain: '#0f172a'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { background: #FCFAF4; font-family: 'IBM Plex Sans', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .gp-serif { font-family: 'Fraunces', serif; }
-        .auth-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.05); width: 100%; max-width: 400px; border: 1px solid #E7DFC9; }
-        .btn-gold { background: #C9A227; color: white; font-weight: 600; width: 100%; padding: 10px; }
-        .btn-gold:hover { background: #A8841F; color: white; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        }
     </style>
 </head>
-<body>
-    <div class="auth-card">
-        <h2 class="gp-serif text-center mb-4">Create Account</h2>
-        {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endif %}
-        <form method="POST" action="/register" id="regForm">
-            <div class="mb-3">
-                <label class="form-label fw-bold">Username</label>
-                <input type="text" name="username" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label fw-bold">Password</label>
-                <!-- Pattern forces 1 upper, 1 lower, minimum 8 chars -->
-                <input type="password" name="password" class="form-control" 
-                       pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" 
-                       title="Must contain at least one number, one uppercase and lowercase letter, and at least 8 or more characters" required>
-                <small class="text-muted" style="font-size: 11px;">Min 8 chars, 1 uppercase, 1 lowercase.</small>
-            </div>
-            
-            <div class="mb-4">
-                <label class="form-label fw-bold">Security Check</label>
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <div class="p-2 bg-light border rounded text-center fw-bold" style="letter-spacing: 2px; width: 100px; font-size: 18px; user-select: none; background: repeating-linear-gradient(45deg, #f0f0f0, #f0f0f0 10px, #e8e8e8 10px, #e8e8e8 20px);" id="captchaProblem"></div>
-                    <input type="text" class="form-control" id="captchaInput" placeholder="Answer?" required>
+<body class="min-h-screen flex text-slate-800">
+    
+    <!-- Left Side: Branding (Hidden on mobile) -->
+    <div class="hidden lg:flex w-5/12 bg-darkblue text-white flex-col relative overflow-hidden bg-grid">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-900/90 to-blue-600/90 mix-blend-multiply"></div>
+        
+        <div class="relative z-10 p-12 flex flex-col h-full">
+            <div class="flex items-center gap-3 text-2xl font-black mb-16">
+                <div class="w-10 h-10 bg-white text-primary rounded-xl flex items-center justify-center">
+                    <span class="text-xl">N</span>
                 </div>
+                NovaPay™
             </div>
             
-            <button type="submit" class="btn btn-gold">Register</button>
-        </form>
-        <p class="text-center mt-3 text-muted">Already have an account? <a href="/login" style="color: #C9A227;">Login here</a></p>
+            <div class="mt-auto mb-auto">
+                <h1 class="text-5xl font-black mb-2 tracking-tight">Join the future</h1>
+                <h1 class="text-5xl font-black text-blue-400 mb-6 tracking-tight">of payments.</h1>
+                
+                <p class="text-blue-100/80 text-lg mb-10 max-w-md leading-relaxed font-medium">
+                    Create your merchant account today. It takes less than 2 minutes to start accepting UPI payments.
+                </p>
+                
+                <ul class="space-y-4">
+                    <li class="flex items-center gap-3 text-sm font-medium text-blue-50">
+                        <div class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                            <i class="fa-solid fa-check text-[10px]"></i>
+                        </div>
+                        Instant Account Activation
+                    </li>
+                    <li class="flex items-center gap-3 text-sm font-medium text-blue-50">
+                        <div class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                            <i class="fa-solid fa-check text-[10px]"></i>
+                        </div>
+                        Secure & Encrypted
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side: Register Form -->
+    <div class="w-full lg:w-7/12 flex items-center justify-center p-6 sm:p-12 relative overflow-y-auto">
+        <a href="/" class="absolute top-8 left-8 lg:hidden text-slate-500 hover:text-slate-800 text-sm font-bold flex items-center gap-2">
+            <i class="fa-solid fa-chevron-left"></i> Home
+        </a>
+
+        <div class="w-full max-w-md bg-white p-8 sm:p-10 rounded-3xl shadow-2xl shadow-slate-200/50 border border-slate-100 my-8">
+            
+            <div class="flex items-center justify-center gap-2 text-2xl font-black mb-6 text-slate-800 lg:hidden">
+                <span class="text-primary text-3xl">N</span> NovaPay™
+            </div>
+
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight">Create an account</h2>
+                <p class="text-slate-500 text-sm mt-2">Start accepting payments for free</p>
+            </div>
+
+            {% if error %}
+            <div class="bg-red-50 border border-red-100 text-red-600 text-xs font-bold p-3 rounded-xl mb-6 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/register">
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">Business / Display Name</label>
+                    <input type="text" name="display_name" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="E.g. Nova Store" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">Email address or Username</label>
+                    <input type="text" name="username" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="you@example.com" required>
+                </div>
+                
+                <div class="mb-6 relative">
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">Password</label>
+                    <input type="password" name="password" id="password" class="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Create a strong password" required>
+                    <button type="button" onclick="togglePassword()" class="absolute right-3 bottom-2.5 text-slate-400 hover:text-slate-600">
+                        <i class="fa-regular fa-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+
+                <button type="submit" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-md shadow-blue-500/20 text-sm flex items-center justify-center gap-2">
+                    Create Account <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <p class="text-center mt-6 text-sm text-slate-500">
+                Already have an account? <a href="/login" class="text-primary font-bold hover:underline">Sign in</a>
+            </p>
+            
+            <p class="text-center mt-6 text-[10px] text-slate-400">
+                By creating an account, you agree to our <a href="#" class="underline">Terms of Service</a> and <a href="#" class="underline">Privacy Policy</a>.
+            </p>
+        </div>
     </div>
 
     <script>
-        // Simple Math Captcha Generator
-        let num1 = Math.floor(Math.random() * 10) + 1;
-        let num2 = Math.floor(Math.random() * 10) + 1;
-        let correctAns = num1 + num2;
-        
-        document.getElementById('captchaProblem').innerText = `${num1} + ${num2}`;
-        
-        document.getElementById('regForm').addEventListener('submit', function(e) {
-            let userAns = parseInt(document.getElementById('captchaInput').value);
-            if(userAns !== correctAns) {
-                e.preventDefault();
-                alert('Captcha is incorrect! Please try again.');
-                // Refresh Captcha
-                num1 = Math.floor(Math.random() * 10) + 1;
-                num2 = Math.floor(Math.random() * 10) + 1;
-                correctAns = num1 + num2;
-                document.getElementById('captchaProblem').innerText = `${num1} + ${num2}`;
-                document.getElementById('captchaInput').value = '';
+        function togglePassword() {
+            const pwd = document.getElementById('password');
+            const icon = document.getElementById('eyeIcon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                pwd.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
             }
-        });
+        }
     </script>
 </body>
 </html>

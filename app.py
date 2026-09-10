@@ -308,6 +308,12 @@ def admin_settings():
     if g_client_id: set_sys_setting('google_client_id', g_client_id)
     if g_client_secret: set_sys_setting('google_client_secret', g_client_secret)
         
+    yt_link = request.form.get('youtube_link')
+    wa_number = request.form.get('support_whatsapp')
+    
+    if yt_link is not None: set_sys_setting('youtube_link', yt_link)
+    if wa_number is not None: set_sys_setting('support_whatsapp', wa_number)
+        
     return redirect('/admin/settings?success=Settings updated')
 
 @app.route('/admin/settings', methods=['GET'])

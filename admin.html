@@ -123,7 +123,7 @@
                         </td>
                         <td class="p-3">
                             {% if u[4] %}
-                                <span class="text-xs font-medium text-slate-600"><i class="fa-regular fa-calendar mr-1"></i> {{ u[4][:10] }}</span>
+                                <span class="text-xs font-medium text-slate-600"><i class="fa-regular fa-calendar mr-1"></i> {{ u[4][:10] if u[4] else 'N/A' }}</span>
                             {% else %}
                                 <span class="text-xs text-slate-400 font-medium italic">Lifetime</span>
                             {% endif %}

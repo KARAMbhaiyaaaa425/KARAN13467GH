@@ -423,9 +423,6 @@ def register():
     return render_template('register.html')
 
 
-@app.route('/subscription')
-@login_required
-
 @app.route('/my_plan')
 @login_required
 def my_plan():

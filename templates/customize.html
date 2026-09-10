@@ -109,7 +109,7 @@
             <!-- Notch -->
             <div class="absolute top-0 inset-x-0 h-6 bg-slate-800 rounded-b-3xl w-40 mx-auto z-20"></div>
             <!-- Iframe -->
-            <iframe src="/preview_checkout" class="w-full h-full border-0 bg-slate-50"></iframe>
+            <iframe id="previewIframe" src="/preview_checkout" class="w-full h-full border-0 bg-slate-50"></iframe>
         </div>
     </div>
 </div>
@@ -123,6 +123,12 @@ function selectTheme(element, theme) {
     element.classList.remove('border-slate-200');
     element.classList.add('border-primary', 'bg-indigo-50', 'ring-2', 'ring-primary', 'ring-offset-1');
     element.querySelector('input').checked = true;
+    
+    // Live update the iframe!
+    const iframe = document.getElementById('previewIframe');
+    if(iframe) {
+        iframe.src = '/preview_checkout?theme=' + theme;
+    }
 }
 </script>
 <script>

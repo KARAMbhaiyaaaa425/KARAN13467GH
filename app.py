@@ -319,7 +319,8 @@ def admin_settings_view():
     g_client_id = get_sys_setting('google_client_id', '')
     g_client_secret = get_sys_setting('google_client_secret', '')
     yt_link = get_sys_setting('youtube_link', '')
-    return render_template('admin_settings.html', maintenance_mode=m_mode, smtp_email=smtp_email, smtp_pass=smtp_pass, g_client_id=g_client_id, g_client_secret=g_client_secret, yt_link=yt_link)
+    wa_number = get_sys_setting('support_whatsapp', '')
+    return render_template('admin_settings.html', maintenance_mode=m_mode, smtp_email=smtp_email, smtp_pass=smtp_pass, g_client_id=g_client_id, g_client_secret=g_client_secret, yt_link=yt_link, wa_number=wa_number)
 
 @app.route('/admin/logs')
 @admin_required
@@ -498,7 +499,8 @@ def index():
     if 'user_id' in session:
         return redirect(url_for('dashboard'))
     yt_link = get_sys_setting('youtube_link', '')
-    return render_template('index.html', yt_link=yt_link)
+    wa_number = get_sys_setting('support_whatsapp', '')
+    return render_template('index.html', yt_link=yt_link, wa_number=wa_number)
 
 @app.route('/dashboard')
 @login_required

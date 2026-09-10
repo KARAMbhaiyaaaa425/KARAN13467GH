@@ -118,6 +118,17 @@ def init_db():
     except: pass
 
     c.execute("CREATE TABLE IF NOT EXISTS system_settings (key TEXT PRIMARY KEY, value TEXT)")
+
+    c.execute("""CREATE TABLE IF NOT EXISTS payouts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT,
+        amount REAL,
+        status TEXT DEFAULT 'pending',
+        upi_id TEXT,
+        created_at TEXT,
+        updated_at TEXT
+    )""")
+
     c.execute("INSERT OR IGNORE INTO system_settings (key, value) VALUES ('maintenance_mode', 'false')")
     c.execute("INSERT OR IGNORE INTO system_settings (key, value) VALUES ('admin_password', 'admin123')")
     c.execute("CREATE TABLE IF NOT EXISTS system_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT, message TEXT, created_at TEXT)")
@@ -280,16 +291,35 @@ def admin_logout():
 def admin_settings():
     m_mode = request.form.get('maintenance_mode', 'false')
     new_pass = request.form.get('admin_password')
+    smtp_email = request.form.get('admin_smtp_email')
+    smtp_pass = request.form.get('admin_smtp_password')
+    
+    g_client_id = request.form.get('google_client_id')
+    g_client_secret = request.form.get('google_client_secret')
+    
     set_sys_setting('maintenance_mode', m_mode)
     if new_pass and len(new_pass) > 2:
         set_sys_setting('admin_password', new_pass)
+    if smtp_email:
+        set_sys_setting('admin_smtp_email', smtp_email)
+    if smtp_pass:
+        set_sys_setting('admin_smtp_password', encrypt_pass(smtp_pass))
+        
+    if g_client_id: set_sys_setting('google_client_id', g_client_id)
+    if g_client_secret: set_sys_setting('google_client_secret', g_client_secret)
+        
     return redirect('/admin/settings?success=Settings updated')
 
 @app.route('/admin/settings', methods=['GET'])
 @admin_required
 def admin_settings_view():
     m_mode = get_sys_setting('maintenance_mode', 'false')
-    return render_template('admin_settings.html', maintenance_mode=m_mode)
+    smtp_email = get_sys_setting('admin_smtp_email', '')
+    smtp_pass = decrypt_pass(get_sys_setting('admin_smtp_password', '')) or ''
+    g_client_id = get_sys_setting('google_client_id', '')
+    g_client_secret = get_sys_setting('google_client_secret', '')
+    yt_link = get_sys_setting('youtube_link', '')
+    return render_template('admin_settings.html', maintenance_mode=m_mode, smtp_email=smtp_email, smtp_pass=smtp_pass, g_client_id=g_client_id, g_client_secret=g_client_secret, yt_link=yt_link)
 
 @app.route('/admin/logs')
 @admin_required
@@ -467,7 +497,8 @@ def logout():
 def index():
     if 'user_id' in session:
         return redirect(url_for('dashboard'))
-    return render_template('index.html')
+    yt_link = get_sys_setting('youtube_link', '')
+    return render_template('index.html', yt_link=yt_link)
 
 @app.route('/dashboard')
 @login_required

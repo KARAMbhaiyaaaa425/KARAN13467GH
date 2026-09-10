@@ -1,9 +1,9 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FamPay API & UPI Payment Gateway for Developers</title>
+  <title>NovaPay API & UPI Payment Gateway for Developers</title>
   <link rel="stylesheet" href="https://famgateway.in/assets/css/style.css?v=4.6">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script defer src="https://unpkg.com/lucide@latest"></script>
@@ -13,11 +13,13 @@
   });
   </script>
   <link rel="stylesheet" href="https://famgateway.in/assets/css/landing.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
   <header class="nav">
     <div class="shell nav-inner">
-      <a class="brand" href="/" style="padding:0;"><img src="https://famgateway.in/assets/img/logo-navbar-bright.png?v=9.0" alt="FamGateway" style="height:28px;width:auto;display:block;object-fit:contain;"></a>
+      <a class="brand" href="/" style="padding:0;"><img src="https://famgateway.in/assets/img/logo-navbar-bright.png?v=9.0" alt="NovaPay" style="height:28px;width:auto;display:block;object-fit:contain;"></a>
       <ul class="links">
         <li><a href="/#flow">How it works</a></li>
         <li><a href="/#api">API</a></li>
@@ -36,11 +38,11 @@
     <section class="hero">
       <div class="shell hero-grid">
         <div>
-          <div class="hero-eyebrow-wrap"><div class="eyebrow"><svg class="hero-fampay-mark" viewBox="0 0 24 24" aria-label="FamPay">
+          <div class="hero-eyebrow-wrap"><div class="eyebrow"><svg class="hero-fampay-mark" viewBox="0 0 24 24" aria-label="NovaPay">
               <path d="M14.828 23.971a.206.206 0 01-.233-.016c-.646-.407-3.892-2.571-6.089-5.288-1.34-1.677 3.783-4.173 3.783-3.844.005 1.782.5 6.467 2.603 8.747a.268.268 0 01-.013.356l-.051.035M13.48 13.082l4.659-2.119a4.386 4.386 0 002.542-2.636l.581-1.634a.174.174 0 00-.11-.222.171.171 0 00-.125 0l-8.897 3.771.033-.142a.902.902 0 01.439-.626c1.505-.927 6.903-3.686 6.903-3.686a6.592 6.592 0 003.53-4.112L23.444.28a.225.225 0 00-.153-.268.222.222 0 00-.144 0s-8.123 3.156-10.734 4.425C9.8 5.707 7.126 7.34 6.2 12.142c-.376 1.945.313 3.592 1.607 5.46-.006-1.836 4.637-4.02 5.673-4.52zM2.026 4.86C1.289 4.299.662 4.25.553 4.299c-.049-.174.846-.597.956-.707.362-.346.565-.804.988-1.098.863-.611 1.93-.424 2.824.064.455.25 1.709 1.071 1.728 1.112A14.02 14.02 0 018.945 5.38a.241.241 0 010 .314c-.211.203-.418.348-.675.565-1.703 1.43-2.73 5.24-2.746 5.711V12s-.999-5.38-3.498-7.14z" />
-            </svg> Fam Pay & FamPay payment gateway for developers</div></div>
-          <div class="hero-h1-wrap"><h1 style="font-size:clamp(40px, 5vw, 68px);">The <em>100% Free</em> Fam Pay API.</h1></div>
-          <div class="hero-copy-wrap"><p class="hero-copy">Create a Fam Pay (FamPay) payment link, show a UPI QR, and know exactly when the money arrives. FamGateway gives Indian developers a simple path from checkout to confirmation — <b>100% Free Forever with 0% Transaction Fees.</b></p></div>
+            </svg> NovaPay & NovaPay payment gateway for developers</div></div>
+          <div class="hero-h1-wrap"><h1 style="font-size:clamp(40px, 5vw, 68px);">The <em>100% Free</em> NovaPay API.</h1></div>
+          <div class="hero-copy-wrap"><p class="hero-copy">Create a NovaPay (NovaPay) payment link, show a UPI QR, and know exactly when the money arrives. NovaPay gives Indian developers a simple path from checkout to confirmation â€” <b>100% Free Forever with 0% Transaction Fees.</b></p></div>
           <div class="hero-actions-wrap"><div class="hero-actions"><a class="primary" href="/register">Create your free account <span>?</span></a><a class="secondary" href="/dashboard">Dashboard <span>?</span></a></div></div>
           <div class="hero-proof-wrap"><div class="proof"><span><b>?</b> 100% Free Forever</span><span><b>?</b> 0% Transaction Fees</span><span><b>?</b> Unlimited API Calls</span></div></div>
         </div>
@@ -51,17 +53,17 @@
                 <div class="dots"><i></i><i></i><i></i></div><span>pay.php</span><span>LIVE</span>
               </div>
               <div class="product-main">
-                <div class="gateway-brand"><img src="https://famgateway.in/assets/img/logo-dark.png?v=9.0" alt="FamGateway" style="height:24px;width:auto;display:block;object-fit:contain;"></div>
+                <div class="gateway-brand"><img src="https://famgateway.in/assets/img/logo-dark.png?v=9.0" alt="NovaPay" style="height:24px;width:auto;display:block;object-fit:contain;"></div>
                 <div class="product-label">Order total</div>
                 <div class="money">?499 <small>INR</small></div>
                 <div class="pay-card">
                   <div class="pay-row"><span>Order ID</span><b>order_8H2KQ</b></div>
-                  <div class="pay-row"><span>FamPay payment link</span><b>Created</b></div>
+                  <div class="pay-row"><span>NovaPay payment link</span><b>Created</b></div>
                   <div class="pay-row"><span>Verification</span><span class="status"><i></i>Payment received</span></div>
                 </div>
                 <div class="flow">
                   <div>Link created</div><span>?</span>
-                  <div>Pay with FamPay</div><span>?</span>
+                  <div>Pay with NovaPay</div><span>?</span>
                   <div class="active">Confirmed</div>
                 </div>
               </div>
@@ -85,7 +87,7 @@
           <article class="step">
             <div class="step-no">01 / CONNECT</div>
             <h3>Get your API key.</h3>
-            <p>Create an account and connect the Gmail account used for FamPay payment notifications.</p>
+            <p>Create an account and connect the Gmail account used for NovaPay payment notifications.</p>
           </article>
           <article class="step">
             <div class="step-no">02 / CREATE</div>
@@ -102,11 +104,7 @@
     </section>
   </main>
   
-  <footer style="background:#0b1120; color:#94a3b8; padding:64px 0 32px; font-size:14px; border-top:1px solid rgba(255,255,255,0.08);">
-    <div class="shell">
-        <p style="margin:0;">&copy; 2026 FamGateway Pro. Built with ??</p>
-    </div>
-  </footer>
+  
   <script>
     function toggleMobileNav() {
       document.getElementById('mobile-nav').classList.toggle('open');
@@ -118,5 +116,194 @@
     }
     document.querySelectorAll('#mobile-nav a').forEach(a => a.addEventListener('click', closeMobileNav));
   </script>
+
+  <!-- Features Cards Section -->
+  <section class="bg-[#0b1120] py-20 border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      
+      <!-- Card 1 -->
+      <div class="bg-[#1e293b]/50 border border-white/10 rounded-2xl p-8 hover:bg-[#1e293b] transition">
+        <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-6">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3 class="text-white text-xl font-bold mb-4">Zero KYC & GST</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">Start accepting payments instantly. No paperwork, no business registration, and no tax hurdles for freelancers.</p>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="bg-[#1e293b]/50 border border-white/10 rounded-2xl p-8 hover:bg-[#1e293b] transition">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-6">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        </div>
+        <h3 class="text-white text-xl font-bold mb-4">Direct Settlements</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">Money doesn't pass through our servers. It goes straight to your personal UPI ID instantly and securely.</p>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="bg-[#1e293b]/50 border border-white/10 rounded-2xl p-8 hover:bg-[#1e293b] transition">
+        <div class="w-12 h-12 rounded-xl bg-red-500/10 text-red-400 flex items-center justify-center mb-6">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h3 class="text-white text-xl font-bold mb-4">100% Free Forever</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">We don't charge any transaction fees or monthly subscriptions. Keep 100% of your hard-earned revenue.</p>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="bg-[#1e293b]/50 border border-white/10 rounded-2xl p-8 hover:bg-[#1e293b] transition">
+        <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-6">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h3 class="text-white text-xl font-bold mb-4">Instant Webhooks</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">Receive real-time HTTP callbacks on your server the moment a payment is verified. Automate digital delivery flawlessly.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Video Section -->
+  <section class="bg-white py-24">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+      <h2 class="text-4xl font-black text-slate-900 mb-10 tracking-tight">Setting up NovaPay in Minutes</h2>
+      <div class="relative w-full overflow-hidden rounded-2xl shadow-2xl bg-black" style="padding-top: 56.25%;">
+        {% if yt_link %}
+          <iframe class="absolute inset-0 w-full h-full" src="{{ yt_link }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        {% else %}
+          <img src="https://images.unsplash.com/photo-1614064641913-a5f15d90956b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Video Thumbnail" class="absolute inset-0 w-full h-full object-cover opacity-60">
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <div class="w-20 h-20 bg-red-600 rounded-2xl flex items-center justify-center cursor-pointer hover:bg-red-700 transition">
+              <svg class="w-8 h-8 text-white ml-2" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <p class="text-white font-bold mt-4">Video link not set in Admin Panel</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- WhatsApp Support Section -->
+  <section class="bg-[#f8fafc] py-24 border-y border-slate-200">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+      <div class="w-20 h-20 mx-auto bg-emerald-500 rounded-full flex items-center justify-center text-white mb-6 shadow-lg shadow-emerald-500/30">
+        <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.527 1.059 3.597l-.767 2.8 2.872-.753c1.01.621 2.186.947 3.398.948h.005c3.18 0 5.767-2.586 5.768-5.767 0-3.182-2.587-5.769-5.767-5.79zm3.176 8.353c-.151.428-.881.841-1.229.882-.321.037-.735.122-2.457-.597-2.072-.868-3.411-3.003-3.513-3.14-.102-.137-.841-1.121-.841-2.14 0-1.02.529-1.52.719-1.722.19-.202.413-.253.551-.253.138 0 .276.002.396.007.126.006.294-.047.457.347.168.406.577 1.408.629 1.512.053.104.088.225.018.365-.071.14-.106.226-.212.351-.106.126-.226.269-.317.362-.102.102-.213.216-.095.421.118.204.526.87 1.129 1.408.777.693 1.428.91 1.637 1.012.209.102.33.085.452-.054.122-.139.526-.612.666-.822.141-.21.282-.176.474-.104.192.072 1.217.574 1.426.678.209.104.348.156.401.242.053.086.053.5-.098.928z"/></svg>
+      </div>
+      <div class="text-emerald-500 font-bold text-sm tracking-widest uppercase mb-4">Verified Developer Support</div>
+      <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">24/7 WhatsApp Support for API Integration</h2>
+      <p class="text-slate-500 text-lg mb-10 max-w-2xl mx-auto">Building a payment flow can be tricky. That's why we offer direct WhatsApp support to help you integrate the NovaPay UPI Gateway flawlessly. Get instant help from real developers.</p>
+      
+      <div class="flex flex-col sm:flex-row justify-center gap-6 mb-12">
+        <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4 shadow-sm w-full sm:w-auto text-left">
+          <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div><div class="font-bold text-slate-800">Instant Setup Help</div><div class="text-xs text-slate-500">Resolve API errors fast</div></div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4 shadow-sm w-full sm:w-auto text-left">
+          <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div><div class="font-bold text-slate-800">Live Status Tracking</div><div class="text-xs text-slate-500">Help with Webhooks</div></div>
+        </div>
+      </div>
+      
+      <a href="https://wa.me/919999999999" class="inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-lg py-4 px-8 rounded-full shadow-lg shadow-emerald-500/30 transition">Chat with Support Team â†’</a>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="bg-[#0f172a] py-24 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div>
+        <div class="inline-block bg-blue-500/20 text-blue-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-6">âš¡ Get Started in Minutes</div>
+        <h2 class="text-5xl md:text-6xl font-black text-white mb-6 leading-tight tracking-tight">Ready to accept<br>UPI payments?</h2>
+        <p class="text-slate-400 text-lg mb-10">Create an account, generate an API key, and make your first payment link in minutes. No complex banking integration or KYC needed.</p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 mb-8">
+          <a href="/register" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl text-center transition">Get your API key â†’</a>
+          <a href="/api_docs" class="bg-[#1e293b] hover:bg-[#334155] text-white font-bold py-4 px-8 rounded-xl text-center transition border border-slate-700">Read docs</a>
+        </div>
+        
+        <div class="flex flex-wrap gap-4 text-emerald-400 text-sm font-bold">
+          <span>âœ“ 100% Free Forever</span>
+          <span>âœ“ 0% Transaction Fees</span>
+          <span>âœ“ Unlimited API Calls</span>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-[#1e293b] border border-white/5 rounded-2xl p-8">
+          <div class="text-4xl font-black text-white mb-2">2</div>
+          <div class="text-slate-400 text-sm">API calls to complete a payment</div>
+        </div>
+        <div class="bg-[#1e293b] border border-white/5 rounded-2xl p-8">
+          <div class="text-4xl font-black text-white mb-2">99%</div>
+          <div class="text-slate-400 text-sm">Uptime across all endpoints</div>
+        </div>
+        <div class="bg-[#1e293b] border border-white/5 rounded-2xl p-8">
+          <div class="text-4xl font-black text-blue-400 mb-2"><5s</div>
+          <div class="text-slate-400 text-sm">Average payment confirmation</div>
+        </div>
+        <div class="bg-blue-600 border border-blue-500 rounded-2xl p-8">
+          <div class="text-4xl font-black text-white mb-2">UPI</div>
+          <div class="text-blue-100 text-sm">NovaPay powered payments</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Giant Footer -->
+  <footer class="bg-[#0b1120] border-t border-slate-800 pt-20 pb-10">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
+        <div class="lg:col-span-2">
+          <div class="flex items-center gap-2 text-2xl font-black text-white mb-6">
+            <div class="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center text-lg">N</div>
+            NovaPayâ„¢
+          </div>
+          <p class="text-slate-400 text-sm leading-relaxed mb-6 pr-4">Automated UPI Payment verification gateway for developers accepting payments with zero transaction fees.</p>
+          <div class="flex flex-col gap-3">
+            <span class="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-full w-max border border-emerald-500/20"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> All Systems Operational</span>
+            <span class="inline-flex items-center gap-2 bg-slate-800 text-slate-300 text-xs font-bold px-3 py-1.5 rounded-full w-max border border-slate-700"><svg class="w-3 h-3" viewBox="0 0 24 24"><path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/></svg> Add to Preferred Sources</span>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="text-white font-bold mb-6">Resources</h4>
+          <ul class="space-y-4 text-sm text-slate-400">
+            <li><a href="/api_docs" class="hover:text-blue-400 transition">API Documentation</a></li>
+            <li><a href="#" class="hover:text-blue-400 transition">Architecture & Webhooks</a></li>
+            <li><a href="#" class="hover:text-blue-400 transition">Handling Collisions</a></li>
+            <li><a href="#" class="hover:text-blue-400 transition">Security & Anti-Fraud</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-white font-bold mb-6">Legal & Blog</h4>
+          <ul class="space-y-4 text-sm text-slate-400">
+            <li><a href="#" class="text-blue-400 hover:text-blue-300 transition">Blog Hub</a></li>
+            <li><a href="#" class="hover:text-white transition">Terms of Service</a></li>
+            <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+            <li><a href="#" class="text-red-400 hover:text-red-300 transition">Scam Warning</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-white font-bold mb-6">Contact & Community</h4>
+          <ul class="space-y-4 text-sm text-slate-400">
+            <li><a href="#" class="text-emerald-400 hover:text-emerald-300 transition font-bold">WhatsApp Support</a></li>
+            <li><a href="#" class="text-blue-400 hover:text-blue-300 transition font-bold">Telegram (3k+ Devs)</a></li>
+            <li><a href="#" class="text-red-400 hover:text-red-300 transition font-bold">YouTube (1.39k+ Devs)</a></li>
+          </ul>
+          <div class="flex gap-4 mt-6">
+            <a href="#" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-slate-700 hover:text-white transition"><i class="fa-brands fa-linkedin-in"></i></a>
+            <a href="#" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-slate-700 hover:text-white transition"><i class="fa-brands fa-x-twitter"></i></a>
+            <a href="#" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-slate-700 hover:text-white transition"><i class="fa-brands fa-instagram"></i></a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <p class="text-slate-500 text-xs">Â© 2026 NovaPay. Built with â¤ï¸ for Developers. All rights reserved.</p>
+        <p class="text-slate-600 text-[10px] text-center md:text-right max-w-xl">NovaPay is an independent payment verifier. Officially registered under the Ministry of Micro, Small and Medium Enterprises (MSME), Government of India.</p>
+      </div>
+    </div>
+  </footer>
+
 </body>
 </html>
+

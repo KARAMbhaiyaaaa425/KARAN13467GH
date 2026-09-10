@@ -39,12 +39,32 @@
                 <input type="password" name="admin_password" placeholder="Leave blank to keep current" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary shadow-sm">
             </div>
 
-            <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm text-sm">
-                Save Configurations
-            </button>
-        </form>
-    </div>
-</div>
+            <hr class="my-6 border-slate-200">
+            <h3 class="text-sm font-bold text-slate-800 mb-4"><i class="fa-solid fa-envelope text-primary mr-2"></i> Broadcast SMTP Settings</h3>
+            
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-slate-700 mb-1">Gmail Address</label>
+                <input type="email" name="admin_smtp_email" value="{{ smtp_email }}" class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm" placeholder="admin@gmail.com">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-slate-700 mb-1">Gmail App Password</label>
+                <input type="password" name="admin_smtp_password" value="{{ smtp_pass }}" class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm" placeholder="16-digit App Password">
+            </div>
+
+            <hr class="my-6 border-slate-200">
+            <h3 class="text-sm font-bold text-slate-800 mb-4"><i class="fa-brands fa-google text-primary mr-2"></i> Google OAuth Settings</h3>
+            
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-slate-700 mb-1">Google Client ID</label>
+                <input type="text" name="google_client_id" value="{{ g_client_id }}" class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-slate-700 mb-1">Google Client Secret</label>
+                <input type="password" name="google_client_secret" value="{{ g_client_secret }}" class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm">
+                <p class="text-[10px] text-slate-400 mt-1">Get this from Google Cloud Console. Set Redirect URI to <code class="bg-slate-100 text-slate-800 px-1 rounded">https://your-domain.onrender.com/login/google/callback</code></p>
+            </div>
 
 <script>
     const urlParams = new URLSearchParams(window.location.search);
@@ -61,3 +81,6 @@
     }
 </script>
 {% endblock %}
+
+
+

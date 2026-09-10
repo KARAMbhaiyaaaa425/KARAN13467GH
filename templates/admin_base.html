@@ -70,6 +70,12 @@
                 <a href="/admin/transactions" class="sidebar-link {% if request.path == '/admin/transactions' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-300">
                     <i class="fa-solid fa-bolt w-5 text-center"></i> Live Transactions
                 </a>
+                <a href="/admin/payouts" class="sidebar-link {% if request.path == '/admin/payouts' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-300">
+                    <i class="fa-solid fa-money-bill-transfer w-5 text-center"></i> Payout Requests
+                </a>
+                <a href="/admin/broadcast" class="sidebar-link {% if request.path == '/admin/broadcast' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-300">
+                    <i class="fa-solid fa-paper-plane w-5 text-center"></i> Broadcast Email
+                </a>
                 <a href="/admin/logs" class="sidebar-link {% if request.path == '/admin/logs' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-300">
                     <i class="fa-solid fa-bug w-5 text-center"></i> System Logs
                 </a>
@@ -117,3 +123,4 @@
     </main>
 </body>
 </html>
+

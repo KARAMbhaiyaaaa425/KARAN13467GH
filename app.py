@@ -559,7 +559,17 @@ def dashboard():
         daily_sum = c.fetchone()[0] or 0
         chart_labels.append(dt.strftime('%d %b'))
         chart_data.append(daily_sum)
-
+    
+    # Donut Chart Data
+    c.execute("SELECT COUNT(*) FROM transactions WHERE user_id=? AND status='completed'", (user_id,))
+    success_count = c.fetchone()[0] or 0
+    c.execute("SELECT COUNT(*) FROM transactions WHERE user_id=? AND status='pending'", (user_id,))
+    pending_count = c.fetchone()[0] or 0
+    c.execute("SELECT COUNT(*) FROM transactions WHERE user_id=? AND status='failed'", (user_id,))
+    failed_count = c.fetchone()[0] or 0
+    
+    donut_data = [success_count, pending_count, failed_count]
+    
     conn.close()
     
     return render_template('dashboard.html', 
@@ -570,7 +580,8 @@ def dashboard():
                            chart_labels=chart_labels,
                            chart_data=chart_data,
                            error=error,
-                           success=success)
+                           success=success,
+                           donut_data=donut_data)
 
 @app.route('/settings')
 @login_required

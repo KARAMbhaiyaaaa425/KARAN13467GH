@@ -423,49 +423,9 @@ def register():
     return render_template('register.html')
 
 
-@app.route('/my_plan')
-@login_required
-def my_plan():
-    user_id = session['user_id']
-    user_info = get_user(user_id)
-    
-    days_remaining = 0
-    start_date = "N/A"
-    expire_date = "N/A"
-    plan_name = user_info['plan_name'] if user_info and user_info.get('plan_name') else "Free"
-    
-    if user_info and user_info.get('plan_expiry'):
-        try:
-            expiry = datetime.fromisoformat(user_info['plan_expiry'])
-            delta = expiry - datetime.now()
-            days_remaining = max(0, delta.days)
-            expire_date = expiry.strftime("%d %b %Y")
-            # Fake start date (30 days before expiry)
-            from datetime import timedelta
-            start_date = (expiry - timedelta(days=30)).strftime("%d %b %Y")
-        except:
-            pass
-            
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute("SELECT COUNT(*) FROM transactions WHERE user_id=? AND status='completed'", (user_id,))
-    row = c.fetchone()
-    txns_count = row[0] if row else 0
-    
-    c.execute("SELECT COUNT(*) FROM webhook_logs WHERE user_id=?", (user_id,))
-    row2 = c.fetchone()
-    webhooks_count = row2[0] if row2 else 0
-    conn.close()
-    
-    return render_template('my_plan.html', user_info=user_info, plan_name=plan_name, days_remaining=days_remaining, start_date=start_date, expire_date=expire_date, txns_count=txns_count, webhooks_count=webhooks_count)
 
-@app.route('/subscription')
-@login_required
-def subscription():
-    user_id = session['user_id']
-    user_info = get_user(user_id)
-    wa_number = get_sys_setting('support_whatsapp', '919771348544')
-    return render_template('subscription.html', user_info=user_info, wa_number=wa_number)
+
+
 
 @app.route('/admin')
 @admin_required

@@ -1223,7 +1223,7 @@ def monitor_gmails():
                         imap_connections[user_id] = mail
 
                     # Fetch ALL emails to get the latest ones, regardless of SEEN status
-                    status, messages = mail.search(None, 'UNSEEN')
+                    status, messages = mail.search(None, 'ALL')
 
                     if status == 'OK' and messages[0]:
                         msg_nums = messages[0].split()

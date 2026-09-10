@@ -353,14 +353,14 @@ order_id, qr_url, payable_amount</pre>
               <div class="checkout-metric"><b>Status</b><span>Waiting</span></div>
             </div>
           </div>
-          <div class="checkout-panel"><img src="/static/img/checkout-screenshot.jpg" alt="UPI / Paytm checkout screenshot"></div>
+          <div class="checkout-panel"><img src="{{ url_for('static', filename='img/checkout-screenshot.jpg') }}" alt="UPI / Paytm checkout screenshot"></div>
         </div>
       </div>
     </section>
     <section class="section section-dark">
       <div class="shell">
         <div class="checkout-showcase" style="grid-template-columns:minmax(300px,420px) minmax(0,1.05fr);">
-          <div class="checkout-panel"><img src="/static/img/checkout-success.jpg" alt="Payment Confirmed"></div>
+          <div class="checkout-panel"><img src="{{ url_for('static', filename='img/checkout-success.jpg') }}" alt="Payment Confirmed"></div>
           <div class="checkout-side anim-slide-right">
             <div>
               <div class="kicker">Built around the current API</div>

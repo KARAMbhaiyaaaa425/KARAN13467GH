@@ -1272,8 +1272,8 @@ def monitor_gmails():
                                     body = payload
 
                             text = str(msg.get("Subject", "")) + " " + body
-                            amt_match = re.search(r'(?:Rs\.?|INR|â‚¹)\s*([\d,]+\.?\d*)', text, re.IGNORECASE)
-                            utr_match = re.search(r'(?:UPI\s*Ref|UTR|Txn\s*ID|RRN|Order\s*ID)\s*[:.]?\s*([A-Z0-9]{8,30})', text, re.IGNORECASE)
+                            amt_match = re.search(r'(?:Rs\.?|INR|₹)\s*([\d,]+\.?\d*)', text, re.IGNORECASE)
+                            utr_match = re.search(r'(?:UPI\s*Ref(?:erence)?\s*(?:No\.?)?|UTR|Txn\s*ID|Transaction\s*ID|RRN|Order\s*ID|Reference\s*ID)\s*[:.-]?\s*([A-Za-z0-9]{8,30})', text, re.IGNORECASE)
 
                             if amt_match and utr_match:
                                 amount = float(amt_match.group(1).replace(',', ''))

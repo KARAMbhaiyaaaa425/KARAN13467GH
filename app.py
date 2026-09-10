@@ -55,9 +55,35 @@ app.secret_key = os.environ.get("SECRET_KEY", "fampay-super-secret-key")
 # ============================================
 # DATABASE INITIALIZATION
 # ============================================
+
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
+    
+    # Run column migrations gracefully
+    def add_col(table, col, def_type="TEXT"):
+        try:
+            c.execute(f"ALTER TABLE {table} ADD COLUMN {col} {def_type}")
+        except:
+            pass
+            
+    try:
+        add_col('transactions', 'callback_url')
+        add_col('transactions', 'expires_at')
+        add_col('transactions', 'customer_email')
+        add_col('transactions', 'merchant_order_id')
+        add_col('transactions', 'customer_name')
+        
+        add_col('users', 'theme')
+        add_col('users', 'profile_pic')
+        add_col('users', 'merchant_id')
+        add_col('users', 'provider')
+        add_col('users', 'role')
+        add_col('users', 'plan_name')
+        add_col('users', 'plan_expiry')
+    except:
+        pass
+
     
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -131,7 +157,7 @@ def init_db():
 
     c.execute("INSERT OR IGNORE INTO system_settings (key, value) VALUES ('maintenance_mode', 'false')")
     c.execute("INSERT OR IGNORE INTO system_settings (key, value) VALUES ('admin_password', 'admin123')")
-    c.execute("CREATE TABLE IF NOT EXISTS system_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT, message TEXT, created_at TEXT)")
+    c.execute("CREATE TABLE IF NOT EXISTS admin_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT, message TEXT, created_at TEXT)")
     
     c.execute('''
         CREATE TABLE IF NOT EXISTS webhook_logs (
@@ -224,11 +250,11 @@ def set_sys_setting(key, value):
     conn.commit()
     conn.close()
 
-def add_sys_log(type_str, msg):
+def add_admin_log(type_str, msg):
     try:
         conn = sqlite3.connect(DB_FILE)
         c = conn.cursor()
-        c.execute("INSERT INTO system_logs (type, message, created_at) VALUES (?, ?, ?)", (type_str, msg, datetime.now().isoformat()))
+        c.execute("INSERT INTO admin_logs (type, message, created_at) VALUES (?, ?, ?)", (type_str, msg, datetime.now().isoformat()))
         conn.commit()
         conn.close()
     except:
@@ -297,6 +323,9 @@ def admin_settings():
     g_client_id = request.form.get('google_client_id')
     g_client_secret = request.form.get('google_client_secret')
     
+    yt_link = request.form.get('youtube_link')
+    wa_number = request.form.get('support_whatsapp')
+    
     set_sys_setting('maintenance_mode', m_mode)
     if new_pass and len(new_pass) > 2:
         set_sys_setting('admin_password', new_pass)
@@ -305,12 +334,8 @@ def admin_settings():
     if smtp_pass:
         set_sys_setting('admin_smtp_password', encrypt_pass(smtp_pass))
         
-    if g_client_id: set_sys_setting('google_client_id', g_client_id)
-    if g_client_secret: set_sys_setting('google_client_secret', g_client_secret)
-        
-    yt_link = request.form.get('youtube_link')
-    wa_number = request.form.get('support_whatsapp')
-    
+    if g_client_id is not None: set_sys_setting('google_client_id', g_client_id)
+    if g_client_secret is not None: set_sys_setting('google_client_secret', g_client_secret)
     if yt_link is not None: set_sys_setting('youtube_link', yt_link)
     if wa_number is not None: set_sys_setting('support_whatsapp', wa_number)
         
@@ -333,7 +358,7 @@ def admin_settings_view():
 def admin_logs():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("SELECT type, message, created_at FROM system_logs ORDER BY id DESC LIMIT 100")
+    c.execute("SELECT type, message, created_at FROM admin_logs ORDER BY id DESC LIMIT 100")
     logs = c.fetchall()
     conn.close()
     return render_template('admin_logs.html', logs=logs)
@@ -403,7 +428,8 @@ def register():
 def subscription():
     user_id = session['user_id']
     user_info = get_user(user_id)
-    return render_template('subscription.html', user_info=user_info)
+    wa_number = get_sys_setting('support_whatsapp', '919771348544')
+    return render_template('subscription.html', user_info=user_info, wa_number=wa_number)
 
 @app.route('/admin')
 @admin_required
@@ -1345,36 +1371,7 @@ def retry_webhook(log_id):
 
 @app.route('/admin-karan', methods=['GET', 'POST'])
 def super_admin():
-    if request.method == 'POST':
-        password = request.form.get('password')
-        if password == 'karan123':  # HARDCODED ADMIN PASSWORD
-            session['is_admin'] = True
-            return redirect(url_for('super_admin'))
-        else:
-            return render_template('admin.html', error="Invalid password")
-            
-    if not session.get('is_admin'):
-        return render_template('admin.html', login_required=True)
-        
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    
-    # Get Stats
-    c.execute("SELECT COUNT(*) FROM users")
-    total_users = c.fetchone()[0]
-    
-    c.execute("SELECT COUNT(*), SUM(amount) FROM transactions WHERE status='completed'")
-    stats = c.fetchone()
-    total_txns = stats[0] or 0
-    total_volume = stats[1] or 0
-    
-    # Get Users List
-    c.execute("SELECT user_id, username, gmail, display_name, upi_id FROM users ORDER BY user_id DESC")
-    users = c.fetchall()
-    
-    conn.close()
-    
-    return render_template('admin.html', total_users=total_users, total_txns=total_txns, total_volume=total_volume, users=users)
+    return redirect('/admin/login')
 
 @app.route('/admin-karan/ban/<int:user_id>', methods=['POST'])
 def admin_ban(user_id):

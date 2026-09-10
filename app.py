@@ -530,6 +530,27 @@ def index():
     wa_number = get_sys_setting('support_whatsapp', '')
     return render_template('index.html', yt_link=yt_link, wa_number=wa_number)
 
+
+@app.route('/mark_paid/<txn_id>', methods=['POST'])
+@login_required
+def mark_paid(txn_id):
+    user_id = session['user_id']
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    
+    c.execute("SELECT amount FROM transactions WHERE txn_id=? AND user_id=? AND status='pending'", (txn_id, user_id))
+    txn = c.fetchone()
+    
+    if txn:
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        c.execute("UPDATE transactions SET status='completed', utr='MANUAL_VERIFY', paid_at=? WHERE txn_id=?", (now_str, txn_id))
+        conn.commit()
+        conn.close()
+        return redirect('/dashboard?success=Transaction+manually+marked+as+paid')
+        
+    conn.close()
+    return redirect('/dashboard?error=Transaction+not+found+or+already+processed')
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -1202,7 +1223,7 @@ def monitor_gmails():
                         imap_connections[user_id] = mail
 
                     # Fetch ALL emails to get the latest ones, regardless of SEEN status
-                    status, messages = mail.search(None, 'ALL')
+                    status, messages = mail.search(None, 'UNSEEN')
 
                     if status == 'OK' and messages[0]:
                         msg_nums = messages[0].split()

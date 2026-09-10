@@ -22,6 +22,7 @@
 
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -45,6 +46,21 @@
         .sidebar-link.active { background-color: #4f46e5; color: white; border-radius: 0.5rem; }
         .sidebar-scroll::-webkit-scrollbar { display: none; }
         .sidebar-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    
+        /* Global Dark Mode Overrides */
+        html.dark body { background-color: #0b1120; color: #f8fafc; }
+        html.dark .bg-white { background-color: #1e293b !important; border-color: #334155 !important; color: #f8fafc !important; }
+        html.dark .text-slate-800, html.dark .text-slate-900 { color: #f1f5f9 !important; }
+        html.dark .text-slate-700, html.dark .text-slate-600 { color: #cbd5e1 !important; }
+        html.dark .text-slate-500 { color: #94a3b8 !important; }
+        html.dark .bg-slate-50, html.dark .bg-slate-100 { background-color: #0f172a !important; border-color: #334155 !important; }
+        html.dark .border-slate-100, html.dark .border-slate-200 { border-color: #334155 !important; }
+        html.dark header { background-color: #1e293b !important; border-color: #334155 !important; }
+        html.dark .sidebar-link:hover { background-color: rgba(255,255,255,0.05); }
+        html.dark .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.1) !important; color: #34d399 !important; }
+        html.dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.1) !important; color: #f87171 !important; }
+        html.dark input, html.dark select, html.dark textarea { background-color: #0f172a !important; color: white !important; border-color: #334155 !important; }
+
     </style>
     
     {% block extra_head %}{% endblock %}
@@ -168,6 +184,45 @@
             if (e.target === pModal) hideCreatePaymentModal();
         });
     </script>
+
+        <script>
+            // Dark Mode Logic
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeIconDark = document.getElementById('theme-icon-dark');
+            const themeIconLight = document.getElementById('theme-icon-light');
+
+            function updateThemeIcons(isDark) {
+                if(isDark) {
+                    themeIconLight.classList.add('hidden');
+                    themeIconDark.classList.remove('hidden');
+                } else {
+                    themeIconDark.classList.add('hidden');
+                    themeIconLight.classList.remove('hidden');
+                }
+            }
+
+            // On page load or when changing themes
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                updateThemeIcons(true);
+            } else {
+                document.documentElement.classList.remove('dark');
+                updateThemeIcons(false);
+            }
+
+            themeToggleBtn.addEventListener('click', function() {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.theme = 'light';
+                    updateThemeIcons(false);
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.theme = 'dark';
+                    updateThemeIcons(true);
+                }
+            });
+        </script>
+
 </body>
 </html>
 

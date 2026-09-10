@@ -1222,16 +1222,12 @@ def monitor_gmails():
                         mail.select("INBOX")
                         imap_connections[user_id] = mail
 
-                    # Fetch ALL emails to get the latest ones, regardless of SEEN status
-                    status, messages = mail.search(None, 'ALL')
+                    status, messages = mail.search(None, '(UNSEEN)')
 
                     if status == 'OK' and messages[0]:
                         msg_nums = messages[0].split()
-                        # Only take the last 10 emails to avoid processing the entire inbox
-                        latest_msg_nums = msg_nums[-10:]
-                        add_sys_log(user_id, f"Checking last {len(latest_msg_nums)} emails in inbox...")
                         
-                        for num in latest_msg_nums:
+                        for num in msg_nums:
                             status, data = mail.fetch(num, '(RFC822)')
                             if status != 'OK': continue
 

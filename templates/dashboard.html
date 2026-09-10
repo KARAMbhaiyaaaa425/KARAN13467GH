@@ -161,6 +161,55 @@
     </div>
 </div>
 
+
+<!-- Quick Setup Guide -->
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8 relative" id="quickSetupGuide">
+    <div class="flex justify-between items-start mb-2">
+        <div class="flex items-center gap-2">
+            <i class="fa-regular fa-circle-play text-red-500"></i>
+            <h3 class="text-base font-bold text-slate-800">Quick Setup Guide</h3>
+        </div>
+        <button onclick="document.getElementById('quickSetupGuide').style.display='none'" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <p class="text-sm text-slate-500 mb-6">Learn how to connect your IMAP and integrate NovaPay into your application.</p>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <!-- Video -->
+        <div class="lg:col-span-3 rounded-xl overflow-hidden border border-slate-100 bg-slate-900 flex items-center justify-center">
+            <iframe width="100%" height="280" src="https://www.youtube.com/embed/CXkjMNHOBQI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        
+        <!-- Next Steps -->
+        <div class="lg:col-span-2 bg-slate-50/50 rounded-xl p-5 border border-slate-100 flex flex-col justify-between">
+            <div>
+                <h4 class="font-bold text-slate-800 mb-4">Next Steps</h4>
+                <ul class="space-y-3">
+                    <li class="flex items-center gap-3 text-sm text-slate-600 font-medium">
+                        <i class="fa-regular fa-circle-check text-emerald-500 text-base"></i> Connect your UPI/Gmail
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-slate-600 font-medium">
+                        <i class="fa-regular fa-circle-check text-emerald-500 text-base"></i> Create your API Keys
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-slate-600 font-medium">
+                        <i class="fa-regular fa-circle-check text-emerald-500 text-base"></i> Setup Webhooks for updates
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-slate-600 font-medium">
+                        <i class="fa-regular fa-circle-check text-emerald-500 text-base"></i> Explore API Documentation
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-slate-600 font-medium">
+                        <i class="fa-regular fa-circle-check text-emerald-500 text-base"></i> Start accepting payments
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <a href="/settings" class="px-4 py-2.5 bg-primary hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition shadow-sm">Configure IMAP</a>
+                <a href="/api_docs" class="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold rounded-lg transition shadow-sm">Read Documentation</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Transactions Table -->
 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-8">
     <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">

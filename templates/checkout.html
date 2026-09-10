@@ -123,9 +123,15 @@
                     <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" class="h-4 opacity-70">
                     <img src="https://i.ibb.co/bRMDCCVC/279e01e3d0f86ec724cc04e47746cd50-1.jpg" class="h-5 rounded-md opacity-80" alt="FamPay">
                 </div>
-                <button onclick="checkVerification(this)" id="verifyPaymentBtn" class="w-full bg-primary hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-colors mt-2 text-sm flex items-center justify-center gap-2 shadow-sm">
-                    <i class="fa-solid fa-circle-check"></i> Verify Payment
-                </button>
+                
+                <div class="mt-4 flex flex-col items-center justify-center py-3 px-4 bg-indigo-50/50 rounded-xl border border-indigo-100/50">
+                    <div class="flex items-center gap-3 text-primary font-bold text-sm">
+                        <i class="fa-solid fa-circle-notch fa-spin text-lg"></i>
+                        <span>Auto-verifying payment...</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 font-medium">Please do not close this window</p>
+                </div>
+                
             </div>
             
             <!-- Mobile Intent Section -->
@@ -240,32 +246,6 @@
         }
 
         
-        async function checkVerification(btn) {
-            const orig = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
-            btn.disabled = true;
-            
-            await new Promise(r => setTimeout(r, 1500));
-            
-            try {
-                const res = await fetch(/api/verify?txn_id=);
-                const data = await res.json();
-                if (data.status === 'completed') {
-                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Verified!';
-                    btn.classList.replace('bg-primary', 'bg-emerald-500');
-                    // Background interval will auto-redirect
-                } else {
-                    btn.innerHTML = orig;
-                    btn.disabled = false;
-                    showUtrModal();
-                }
-            } catch(e) {
-                btn.innerHTML = orig;
-                btn.disabled = false;
-                showUtrModal();
-            }
-        }
-
         async function submitUtrManual() {
             const utr = document.getElementById('utrInput').value.trim();
             if(!utr) return;

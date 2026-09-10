@@ -90,13 +90,6 @@
     
     <!-- Right Column: Methods & Quick Actions -->
     <div class="flex flex-col gap-6">
-        <!-- Analytics Donut Chart -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-            <h3 class="text-base font-bold text-slate-800 mb-4">Transaction Status</h3>
-            <div class="relative h-48 w-full flex items-center justify-center">
-                <canvas id="statusChart"></canvas>
-            </div>
-        </div>
         <!-- Payment Methods -->
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 h-full">
             <div class="flex justify-between items-center mb-6">
@@ -245,41 +238,35 @@
 </div>
 
 <script>
+    // Initialize Chart.js for Revenue Analytics
     document.addEventListener('DOMContentLoaded', function() {
-        // --- 1. Glowing Line Chart for Revenue ---
-        const ctxLine = document.getElementById('revenueChart').getContext('2d');
+        const ctx = document.getElementById('revenueChart').getContext('2d');
         
-        // Premium Glowing Gradient
-        let gradientLine = ctxLine.createLinearGradient(0, 0, 0, 400);
-        gradientLine.addColorStop(0, 'rgba(79, 70, 229, 0.8)'); // Intense Indigo
-        gradientLine.addColorStop(0.5, 'rgba(79, 70, 229, 0.2)');
-        gradientLine.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
+        // Gradient for the area under the line
+        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(79, 70, 229, 0.5)'); // Indigo 600
+        gradient.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
 
         const labels = {{ chart_labels | tojson | safe }};
         const data = {{ chart_data | tojson | safe }};
 
-        new Chart(ctxLine, {
+        new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'Revenue (₹)',
                     data: data,
-                    borderColor: '#6366f1', // Indigo 500
-                    backgroundColor: gradientLine,
-                    borderWidth: 4, // Thicker line
+                    borderColor: '#818cf8', // Indigo 400
+                    backgroundColor: gradient,
+                    borderWidth: 3,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#6366f1',
-                    pointBorderWidth: 3,
-                    pointRadius: 5,
-                    pointHoverRadius: 8,
+                    pointBorderColor: '#818cf8',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     fill: true,
-                    tension: 0.4, // Smooth curves
-                    // Glowing effect via shadow
-                    shadowOffsetX: 0,
-                    shadowOffsetY: 8,
-                    shadowBlur: 15,
-                    shadowColor: 'rgba(99, 102, 241, 0.5)'
+                    tension: 0.4 // Smooth curves
                 }]
             },
             options: {
@@ -292,7 +279,6 @@
                         titleColor: '#f8fafc',
                         bodyColor: '#f8fafc',
                         padding: 12,
-                        cornerRadius: 8,
                         displayColors: false,
                         callbacks: {
                             label: function(context) {
@@ -304,7 +290,7 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)', drawBorder: false },
                         ticks: { color: '#94a3b8', font: { family: "'Inter', sans-serif", size: 11 } }
                     },
                     x: {
@@ -314,57 +300,6 @@
                 }
             }
         });
-
-        // --- 2. Donut Chart for Statuses ---
-        const donutCanvas = document.getElementById('statusChart');
-        if (donutCanvas) {
-            const ctxDonut = donutCanvas.getContext('2d');
-            const donutData = {{ donut_data | tojson | safe }}; // [Success, Pending, Failed]
-            
-            // Only render if there's data, else show dummy
-            const total = donutData.reduce((a,b)=>a+b, 0);
-            const dataToRender = total > 0 ? donutData : [1, 1, 1]; // Dummy equal sizes if 0
-            const colors = total > 0 ? ['#10b981', '#f59e0b', '#ef4444'] : ['#e2e8f0', '#e2e8f0', '#e2e8f0'];
-
-            new Chart(ctxDonut, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Success', 'Pending', 'Failed'],
-                    datasets: [{
-                        data: dataToRender,
-                        backgroundColor: colors,
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '75%', // Thin donut
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: document.documentElement.classList.contains('dark') ? '#cbd5e1' : '#475569',
-                                usePointStyle: true,
-                                padding: 20,
-                                font: { size: 12, family: "'Inter', sans-serif" }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    if(total === 0) return ' No Data';
-                                    const val = context.raw;
-                                    const percentage = Math.round((val / total) * 100);
-                                    return  :  (%);
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
     });
 </script>
 {% endblock %}

@@ -606,7 +606,7 @@ def preview_checkout():
     
     upi_id = row[0] if row and row[0] else "merchant@upi"
     display_name = row[1] if row and row[1] else "Merchant"
-    theme = row[2] if row and row[2] else "default"
+    theme = request.args.get('theme') or (row[2] if row and row[2] else "default")
     profile_pic = row[3] if row and len(row)>3 and row[3] else None
     
     return render_template('checkout.html',

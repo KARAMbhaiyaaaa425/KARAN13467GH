@@ -1,239 +1,249 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
 <style>
-    .plan-card {
-        background-color: white;
-        border: 1px solid #e5e0d8;
-        border-radius: 8px;
+    .sub-bg {
+        background-color: #faf8f2;
+        min-height: calc(100vh - 64px); /* assuming topnav is ~64px */
         padding: 2rem;
-        transition: all 0.3s ease;
+        margin: -1.5rem; /* negate default padding if any */
+    }
+    
+    .serif-font {
+        font-family: 'Georgia', 'Times New Roman', serif;
+    }
+    
+    .dark-green {
+        color: #112a20;
+    }
+    
+    .sub-header-small {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: #a8884d;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+    
+    .sub-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .sub-desc {
+        color: #6b7280;
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .sub-hr {
+        border-color: #d8cba9;
+        margin-bottom: 2.5rem;
+    }
+    
+    .plan-grid {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 1.5rem;
+    }
+    
+    @media (min-width: 768px) {
+        .plan-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+    
+    @media (min-width: 1024px) {
+        .plan-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+    }
+    
+    .plan-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        padding: 2rem 1.5rem;
+        display: flex;
+        flex-direction: column;
         position: relative;
     }
-    .plan-card:hover {
-        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
-        transform: translateY(-2px);
-    }
-    .plan-btn {
-        background-color: #1a362b;
-        color: white;
-        width: 100%;
-        padding: 0.75rem;
-        border-radius: 4px;
-        font-weight: 700;
-        font-size: 0.875rem;
-        text-align: center;
-        display: block;
-        transition: background-color 0.2s;
-    }
-    .plan-btn:hover { background-color: #11241c; }
-    .plan-btn-gold {
-        background-color: #dfba6b;
-        color: #1a362b;
-    }
-    .plan-btn-gold:hover { background-color: #c9a55c; }
     
-    .current-plan-btn {
-        background-color: #f0f7f4;
-        color: #1a362b;
-        border: 1px solid #1a362b;
+    .plan-card-popular {
+        border: 1px solid #112a20;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        transform: scale(1.02);
+        z-index: 10;
     }
     
-    .check-icon {
-        color: #7b8a81;
-        margin-right: 0.5rem;
-        font-size: 0.75rem;
-    }
-    .feature-text {
-        color: #4b5563;
-        font-size: 0.8rem;
-        font-weight: 500;
-    }
-    .most-popular-badge {
+    .popular-badge {
         position: absolute;
         top: -12px;
         left: 50%;
         transform: translateX(-50%);
-        background-color: #1a362b;
-        color: white;
-        font-size: 0.65rem;
-        padding: 0.2rem 1rem;
-        border-radius: 12px;
+        background-color: #112a20;
+        color: #fcd34d;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 1rem;
+        border-radius: 9999px;
+        white-space: nowrap;
+    }
+    
+    .plan-name {
+        text-align: center;
+        font-size: 1.25rem;
         font-weight: bold;
-        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .plan-price {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 2rem;
+    }
+    
+    .plan-price span {
+        font-size: 0.8rem;
+        color: #6b7280;
+        font-weight: normal;
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    
+    .feature-list {
+        flex-grow: 1;
+        margin-bottom: 2rem;
+    }
+    
+    .feature-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        font-size: 0.8rem;
+        color: #4b5563;
+    }
+    
+    .feature-icon {
+        color: #6b7280;
+        margin-right: 0.5rem;
+        margin-top: 0.15rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn-subscribe {
+        width: 100%;
+        padding: 0.75rem;
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+        border-radius: 0.375rem;
+        transition: all 0.2s;
+    }
+    
+    .btn-dark {
+        background-color: #112a20;
+        color: white;
+    }
+    
+    .btn-dark:hover {
+        background-color: #0a1913;
+    }
+    
+    .btn-gold {
+        background-color: #e6c56b;
+        color: #112a20;
+    }
+    
+    .btn-gold:hover {
+        background-color: #d6b55b;
     }
 </style>
 
-<div class="max-w-5xl mx-auto pb-12">
-    <div class="mb-8">
-        <h1 class="text-3xl font-black text-slate-800" style="font-family: serif;">Subscription Plans</h1>
-        <p class="text-sm text-slate-500 mt-2">Upgrade or switch plans at any time — orders and links are auto-allocated the moment payment clears.</p>
-    </div>
-
-    <!-- Active Plan Banner -->
-    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-10 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-primary shadow-sm">
-                <i class="fa-solid fa-crown"></i>
-            </div>
-            <div>
-                <p class="text-xs text-indigo-400 font-bold uppercase tracking-wide">Current Plan</p>
-                <h3 class="text-lg font-black text-indigo-900">{{ user_info.plan_name if user_info and user_info.plan_name else 'Free' }} Plan</h3>
-            </div>
+<div class="sub-bg">
+    <div class="sub-header-small">PASSBOOK &middot; TARIFF SHEET</div>
+    <div class="flex items-center gap-3 mb-1">
+        <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-[#e6c56b]">
+            <i class="fa-solid fa-layer-group text-xl"></i>
         </div>
-        <div class="text-right">
-            {% if user_info and user_info.plan_expiry %}
-                <p class="text-xs text-slate-500 font-medium">Valid until</p>
-                <p class="text-sm font-bold text-slate-800">{{ user_info.plan_expiry[:10] }}</p>
-            {% else %}
-                <p class="text-xs text-slate-500 font-medium">Status</p>
-                <p class="text-sm font-bold text-emerald-600">Active</p>
-            {% endif %}
-        </div>
+        <h1 class="sub-title serif-font dark-green m-0">Subscription Plans</h1>
     </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-x-8 gap-y-12">
+    <p class="sub-desc">Upgrade or switch plans at any time &mdash; orders and links are auto-allocated the moment payment clears</p>
+    
+    <hr class="sub-hr">
+    
+    <div class="plan-grid">
+        <!-- Basic -->
+        <div class="plan-card rounded-xl">
+            <h3 class="plan-name serif-font dark-green">Basic</h3>
+            <div class="plan-price serif-font dark-green">₹1<span>/month</span></div>
+            <div class="feature-list">
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>Unlimited successful<br>transactions/week</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>3 Cashiers</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>1 Staff Member</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>1 Transfer/day</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>100 Static Paylinks</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>1 Webhook</span></div>
+            </div>
+            <button onclick="showUpgradeAlert('Basic')" class="btn-subscribe btn-dark">Subscribe Now</button>
+        </div>
+        
+        <!-- Nano -->
+        <div class="plan-card rounded-xl">
+            <h3 class="plan-name serif-font dark-green">Nano</h3>
+            <div class="plan-price serif-font dark-green">₹45<span>/month</span></div>
+            <div class="feature-list">
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>800 successful transactions/week</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>5 Cashiers</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>5 Staff Members</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>3 Transfers/day</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>100 Static Paylinks</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>1 Webhook</span></div>
+            </div>
+            <button onclick="showUpgradeAlert('Nano')" class="btn-subscribe btn-dark">Subscribe Now</button>
+        </div>
         
         <!-- Micro -->
-        <div class="plan-card">
-            <div class="text-center mb-6">
-                <h3 class="text-lg font-bold" style="font-family: serif; color: #1a362b;">Micro</h3>
-                <div class="mt-2 mb-2 flex justify-center items-end gap-1">
-                    <span class="text-3xl font-black" style="font-family: serif; color: #1a362b;">₹29</span>
-                    <span class="text-xs text-slate-500 font-medium mb-1">/month</span>
-                </div>
+        <div class="plan-card plan-card-popular rounded-xl">
+            <div class="popular-badge">Most Popular</div>
+            <h3 class="plan-name serif-font dark-green">Micro</h3>
+            <div class="plan-price serif-font dark-green">₹95<span>/month</span></div>
+            <div class="feature-list">
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>1,000 successful transactions/week</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>5 Cashiers</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>5 Staff Members</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>5 Transfers/day</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>100 Static Paylinks</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>2 Webhooks</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>QR Code Removed</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>Custom API Keys</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>Friday Unlimited Transactions</span></div>
             </div>
-            <ul class="space-y-3 mb-8">
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">50 Orders/month</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">1 Merchant Account</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">1 Webhook</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">Basic Support</span></li>
-            </ul>
-            {% if user_info and user_info.plan_name == 'Micro' %}
-                <button class="plan-btn current-plan-btn"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Current Active Plan</button>
-            {% else %}
-                <button onclick="showUpgradeAlert()" class="plan-btn">Subscribe Now</button>
-            {% endif %}
+            <button onclick="showUpgradeAlert('Micro')" class="btn-subscribe btn-gold">Subscribe Now</button>
         </div>
-
+        
         <!-- Starter -->
-        <div class="plan-card">
-            <div class="text-center mb-6">
-                <h3 class="text-lg font-bold" style="font-family: serif; color: #1a362b;">Starter</h3>
-                <div class="mt-2 mb-2 flex justify-center items-end gap-1">
-                    <span class="text-3xl font-black" style="font-family: serif; color: #1a362b;">₹79</span>
-                    <span class="text-xs text-slate-500 font-medium mb-1">/month</span>
-                </div>
+        <div class="plan-card rounded-xl">
+            <h3 class="plan-name serif-font dark-green">Starter</h3>
+            <div class="plan-price serif-font dark-green">₹195<span>/month</span></div>
+            <div class="feature-list">
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>300 successful transactions/week</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>3 Cashiers</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>1 Staff Member</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>1 Transfer/day</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>120 Static Paylinks</span></div>
+                <div class="feature-item"><i class="fa-regular fa-circle-check feature-icon"></i> <span>2 Webhooks</span></div>
             </div>
-            <ul class="space-y-3 mb-8">
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">500 Orders/month</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">1 Merchant Account</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">5 Webhooks</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">Email Support</span></li>
-            </ul>
-            {% if user_info and user_info.plan_name == 'Starter' %}
-                <button class="plan-btn current-plan-btn"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Current Active Plan</button>
-            {% else %}
-                <button onclick="showUpgradeAlert()" class="plan-btn">Subscribe Now</button>
-            {% endif %}
+            <button onclick="showUpgradeAlert('Starter')" class="btn-subscribe btn-dark">Subscribe Now</button>
         </div>
-
-        <!-- Basic -->
-        <div class="plan-card">
-            <div class="text-center mb-6">
-                <h3 class="text-lg font-bold" style="font-family: serif; color: #1a362b;">Basic</h3>
-                <div class="mt-2 mb-2 flex justify-center items-end gap-1">
-                    <span class="text-3xl font-black" style="font-family: serif; color: #1a362b;">₹129</span>
-                    <span class="text-xs text-slate-500 font-medium mb-1">/month</span>
-                </div>
-            </div>
-            <ul class="space-y-3 mb-8">
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">1500 Orders/month</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">2 Merchant Accounts</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">10 Webhooks</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">Priority Email Support</span></li>
-            </ul>
-            {% if user_info and user_info.plan_name == 'Basic' %}
-                <button class="plan-btn current-plan-btn"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Current Active Plan</button>
-            {% else %}
-                <button onclick="showUpgradeAlert()" class="plan-btn">Subscribe Now</button>
-            {% endif %}
-        </div>
-
-        <!-- Growth (Most Popular) -->
-        <div class="plan-card" style="box-shadow: 0 10px 25px -5px rgba(223, 186, 107, 0.2); border-color: #dfba6b;">
-            <div class="most-popular-badge">Most Popular</div>
-            <div class="text-center mb-6">
-                <h3 class="text-lg font-bold" style="font-family: serif; color: #1a362b;">Growth</h3>
-                <div class="mt-2 mb-2 flex justify-center items-end gap-1">
-                    <span class="text-3xl font-black" style="font-family: serif; color: #1a362b;">₹179</span>
-                    <span class="text-xs text-slate-500 font-medium mb-1">/month</span>
-                </div>
-            </div>
-            <ul class="space-y-3 mb-8">
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">5000 Orders/month</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">2 Merchant Accounts</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">Unlimited Webhooks</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">Priority Support</span></li>
-            </ul>
-            {% if user_info and user_info.plan_name == 'Growth' %}
-                <button class="plan-btn current-plan-btn"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Current Active Plan</button>
-            {% else %}
-                <button onclick="showUpgradeAlert()" class="plan-btn plan-btn-gold">Subscribe Now</button>
-            {% endif %}
-        </div>
-
-        <!-- Pro -->
-        <div class="plan-card">
-            <div class="text-center mb-6">
-                <h3 class="text-lg font-bold" style="font-family: serif; color: #1a362b;">Pro</h3>
-                <div class="mt-2 mb-2 flex justify-center items-end gap-1">
-                    <span class="text-3xl font-black" style="font-family: serif; color: #1a362b;">₹399</span>
-                    <span class="text-xs text-slate-500 font-medium mb-1">/month</span>
-                </div>
-            </div>
-            <ul class="space-y-3 mb-8">
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">10000 Orders/month</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">3 Merchant Accounts</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">Unlimited Webhooks</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">Dedicated Support</span></li>
-            </ul>
-            {% if user_info and user_info.plan_name == 'Pro' %}
-                <button class="plan-btn current-plan-btn"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Current Active Plan</button>
-            {% else %}
-                <button onclick="showUpgradeAlert()" class="plan-btn">Subscribe Now</button>
-            {% endif %}
-        </div>
-
-        <!-- Elite -->
-        <div class="plan-card">
-            <div class="text-center mb-6">
-                <h3 class="text-lg font-bold" style="font-family: serif; color: #1a362b;">Elite</h3>
-                <div class="mt-2 mb-2 flex justify-center items-end gap-1">
-                    <span class="text-3xl font-black" style="font-family: serif; color: #1a362b;">₹599</span>
-                    <span class="text-xs text-slate-500 font-medium mb-1">/month</span>
-                </div>
-            </div>
-            <ul class="space-y-3 mb-8">
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">Unlimited Orders</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">Unlimited Merchant Accounts</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">Unlimited Webhooks</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">Unlimited Payment Links</span></li>
-                <li class="flex items-center"><i class="fa-solid fa-circle-check check-icon"></i> <span class="feature-text">24/7 Premium Support</span></li>
-            </ul>
-            {% if user_info and user_info.plan_name == 'Elite' %}
-                <button class="plan-btn current-plan-btn"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Current Active Plan</button>
-            {% else %}
-                <button onclick="showUpgradeAlert()" class="plan-btn">Subscribe Now</button>
-            {% endif %}
-        </div>
-
     </div>
 </div>
+
 <script>
-    function showUpgradeAlert() {
+    function showUpgradeAlert(planName) {
         Swal.fire({
-            title: 'Upgrade Plan',
+            title: 'Upgrade to ' + planName,
             text: 'You will be redirected to WhatsApp to contact the Admin for payment.',
             icon: 'info',
             showCancelButton: true,
@@ -242,12 +252,11 @@
             cancelButtonText: 'Cancel'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Replace with your actual WhatsApp number
-                window.open('https://wa.me/{{ wa_number }}?text=Hello%20Admin,%20I%20want%20to%20upgrade%20my%20NovaPay%20subscription%20plan.', '_blank');
+                const waNumber = "{{ wa_number }}".replace('+', '').trim() || '919771348544';
+                const message = encodeURIComponent('Hello Admin, I want to upgrade my NovaPay subscription to the ' + planName + ' plan.');
+                window.open('https://wa.me/' + waNumber + '?text=' + message, '_blank');
             }
         });
     }
 </script>
 {% endblock %}
-
-

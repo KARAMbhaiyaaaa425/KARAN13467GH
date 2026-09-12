@@ -593,12 +593,40 @@ def dashboard():
                            error=error,
                            success=success)
 
-@app.route('/settings')
+
+@app.route('/update_credentials', methods=['POST'])
 @login_required
-def settings():
+def update_credentials():
+    user_id = session['user_id']
+    new_username = request.form.get('username')
+    new_password = request.form.get('password')
+    
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    
+    try:
+        if new_password:
+            from werkzeug.security import generate_password_hash
+            new_hash = generate_password_hash(new_password)
+            c.execute("UPDATE users SET username=?, password_hash=? WHERE user_id=?", (new_username, new_hash, user_id))
+        else:
+            c.execute("UPDATE users SET username=? WHERE user_id=?", (new_username, user_id))
+            
+        conn.commit()
+        success = 'Credentials updated successfully!'
+    except sqlite3.IntegrityError:
+        success = 'Error: Username already exists!'
+    finally:
+        conn.close()
+        
+    return redirect(url_for('settings', success=success))
+
+@app.route('/connect')
+@login_required
+def connect_accounts():
     user_id = session['user_id']
     user_info = get_user(user_id)
-    return render_template('settings.html', user_info=user_info)
+    return render_template('connect.html', user_info=user_info)
 
 @app.route('/save_account', methods=['POST'])
 @login_required
@@ -670,12 +698,12 @@ def preview_checkout():
                            payment_url="#",
                            profile_pic=profile_pic)
 
-@app.route('/customize')
+@app.route('/settings')
 @login_required
-def customize():
+def settings():
     user_id = session['user_id']
     user_info = get_user(user_id)
-    return render_template('customize.html', user_info=user_info)
+    return render_template('settings.html', user_info=user_info)
 
 @app.route('/api_docs')
 @login_required
@@ -705,7 +733,7 @@ def save_customize():
         c.execute("UPDATE users SET display_name=?, theme=? WHERE user_id=?", (display_name, theme, user_id))
     conn.commit()
     conn.close()
-    return redirect(url_for('customize', success='Customization Saved!'))
+    return redirect(url_for('settings', success='Customization Saved!'))
 
 @app.route('/delete_account')
 @login_required
@@ -717,7 +745,7 @@ def delete_account():
     c.execute("UPDATE users SET upi_id=NULL, gmail=NULL, app_pass=NULL, api_key=NULL WHERE user_id=?", (user_id,))
     conn.commit()
     conn.close()
-    return redirect(url_for('settings', success='Account Connection Deleted!'))
+    return redirect(url_for('connect_accounts', success='Account Connection Deleted!'))
 
 @app.route('/payment_links')
 @login_required
